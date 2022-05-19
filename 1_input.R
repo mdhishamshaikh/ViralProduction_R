@@ -5,6 +5,9 @@ setwd("C:/Users/hisham.shaikh/OneDrive - UGent/Projects/FCM_R/ViralProduction_R"
 library(quantmod)
 library(magrittr)
   library(ggplot2)
+  library(ggpubr)
+  library(tidyverse)
+  library(gridExtra)
 }
 
 
@@ -78,37 +81,120 @@ mat <- matrix(c(1, 2, 3  # First, second
              byrow = TRUE)
 
 layout(mat = mat)
-
-
-ggplot(lm_data,aes(Timepoints, VP_a)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F, formula = y ~x) +
-  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
-  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..))
-
-ggplot(lm_data,aes(Timepoints, VP_b)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F) +
-  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
-  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..))
-
-ggplot(lm_data,aes(Timepoints, VP_c)) +
-  geom_point() +
-  geom_smooth(method='lm', se=F) +
-  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
-  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..))
-
-
 #Linear models 
-lm_data<- data[2:7,]
+lm_data<- data[1:6,]
+lm_data$VP_mean <- apply(lm_data[,2:4], 1, mean)
+lm_data$VP_sd <- apply(lm_data[,2:4], 1, sd)
+lm_data$VPC_mean <- apply(lm_data[,5:7], 1, mean)
+lm_data$VPC_sd <- apply(lm_data[,5:7], 1, sd)
+
 for (i in 2:7) {
-model<- lm(lm_data[,i] ~ Timepoints, lm_data)
-slope<- model$coefficient[2]
-r2<- summary(model)$r.squared
-print(slope)
-print(r2)
+  model<- lm(lm_data[,i] ~ Timepoints, lm_data)
+  slope<- model$coefficient[2]
+  r2<- summary(model)$r.squared
+  print(slope)
+  print(r2)
 }
 
 check_model(lmmodel2)
 
 
+a<-ggplot(lm_data,aes(Timepoints, VP_a)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F, formula = y ~x) +
+  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..))  +
+  theme_minimal()
+
+b<-ggplot(lm_data,aes(Timepoints, VP_b)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..))  +
+  theme_minimal()
+
+c<-ggplot(lm_data,aes(Timepoints, VP_c)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..)) +
+  theme_minimal()
+
+d<-ggplot(lm_data,aes(Timepoints, VP_mean)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 1.18e+07, aes(label = ..rr.label..)) +
+  geom_errorbar(aes(ymin= VP_mean-VP_sd, ymax=VP_mean+VP_sd), width=.2,
+                position=position_dodge(.9)) +
+  theme_minimal()
+
+e<-ggplot(lm_data,aes(Timepoints, VPC_a)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F, formula = y ~x) +
+  stat_regline_equation(label.y= 4.2e+06, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 4.18e+06, aes(label = ..rr.label..))  +
+  theme_minimal()
+
+f<-ggplot(lm_data,aes(Timepoints, VPC_b)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 4.2e+06, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 4.18e+06, aes(label = ..rr.label..))  +
+  theme_minimal()
+
+g<-ggplot(lm_data,aes(Timepoints, VPC_c)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 4.2e+06, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 4.18e+06, aes(label = ..rr.label..)) +
+  theme_minimal()
+
+h<-ggplot(lm_data,aes(Timepoints, VPC_mean)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 4.2e+06, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 4.18e+06, aes(label = ..rr.label..)) +
+  geom_errorbar(aes(ymin= VPC_mean-VPC_sd, ymax=VPC_mean+VPC_sd), width=.2,
+                position=position_dodge(.9)) +
+  theme_minimal()
+
+grob_list<- list(a,b,c,d,e,f,g,h)
+#can arrange the above three plots in one plot
+windows(width = 45, height = 20)
+gridExtra::grid.arrange(grobs=grob_list, ncol=4)
+
+colnames<- colnames(lm_data)[2:7]
+
+for (i in colnames){
+plot<- ggplot(lm_data,aes_string(x=lm_data$Timepoints, y=i)) +
+  geom_point() +
+  geom_smooth(method='lm', se=F) +
+  stat_regline_equation(label.y= 4.2e+06, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 4.18e+06, aes(label = ..rr.label..)) +
+  theme_minimal() +
+  labs(x = " Timepoints")
+plot_list[[length(plot_list)+1]]<- plot
+}
+windows(width = 45, height = 20)
+gridExtra::grid.arrange(grobs=plot_list, ncol=3)
+
+
+
+
+
+
+lm_data<- tidyr::gather(lm_data, 'VP_a', 'VP_b', "VP_c", "Diff_a", "Diff_b", "Diff_c", 
+                        key = "Replicate", value = "Counts")
+{windows(width=25,height=16)                                                                                    
+  par(mfrow=c(1,3), pty = 's')}
+
+ggplot(lm_data,aes(x= Timepoints, y = Counts, color= as.factor(Replicate))) +
+  geom_point() +
+  geom_smooth(method='lm', se=F, formula = y ~x) +
+  stat_regline_equation(label.y= 1.2e+07, aes(label = ..eq.label..)) +
+  stat_regline_equation(label.y= 1.1e+07, aes(label = ..rr.label..)) +
+  facet_wrap(~Replicate)
+
+
+par(mfrow=c(2,2))
