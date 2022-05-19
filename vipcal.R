@@ -15,10 +15,10 @@ data<- as.data.frame(read_excel("viralproduction_R.xlsx"))
 
 data$VP_mean <- apply(data[,2:4], 1, mean)
 data$Diff_mean <- apply(data[,5:7], 1, mean)
+data<- rbind (c(-1e+2, rep(1e+10, times=11)), data)
+data<- rbind (data,c(1e+2, rep(-1e+10, times=11)))
 data$VP_sd <- apply(data[,2:4], 1, sd)
 data$Diff_sd <- apply(data[,5:7], 1, sd)
-data<- rbind (c(-1e+2, rep(1e+10, times=13)), data)
-data<- rbind (data,c(1e+2, rep(-1e+10, times=13)))
 
 
 
@@ -69,3 +69,13 @@ ggplot(data[2:7,], aes(Timepoints, Diff_mean))+
   theme_minimal()+
   geom_errorbar(aes(ymin= Diff_mean-Diff_sd, ymax=Diff_mean+Diff_sd), width=.2,
                 position=position_dodge(.9))
+
+
+
+
+#Trying to see if i could find peaks and valleys
+
+peaks(data$Diff_mean, data$Diff_sd)
+valleys(data$Diff_mean, data$Diff_sd)
+#works!!!!!!!
+
