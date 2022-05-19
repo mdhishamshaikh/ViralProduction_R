@@ -229,9 +229,30 @@ Different timepoint<br />
 <p>LM plots<br />
 I will first try to build an LM plot for total viruses per time point combination for all three replicates of VP.<br />
 </p>
+<p><strong>Trying to recreate VIPCAL. And further adding the standard deviation command</strong><br />
+We want the VIPCAL to only give out values if the negative SD is above the positive SD of previous time point</p>
+<p>To idnetify the peaks we’ll use the <code>findPeaks</code> and <code>findValleys</code> function FROM <code>quantmod</code> R package. Three considerations:<br />
+1. It always gives the outcome as the value after the peak. Therfore it is important to add a <code>-1</code> in the code. Or we define our own fucntion<br />
+2. To identify the first timepoint as a valley, you’ll have to add a timepoint before and assign a really high value. Let’s say <code>1E10</code><br />
+3. To identify the last time point as a peak, you’ll have to to add a timepoint after and assign a really low value. Let’s say <code>-1E10</code></p>
+<p>Okay, so for modiefied VIPCAL, VP is estimated between a minima and the maxima that follows the minima with the following criterion<br />
+The mean-SD of the maxima &gt; mean+SD of the minima.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KGRhdGFbMjo3LF0sIGFlcyhUaW1lcG9pbnRzLCBWUF9tZWFuKSkrXG4gIGdlb21fcG9pbnQoKStcbiAgI2dlb21fc21vb3RoKCkrXG5nZW9tX2xpbmUoKStcbiAgdGhlbWVfbWluaW1hbCgpK1xuICBnZW9tX2Vycm9yYmFyKGFlcyh5bWluPSBWUF9tZWFuLVZQX3NkLCB5bWF4PVZQX21lYW4rVlBfc2QpLCB3aWR0aD0uMixcbiAgICAgICAgICAgICAgICBwb3NpdGlvbj1wb3NpdGlvbl9kb2RnZSguOSkpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(data[2:7,], aes(Timepoints, VP_mean))+
+  geom_point()+
+  #geom_smooth()+
+geom_line()+
+  theme_minimal()+
+  geom_errorbar(aes(ymin= VP_mean-VP_sd, ymax=VP_mean+VP_sd), width=.2,
+                position=position_dodge(.9))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlZpcmFsIFByb2R1Y3Rpb24gaW4gUiINCm91dHB1dDogaHRtbF9ub3RlYm9vaw0KLS0tDQoNCioqVG8gZG8gbGlzdDoqKg0KDQoxLiBTZXQgdXAgbG0gcGxvdHNcDQogIERpZmZlcmVudCB0aW1lcG9pbnRcDQoyLiBTZXQgdXAgVklQQ0FMIHBsb3RzDQoNCg0KDQpMTSBwbG90c1wNCkkgd2lsbCBmaXJzdCB0cnkgdG8gYnVpbGQgYW4gTE0gcGxvdCBmb3IgdG90YWwgdmlydXNlcyBwZXIgdGltZSBwb2ludCBjb21iaW5hdGlvbg0KZm9yIGFsbCB0aHJlZSByZXBsaWNhdGVzIG9mIFZQLlw=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlZpcmFsIFByb2R1Y3Rpb24gaW4gUiINCm91dHB1dDogaHRtbF9ub3RlYm9vaw0KLS0tDQoNCioqVG8gZG8gbGlzdDoqKg0KDQoxLiBTZXQgdXAgbG0gcGxvdHNcDQogIERpZmZlcmVudCB0aW1lcG9pbnRcDQoyLiBTZXQgdXAgVklQQ0FMIHBsb3RzDQoNCg0KDQpMTSBwbG90c1wNCkkgd2lsbCBmaXJzdCB0cnkgdG8gYnVpbGQgYW4gTE0gcGxvdCBmb3IgdG90YWwgdmlydXNlcyBwZXIgdGltZSBwb2ludCBjb21iaW5hdGlvbg0KZm9yIGFsbCB0aHJlZSByZXBsaWNhdGVzIG9mIFZQLlwNCg0KDQoNCg0KKipUcnlpbmcgdG8gcmVjcmVhdGUgVklQQ0FMLiBBbmQgZnVydGhlciBhZGRpbmcgdGhlIHN0YW5kYXJkIGRldmlhdGlvbiBjb21tYW5kKipcDQpXZSB3YW50IHRoZSBWSVBDQUwgdG8gb25seSBnaXZlIG91dCB2YWx1ZXMgaWYgdGhlIG5lZ2F0aXZlIFNEIGlzIGFib3ZlIHRoZSBwb3NpdGl2ZSANClNEIG9mIHByZXZpb3VzIHRpbWUgcG9pbnQNCg0KDQpUbyBpZG5ldGlmeSB0aGUgcGVha3Mgd2UnbGwgdXNlIHRoZSBgZmluZFBlYWtzYCBhbmQgYGZpbmRWYWxsZXlzYCBmdW5jdGlvbiBGUk9NIA0KYHF1YW50bW9kYCBSIHBhY2thZ2UuIFRocmVlIGNvbnNpZGVyYXRpb25zOlwNCjEuIEl0IGFsd2F5cyBnaXZlcyB0aGUgb3V0Y29tZSBhcyB0aGUgdmFsdWUgYWZ0ZXIgdGhlIHBlYWsuIFRoZXJmb3JlIGl0IGlzIGltcG9ydGFudA0KdG8gYWRkIGEgYC0xYCBpbiB0aGUgY29kZS4gT3Igd2UgZGVmaW5lIG91ciBvd24gZnVjbnRpb25cDQoyLiBUbyBpZGVudGlmeSB0aGUgZmlyc3QgdGltZXBvaW50IGFzIGEgdmFsbGV5LCB5b3UnbGwgaGF2ZSB0byBhZGQgYSB0aW1lcG9pbnQgYmVmb3JlDQphbmQgYXNzaWduIGEgcmVhbGx5IGhpZ2ggdmFsdWUuIExldCdzIHNheSBgMUUxMGBcDQozLiBUbyBpZGVudGlmeSB0aGUgbGFzdCB0aW1lIHBvaW50IGFzIGEgcGVhaywgeW91J2xsIGhhdmUgdG8gdG8gYWRkIGEgdGltZXBvaW50IGFmdGVyDQphbmQgYXNzaWduIGEgcmVhbGx5IGxvdyB2YWx1ZS4gTGV0J3Mgc2F5IGAtMUUxMGANCg0KDQoNCg0KDQpPa2F5LCBzbyBmb3IgbW9kaWVmaWVkIFZJUENBTCwgVlAgaXMgZXN0aW1hdGVkIGJldHdlZW4gYSBtaW5pbWEgYW5kIHRoZSBtYXhpbWEgdGhhdCBmb2xsb3dzIHRoZSBtaW5pbWENCndpdGggdGhlIGZvbGxvd2luZyBjcml0ZXJpb25cDQpUaGUgbWVhbi1TRCBvZiB0aGUgbWF4aW1hID4gbWVhbitTRCBvZiB0aGUgbWluaW1hLiANCg0KYGBge3J9DQpnZ3Bsb3QoZGF0YVsyOjcsXSwgYWVzKFRpbWVwb2ludHMsIFZQX21lYW4pKSsNCiAgZ2VvbV9wb2ludCgpKw0KICAjZ2VvbV9zbW9vdGgoKSsNCmdlb21fbGluZSgpKw0KICB0aGVtZV9taW5pbWFsKCkrDQogIGdlb21fZXJyb3JiYXIoYWVzKHltaW49IFZQX21lYW4tVlBfc2QsIHltYXg9VlBfbWVhbitWUF9zZCksIHdpZHRoPS4yLA0KICAgICAgICAgICAgICAgIHBvc2l0aW9uPXBvc2l0aW9uX2RvZGdlKC45KSkNCmBgYA0KDQogIA0KICA=</div>
 
 
 
