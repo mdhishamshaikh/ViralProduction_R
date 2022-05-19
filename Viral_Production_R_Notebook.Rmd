@@ -1,0 +1,16 @@
+---
+title: "Viral Production in R"
+output: html_notebook
+---
+
+**To do list:**
+
+1. Set up lm plots\
+  Different timepoint\
+2. Set up VIPCAL plots
+
+
+
+LM plots\
+I will first try to build an LM plot for total viruses per time point combination
+for all three replicates of VP.\
