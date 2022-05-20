@@ -26,7 +26,7 @@ data$Diff_sd <- apply(data[,8:10], 1, sd)
 #VIPCAL Viral Production without standard deviation
 
 viralp<- c()
-for ( i in 11:12){
+for ( i in c(11,13)){
   p<- quantmod::findPeaks(data[,i])-1
   print(p)
   v<- quantmod::findValleys(data[,i])-1
@@ -65,7 +65,7 @@ ggplot(data[2:7,], aes(Timepoints, VP_mean))+
   geom_point()+
   #geom_smooth()+
 geom_line()+
-  theme_minimal()+
+  theme_minimal() +
   geom_errorbar(aes(ymin= VP_mean-VP_sd, ymax=VP_mean+VP_sd), width=.2,
                 position=position_dodge(.9))
 ggplot(data[2:7,], aes(Timepoints, VPC_mean))+
@@ -100,9 +100,9 @@ valleys(data$VP_mean, data$VP_sd)
 
 viralp<- c()
 for ( i in c(11,13)){
-  p<- peaks(data[,i])-1
+  p<- peaks(data[,i],data[,i+3])
   print(p)
-  v<- quantmod::findValleys(data[,i])-1
+  v<- valleys(data[,i],data[,i+3])
   print(v)
   
   print (i)
@@ -127,3 +127,15 @@ for ( i in c(11,13)){
   print(vp)
   viralp = c(viralp, vp)
 }
+viralproduction_sd_VP<- viralp[1]
+viralproduction_sd_Diff<- viralp[2]
+
+
+viral_production<- c(viralproduction_VP,viralproduction_sd_VP,viralproduction_Diff,viralproduction_sd_Diff)
+plot(viral_production)
+
+
+vp_name<- c("viralproduction_VP","viralproduction_sd_VP","viralproduction_Diff","viralproduction_sd_Diff")
+vp<- c(128102.31, 162261.64,  59510.85, 415142.72)
+vp_df<- data.frame(vp_name, vp)
+ggplot(vp_df, aes(x=vp_name, y=vp)) + geom_point()

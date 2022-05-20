@@ -3,15 +3,15 @@
 #from quantmod R package
 
 #without standard deviation
-findpeaks<- function(x){
-  which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) < 
-          0) + 1
-}
-
-findvalleys<-function(x){
-  which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) > 
-          0) + 1
-}
+# findpeaks<- function(x){
+#   which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) < 
+#           0) + 1
+# }
+# 
+# findvalleys<-function(x){
+#   which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) > 
+#           0) + 1
+# }
 
 
 #with standard deviation
