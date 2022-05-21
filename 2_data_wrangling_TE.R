@@ -1,7 +1,7 @@
 #### 0.0 Setting Up the Environment####
 
 #Setting working directory
-setwd("C:/Users/hisham.shaikh/OneDrive - UGent/Projects/Microbial_Abundances/Microbial_Abundances_NJ2020_PE477_PE486/Microbial Abundances/Microbial_Abundances")
+#setwd("C:/Users/hisham.shaikh/OneDrive - UGent/Projects/Microbial_Abundances/Microbial_Abundances_NJ2020_PE477_PE486/Microbial Abundances/Microbial_Abundances")
 
 #Install packages if needed.
 if (!requireNamespace("BiocManager", quietly = TRUE)){
@@ -195,6 +195,7 @@ for (cols in c( "c_Bacteria", "c_HNA", "c_LNA", "c_Viruses", "c_V1", "c_V2", "c_
   counts_metadata$c_Bacteria<- with(counts_metadata, ((HNALNA-((HNALNA/HNALNA)*TE_Ba))*Dilution*60*1000)/(Flowrate*Acquisition_Duration))
   counts_metadata$c_HNA<- with(counts_metadata, ((HNA_Bacteria-((HNA_Bacteria/HNALNA)*TE_Ba))*Dilution*60*1000)/(Flowrate*Acquisition_Duration)) 
   counts_metadata$c_LNA<- with(counts_metadata, ((LNA_Bacteria-((LNA_Bacteria/HNALNA)*TE_Ba))*Dilution*60*1000)/(Flowrate*Acquisition_Duration))
+  counts_metadata$VBR<- with(counts_metadata, c_Viruses/c_Bacteria)
 }
 # { #no need to selectively delete
 #   counts_metadata[counts_metadata$Staining_Protocol == 'Viruses',]$c_Bacteria <- NA 
@@ -211,7 +212,7 @@ for (cols in c( "c_Bacteria", "c_HNA", "c_LNA", "c_Viruses", "c_V1", "c_V2", "c_
   NJ1<- counts_metadata[counts_metadata$Counts_TE== 'count',]
   NJ1<- NJ1[, c('Sample_Name', 'Staining_Protocol', 'Expt_Date', 
                             'Location', 'Expt_No','Depth', 'Sample_Type', 'Timepoint', 'Replicate', 'c_Bacteria', 'c_HNA', 'c_LNA', 
-                            'c_Viruses', 'c_V1', 'c_V2', 'c_V3', 'Comments')]
+                            'c_Viruses', 'c_V1', 'c_V2', 'c_V3', 'VBR', 'Comments')]
   NJ1<- NJ1[
     with(NJ1,
          order(
@@ -226,6 +227,7 @@ for (cols in c( "c_Bacteria", "c_HNA", "c_LNA", "c_Viruses", "c_V1", "c_V2", "c_
          )),
   ]
 }
+
 
 
 write.csv(NJ1, "NJ1.csv", row.names=F)
