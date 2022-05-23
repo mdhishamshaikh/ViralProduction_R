@@ -57,14 +57,21 @@ print("Viral Production means and standard deviations were calculated")
 #Plotting function
 #I want to give it a datafram ewith means and sd. This could be just for VP or VPC (including Diff)
 
-NJ1<- NJ1%>% #Adding 'Microbe' and 'Subgroup' to the dataframe for ease. 
-  mutate(Microbe = if_else(NJ1$count == 'c_Bacteria' | NJ1$count == 'c_HNA' | NJ1$count == 'c_LNA', "Bacteria", "Viruses"))%>%
-  mutate(Subgroup = if_else(NJ1$count == 'c_Bacteria' | NJ1$count == 'c_Viruses', "Total", "Subgroups")) %>%
+NJ1<-  mutate(NJ1, Subgroup = case_when(NJ1$count == 'c_Bacteria' ~ "Total",
+                              NJ1$count == 'c_Viruses' ~ "Total",
+                              NJ1$count == 'c_HNA' ~ "Bacteria",
+                              NJ1$count == 'c_LNA' ~ "Bacteria",
+                              NJ1$count == 'c_V1' ~ "Viruses",
+                              NJ1$count == 'c_V2' ~ "Viruses",
+                              NJ1$count == 'c_V3' ~ "Viruses")) %>%
   arrange(Timepoint)
+
 
 
 }
 
 
 plots_vp(NJ1)
+  ggsave("NJ1.png")
+
 
