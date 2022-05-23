@@ -44,9 +44,9 @@ valleys<- function(x,y){
 plots_vp<- function(df){
 
 ggplot(df, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
-  geom_point(size= 2.0)+
-  geom_line(size= 1.0)+
-  facet_grid(Subgroup~factor(Sample_Type, levels = c("VP", "VPC", "Diff")))+
+  geom_point(size= 1.5)+
+  geom_line(size= 0.8)+
+  facet_grid(factor(Subgroup, levels = c("Total", "Bacteria", "Viruses"))~factor(Sample_Type, levels = c("VP", "VPC", "Diff")))+
   scale_color_manual(name= 'Populations',
                      labels=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
                               "Total Viruses", "V1 Viruses", "V2 Viruses", "V3 Viruses"),
