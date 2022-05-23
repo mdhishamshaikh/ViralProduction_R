@@ -16,7 +16,7 @@
   data$VP_mean <- apply(data[,2:4], 1, mean)
   data$VPC_mean <- apply(data[,5:7], 1, mean)
   data$Diff_mean <- apply(data[,8:10], 1, mean)
-  data<- rbind (c(-1e+2, rep(1e+10, times=12)), data)
+  data<- rbind (c(-1e+2, rep(1e+10, times=12)), data) #replace these values by Inf
   data<- rbind (data,c(1e+2, rep(-1e+10, times=12)))
   data$VP_sd <- apply(data[,2:4], 1, sd)
   data$VPC_sd <- apply(data[,5:7], 1, sd)

@@ -197,15 +197,7 @@ for (cols in c( "c_Bacteria", "c_HNA", "c_LNA", "c_Viruses", "c_V1", "c_V2", "c_
   counts_metadata$c_LNA<- with(counts_metadata, ((LNA_Bacteria-((LNA_Bacteria/HNALNA)*TE_Ba))*Dilution*60*1000)/(Flowrate*Acquisition_Duration))
   counts_metadata$VBR<- with(counts_metadata, c_Viruses/c_Bacteria)
 }
-# { #no need to selectively delete
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Viruses',]$c_Bacteria <- NA 
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Viruses',]$c_HNA <- NA 
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Viruses',]$c_LNA <- NA 
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Bacteria',]$c_Viruses <- NA 
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Bacteria',]$c_V1 <- NA 
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Bacteria',]$c_V2 <- NA
-#   counts_metadata[counts_metadata$Staining_Protocol == 'Bacteria',]$c_V3 <- NA
-# }
+
 
 
 {

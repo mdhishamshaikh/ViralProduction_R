@@ -34,9 +34,12 @@ and assign a really low value. Let's say `-1E10`
 
 
 
+Check the plots vs subgroups script for the function
 
 
-Okay, so for modiefied VIPCAL, VP is estimated between a minima and the maxima that follows the minima
+
+
+Okay, so for modified VIPCAL, VP is estimated between a minima and the maxima that follows the minima
 with the following criterion\
 The mean-SD of the maxima > mean+SD of the minima. 
 
@@ -52,3 +55,36 @@ geom_line()+
 
   
   
+  
+  
+  
+  Let's start again. \
+  I have managed to do the following\
+  1. Get counts for NJ1 data set- Bacteria, HNA, LNA, Viruses, V1, V2, V3\
+  2. Correct for TE. Calculate means and SD. \
+  3. Plot all, parents and subgroup plots for VP and VPC. \
+  4. Calculate viral production for VIPCAL. with and without SD. \
+  
+  To do:\
+  1. Plots for VIPCAL- VP, VPC and Diff together.\
+  2. LM and VIPCAL plots with sloughed off  time points. \
+  3. viral production compared between LM, VIPCAL, VIPCAL-SD.\
+  4. Bacterial production addition
+  
+  
+  
+1. Bacterial Production: net growth rate.\
+We will observe generation time over 24 hours of incubation to understand when the
+assay need to stop.\ 
+We say \
+Gross Bacterial Production = Net bacterial production + bacterial loss due to viral lysis 
++ bacterial loss due to grazing\
+As we only have the the net growth rate, we will assume that the gross bacterial growth rate
+is two times higher (or the factor for grazing) that next growth rate.\
+We will then determine generation time, and the moment generation time based on net growth rate
+reaches 12 hours, our assay stops. 12 hours and not 24 hours because GP = 2NP.\
+But doing that dramatically increases the Vp in some cases. 
+
+
+
+
