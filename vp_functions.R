@@ -12,7 +12,11 @@
 #   which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) > 
 #           0) + 1
 # }
-
+{
+  library(tidyverse)
+  library(ggsci)
+  library(scales)
+}
 
 #with standard deviation
 peaks<- function(x,y){

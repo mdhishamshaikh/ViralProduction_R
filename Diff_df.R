@@ -1,4 +1,4 @@
-
+source("vp_functions.R", echo =T)
 
 #Importing Data, calculating means,sd and Differnce values between VP and VPC
 {#Works for with and without VPC
@@ -36,7 +36,9 @@ if (length(colnames_sd)==2){
 
 if ('VPC' %in% NJ1$Sample_Type){
 NJ1_mean$Diff_mean <- with(NJ1_mean, VPC_mean-VP_mean) #calcualting Diff mean
+NJ1_mean<- pivot_longer(NJ1_mean, cols = c("VP_mean", "VPC_mean", "Diff_mean"), names_to= 'mean', values_to='mean_value')
 NJ1_sd$Diff_sd <- with(NJ1_sd, VPC_sd+VP_sd) #Calculating Diff sd, whcih si addition of the other sds
+NJ1_sd<- pivot_longer(NJ1_sd, cols = c("VP_sd", "VPC_sd", "Diff_sd"), names_to='sd', values_to= 'sd_value')
 }
 
 NJ1<- merge(NJ1_mean, NJ1_sd, by= c('Location', 'Expt_No', 'Depth',
@@ -62,7 +64,9 @@ NJ1<- NJ1%>% #Adding 'Microbe' and 'Subgroup' to the dataframe for ease.
 
 
 }
-  
+
+
+{ 
 levels_total<- c("c_Bacteria", "c_HNA", "c_LNA",
                    "c_Viruses", "c_V1", "c_V2", "c_V3")
 levels_parents<- c("c_Bacteria", "c_Viruses")
@@ -86,7 +90,7 @@ color_child<- color_total[c(2,3,5:7)]
 shape_total<- c(16,16,16,17,17,17,17)
 shape_parents<- c(16,17)
 shape_child<- c(16,16,17,17,17)
-
+}
 
 {
   plot_list<- list()
@@ -302,3 +306,31 @@ ggplot(NJ1, aes(x=Timepoint, y=VP_mean, color=count_factor, shape= count_factor)
   # stat_summary(fun.min = function(x) mean(x) - sd(x), 
   #              fun.max = function(x) mean(x) + sd(x), width = 0.5, size= 0.7,
   #              geom = 'errorbar', aes(group = count_factor))
+
+
+
+
+ggplot(NJ1, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
+  geom_point(size= 2.0)+
+  geom_line(size= 1.0)+
+  facet_grid(Subgroup~mean, space= "free_y")+
+  scale_color_manual(name= 'Populations',
+                     labels=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
+                              "Total Viruses", "V1 Viruses", "V2 Viruses", "V3 Viruses"),
+                     values= c(c_Bacteria = "#00468BFF", 
+                               c_HNA = "#ED0000FF",
+                               c_LNA = "#42B540FF",
+                               c_Viruses = "#0099B4FF",
+                               c_V1 = "#925E9FFF",
+                               c_V2 = "#FDAF91FF",
+                               c_V3 = "#AD002AFF"))+
+  scale_shape_manual(name = 'Populations', 
+                     values = c(16,16,16,17,17,17,17),
+                     labels=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
+                              "Total Viruses", "V1 Viruses", "V2 Viruses", "V3 Viruses"))+
+  theme_minimal()+
+  geom_errorbar(aes(ymin=mean_value + sd_value, ymax= mean_value - sd_value), width = 0.5, size = 1.0)+
+  scale_x_continuous(breaks = c(0,3,6,17,20,24))+
+  labs(title = 'NJ1 - Viral Production', subtitle = 'Overview - Bacterial and Viral counts for Lytic and Lysogenic inductions',
+       x= 'Sampling Timepoints\n (in hours)', y='FCM Counts')
+
