@@ -71,7 +71,9 @@ NJ1<-  mutate(NJ1, Subgroup = case_when(NJ1$count == 'c_Bacteria' ~ "Total",
 }
 
 
-plots_vp(NJ1)
-  ggsave("NJ1.png")
+plots_vipcal(NJ1)
+plots_lm(NJ1)
+  
+ggsave("NJ1.png")
 
 
