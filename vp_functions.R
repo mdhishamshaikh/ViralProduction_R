@@ -116,6 +116,68 @@ plots_lm<- function(df){
           title = element_text(face = 'bold'))
 }
 
+df_lm_tp<- function(df){
+  df<- df[df$Sample_Type != '0.22',] #Lose 0.22 values
+  
+  df<- gather(df, 'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3', key="count", value="value") %>%
+    group_by(Location, Expt_No, Depth, Sample_Type, Timepoint, count ) %>%
+    summarise(n =n(), mean=mean(value), sd=sd(value)) #calculating means and sd
+  
+  df_mean<- df[,1:8] %>% #splitting the datfram cause I haven't figure out how to spread teh table without adding NAs
+    spread('Sample_Type', 'mean')
+  colnames(df_mean)[7:8]<- c("VP_mean", "VPC_mean")
+  df_mean$Diff_mean <- with(df_mean, VPC_mean-VP_mean) #calcualting Diff mean
+  
+  df_sd<- df[,c(1:7,9)] %>%
+    spread('Sample_Type', 'sd')
+  colnames(df_sd)[7:8]<- c("VP_sd", "VPC_sd")
+  df_sd$Diff_sd <- with(df_sd, VPC_sd+VP_sd) #Calculating Diff sd, whcih si addition of the other sds
+  
+  
+  df<- merge(df_mean, df_sd, by= c('Location', 'Expt_No', 'Depth',
+                                      'Timepoint', 'count', 'n')) %>%
+    mutate(Microbe = if_else(count == 'c_Bacteria' | count == 'c_HNA' | count == 'c_LNA', "Bacteria", "Viruses"))%>%
+    mutate(Subgroup = if_else(count == 'c_Bacteria' | count == 'c_Viruses', "Parent", "Subgroup"))
+  
+  rm(df_mean)
+  rm(df_sd)
+  TP<- unique(NJ1$Timepoint)
+  colnames<- c()
+  for (col in 2: length(TP)){
+    a<- paste("T", TP[1], "_T", TP[col], sep = "")
+    colnames[length(colnames)+1]<- a
+  }
+  df<- df%>%
+    mutate("T0_T3" = case_when(Timepoint == '0' ~ "T0:T3",
+                               Timepoint == '3' ~ "T0:T3"))%>%
+    
+    mutate("T0_T6" = case_when(Timepoint == '0' ~ "T0:T6",
+                               Timepoint == '3' ~ "T0:T6", 
+                               Timepoint == '6' ~ "T0:T6"))%>%
+    
+    mutate("T0_T17" = case_when(Timepoint == '0' ~ "T0:T17",
+                                Timepoint == '3' ~ "T0:T17", 
+                                Timepoint == '6' ~ "T0:T17",
+                                Timepoint == '17' ~ "T0:T17"))%>%
+    
+    mutate("T0_T20" = case_when(Timepoint == '0' ~ "T0:T20",
+                                Timepoint == '3' ~ "T0:T20",
+                                Timepoint == '6' ~ "T0:T20",
+                                Timepoint == '17' ~ "T0:T20",
+                                Timepoint == '20' ~ "T0:T20"))%>%
+    
+    mutate("T0_T24" = case_when(Timepoint == '0' ~ "T0:T24",
+                                Timepoint == '3' ~ "T0:T24",
+                                Timepoint == '6' ~ "T0:T24",
+                                Timepoint == '17' ~ "T0:T24",
+                                Timepoint == '20' ~ "T0:T24",
+                                Timepoint == '24' ~ "T0:T24")) %>%
+    pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
+    drop_na()
+  
+  
+  return(df)
+}
 
 plots_lm_tp<- function(df){
   n<- ggplot(df, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
@@ -160,7 +222,7 @@ plots_lm_tp<- function(df){
   o<- ggplot_gtable(ggplot_build(n))
   strip_both<- which(grepl('strip-', o$layout$name))
   fills<- c(rep("white", 14))
-  fills[3]<- "#E489A6" #Change the index to that of the time range after bacterial generation time
+  fills[bp_endpoint]<- "#E489A6" #Change the index to that of the time range after bacterial generation time
   k <- 1
   
   for (i in strip_both) {

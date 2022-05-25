@@ -24,29 +24,19 @@
   
   
   NJ1<- merge(NJ1_mean, NJ1_sd, by= c('Location', 'Expt_No', 'Depth',
-                                      'Timepoint', 'count', 'n')) 
+                                      'Timepoint', 'count', 'n')) %>%
+    mutate(Microbe = if_else(count == 'c_Bacteria' | count == 'c_HNA' | count == 'c_LNA', "Bacteria", "Viruses"))%>%
+    mutate(Subgroup = if_else(count == 'c_Bacteria' | count == 'c_Viruses', "Parent", "Subgroup"))
   
   rm(NJ1_mean)
   rm(NJ1_sd)
 }
 
-#only selecting total bacteria here.
-Ba<- NJ1[NJ1$count== 'c_Bacteria',]
-plot(x = Ba$Timepoint, y = log10(Ba$VP_mean))
 
-Ba<-arrange(Ba,Timepoint)
-#Generation time
-
-#Generation time = (log10(2) *(time2-time1))/(log10(bacteria2)-log10(bacteria1))
 
 Ba_gt<- function(x){
   GT<- (log10(2)*(Ba$Timepoint[x]-Ba$Timepoint[1]))/(log10(Ba$VP_mean[x])-log10(Ba$VP_mean[1]))
   print(GT) 
-}
-plot<- c()
-for (i in 1:6){
-  y<-Ba_gt(i)
-  plot[[length(plot)+1]]<- y
 }
 
 plot<- c()
@@ -54,12 +44,14 @@ plot<- c()
 for (x in c('c_Bacteria', 'c_HNA', 'c_LNA')){
   Ba<- NJ1[NJ1$count== x,] %>%
     arrange(Timepoint)
-  plot<- list()
+  
   for (i in 2:6){
     y<-Ba_gt(i)
-   plot[[length(plot)+1]]<- y
+   plot[length(plot)+1]<- y
    if (y > 24){
-     print("High bacterial production") }
+     print("Low bacterial production") }
+   if (y < 0){
+     print("Low bacterial production") }
 #   plot(plot, x=c(3,6,17,20,24))
 # abline(h=24)
 # abline(h=48, col=2)
@@ -69,5 +61,16 @@ for (x in c('c_Bacteria', 'c_HNA', 'c_LNA')){
 
 #Interesting! LNA bacterial growth isn't that significant
 
+Bacterial_GT <- plot[1:5]
+HNA_GT <- plot[6:10]
+LNA_GT <- plot[11:15]
+bp_df<- data.frame(Bacterial_GT, HNA_GT, LNA_GT) #in hours
+
+bp_endpoint<- intersect(which(Bacterial_GT>0), which(Bacterial_GT<24))[1] #use this as the index for highlighting on plot
+bp<- Bacterial_GT[bp_endpoint]
+intersect(which(HNA_GT>0), which(HNA_GT<24))[1]
+intersect(which(LNA_GT>0), which(LNA_GT<24))[1]
 
 
+
+#Add the bacterial generation time and production rate along with time in a tibble or dataframe

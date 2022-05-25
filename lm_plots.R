@@ -69,33 +69,7 @@ NJ1a<- NJ1%>%
   drop_na()
 
   
-mutate("T0_T3" = case_when(Timepoint == '0' ~ "T0:T3",
-                           Timepoint == '3' ~ "T0:T3"))%>%
-  
-  mutate("T0_T6" = case_when(Timepoint == '0' ~ "T0:T6",
-                             Timepoint == '3' ~ "T0:T6", 
-                             Timepoint == '6' ~ "T0:T6"))%>%
-  
-  mutate("T0_T17" = case_when(Timepoint == '0' ~ "T0:T17",
-                              Timepoint == '3' ~ "T0:T17", 
-                              Timepoint == '6' ~ "T0:T17",
-                              Timepoint == '17' ~ "T0:T17"))%>%
-  
-  mutate("T0_T20" = case_when(Timepoint == '0' ~ "T0:T20",
-                              Timepoint == '3' ~ "T0:T20",
-                              Timepoint == '6' ~ "T0:T20",
-                              Timepoint == '17' ~ "T0:T20",
-                              Timepoint == '20' ~ "T0:T20"))%>%
-  
-  mutate("T0_T24" = case_when(Timepoint == '0' ~ "T0:T24",
-                              Timepoint == '3' ~ "T0:T24",
-                              Timepoint == '6' ~ "T0:T24",
-                              Timepoint == '17' ~ "T0:T24",
-                              Timepoint == '20' ~ "T0:T24",
-                              Timepoint == '24' ~ "T0:T24")) %>%
-  pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
-  drop_na()
-colnames
+
 
 
 
