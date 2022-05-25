@@ -43,13 +43,13 @@ Ba_gt<- function(x){
   GT<- (log10(2)*(Ba$Timepoint[x]-Ba$Timepoint[1]))/(log10(Ba$VP_mean[x])-log10(Ba$VP_mean[1]))
   print(GT) 
 }
-
+plot<- c()
 for (i in 1:6){
   y<-Ba_gt(i)
   plot[[length(plot)+1]]<- y
 }
 
-
+plot<- c()
 
 for (x in c('c_Bacteria', 'c_HNA', 'c_LNA')){
   Ba<- NJ1[NJ1$count== x,] %>%
@@ -58,7 +58,7 @@ for (x in c('c_Bacteria', 'c_HNA', 'c_LNA')){
   for (i in 2:6){
     y<-Ba_gt(i)
    plot[[length(plot)+1]]<- y
-   if (0< y > 24){
+   if (y > 24){
      print("High bacterial production") }
 #   plot(plot, x=c(3,6,17,20,24))
 # abline(h=24)

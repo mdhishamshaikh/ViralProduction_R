@@ -103,14 +103,14 @@ colnames
 
 
 
-ggplot(NJ1, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
+n<- ggplot(NJ1a, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
   geom_point(size= 1.5)+
   geom_smooth(size= 1.0, method = 'lm', se = F)+
   geom_line()+
   geom_hline(yintercept = 0, color= '#636363', size= 0.3, linetype = "dashed")+
   facet_grid(factor(Subgroup, levels = c("Total", "Bacteria", "Viruses")) +
                factor(Sample_Type, levels = c("VP", "VPC", "Diff"))~
-                factor(Time_Time, levels = unique(NJ1$Time_Time))  
+                factor(Time_Time, levels = unique(NJ1a$Time_Time))  
               )+
   scale_color_manual(name= 'Populations',
                      labels=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
@@ -140,3 +140,22 @@ ggplot(NJ1, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
         title = element_text(face = 'bold'),
         legend.position = "bottom")+
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
+
+
+o<- ggplot_gtable(ggplot_build(n))
+strip_both<- which(grepl('strip-', o$layout$name))
+fills<- c(rep("white", 14))
+fills[3]<- "#E489A6" #Change the index to that of the time range after bacterial generation time
+k <- 1
+
+for (i in strip_both) {
+  j<- which(grepl('rect', o$grobs[[i]]$grobs[[1]]$childrenOrder))
+  o$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
+  k<- k+1
+}
+#https://ojkftyk.blogspot.com/2019/01/r-ggplot2-change-colour-of-font-and.html
+grid::grid.draw(o)
+
+
+plots_lm_tp(NJ1a)
+
