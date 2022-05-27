@@ -1,7 +1,16 @@
 ---
 title: "Viral Production in R"
-output: html_notebook
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+  word_document: default
 ---
+```
+{
+library(ggplot2)
+}
+```
 
 **To do list:**
 
@@ -43,7 +52,7 @@ Okay, so for modified VIPCAL, VP is estimated between a minima and the maxima th
 with the following criterion\
 The mean-SD of the maxima > mean+SD of the minima. 
 
-```{r}
+```{r echo=TRUE}
 ggplot(data[2:7,], aes(Timepoints, VP_mean))+
   geom_point()+
   #geom_smooth()+
@@ -87,7 +96,32 @@ reaches 12 hours, our assay stops. 12 hours and not 24 hours because GP = 2NP.\
 But doing that dramatically increases the Vp in some cases. \
 
 
+***Calculating Lytic Viral Production***\
+1. **Linear regression:**\
+  a. Three slopes (one per replicate). We then, average these slopes to get a VP, along with SD value.\
+  b. Average the timepoints (with SD). One slope. **LYT-LM-SR** \
+  *The only difference between 1a and 1b will be SD values.* **LYT-LM-AVG**\
+2. **VIPCAL:**\
+  a. Three values. One per replicate. Then average, and calculate SD **LYT-VCAL-SR**\
+  b. One value, after averaging timepoints without SD **LYT-VCAL-AVG**\
+3. **VIPCAL-SD:**\
+  a. Three values. One per replicate. Then average, and calculate SD **LYT-VSD-SR**\
+  b. One value, after averaging timepoints without SD **LYT-VSD-AVG**\
 
+***Calculating Lysogenic Viral Production***\
+1. **Linear Regression:**\
+  a. Three slopes of VP, and VPC. Subtracting avg slopes Avg(SD) VPC - Avg(SD) VP. **LYS-LM-SR**\
+  b. One slope of VP and VPC, each, after averaging timepoints. Then subtracting them. **LYS-LM-AVG**\
+  *The only difference here would be SD values*\
+2. **VIPCAL:**\
+  a. Avg timepoints. Diff curve is calculated by subtracting av timepoints between VPC and VP.
+  One curve. One value. NO SD. **LYS-VCAL-AVG**\
+3. **VIPCAL-SD:**\
+  a. Avg timepoints. Diff curve is calculated by subtracting avg timepoints between VPC and VP.
+  You take into account the SD for calculating peaks. **LYS-VSD-AVG**\
+\\
 
+First, we can calculate viral production rates on separate replicate dataframe. 
+I will have to create SR dataframe and Avg Dataframes from metadata, TE-corrected dataframe.
 
 
