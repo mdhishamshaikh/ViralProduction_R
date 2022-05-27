@@ -80,42 +80,54 @@ df_avg<- function(df, keep_0.22 = F) {
 df_avg_tp<- function(df, keep_0.22 = F){
   DF<- df_avg(df)
   
-  TP<- unique(DF$Timepoint) #temporary variable
-  
-  colnames<- c() #temporary variable
-  
+  TP<- unique(DF$Timepoint)
+  colnames<- c()
   for (col in 2: length(TP)){
-    colnames[length(colnames)+1] <- paste("T", TP[1], "_T", TP[col], sep = "")
+    a<- paste("T", TP[1], "_T", TP[col], sep = "")
+    colnames[length(colnames)+1]<- a
+  }
+  colvalues<- c()
+  for (col in 2: length(TP)){
+    a<- paste("T", TP[1], ":T", TP[col], sep = "")
+    colvalues[length(colvalues)+1]<- a
   }
   
-  DF<- DF%>%
-    mutate("T0_T3" = case_when(Timepoint == '0' ~ "T0:T3",
-                               Timepoint == '3' ~ "T0:T3"))%>%
-    
-    mutate("T0_T6" = case_when(Timepoint == '0' ~ "T0:T6",
-                               Timepoint == '3' ~ "T0:T6", 
-                               Timepoint == '6' ~ "T0:T6"))%>%
-    
-    mutate("T0_T17" = case_when(Timepoint == '0' ~ "T0:T17",
-                                Timepoint == '3' ~ "T0:T17", 
-                                Timepoint == '6' ~ "T0:T17",
-                                Timepoint == '17' ~ "T0:T17"))%>%
-    
-    mutate("T0_T20" = case_when(Timepoint == '0' ~ "T0:T20",
-                                Timepoint == '3' ~ "T0:T20",
-                                Timepoint == '6' ~ "T0:T20",
-                                Timepoint == '17' ~ "T0:T20",
-                                Timepoint == '20' ~ "T0:T20"))%>%
-    
-    mutate("T0_T24" = case_when(Timepoint == '0' ~ "T0:T24",
-                                Timepoint == '3' ~ "T0:T24",
-                                Timepoint == '6' ~ "T0:T24",
-                                Timepoint == '17' ~ "T0:T24",
-                                Timepoint == '20' ~ "T0:T24",
-                                Timepoint == '24' ~ "T0:T24")) %>%
+  ncol<- ncol(DF)
+  DF[colnames]<- NA
+  
+  
+  DF[,ncol+1]<- case_when(DF$Timepoint == TP[1] ~ colvalues[1],
+                           DF$Timepoint == TP[2] ~ colvalues[1])
+  
+  
+  DF[,ncol+2]<- case_when(DF$Timepoint == TP[1] ~ colvalues[2],
+                           DF$Timepoint == TP[2] ~ colvalues[2],
+                           DF$Timepoint == TP[3] ~ colvalues[2])
+  
+  DF[,ncol+3]<- case_when(DF$Timepoint == TP[1] ~ colvalues[3],
+                           DF$Timepoint == TP[2] ~ colvalues[3],
+                           DF$Timepoint == TP[3] ~ colvalues[3],
+                           DF$Timepoint == TP[4] ~ colvalues[3])
+  
+  DF[,ncol+4]<- case_when(DF$Timepoint == TP[1] ~ colvalues[4],
+                           DF$Timepoint == TP[2] ~ colvalues[4],
+                           DF$Timepoint == TP[3] ~ colvalues[4],
+                           DF$Timepoint == TP[4] ~ colvalues[4],
+                           DF$Timepoint == TP[5] ~ colvalues[4])
+  
+  DF[,ncol+5]<- case_when(DF$Timepoint == TP[1] ~ colvalues[5],
+                           DF$Timepoint == TP[2] ~ colvalues[5],
+                           DF$Timepoint == TP[3] ~ colvalues[5],
+                           DF$Timepoint == TP[4] ~ colvalues[5],
+                           DF$Timepoint == TP[5] ~ colvalues[5],
+                           DF$Timepoint == TP[6] ~ colvalues[5])
+  
+  
+  DF<- DF %>%
     pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
     drop_na()
   
+  rm('colnames', 'colvalues', 'TP', 'colnames_mean', 'colnames_sd', 'a', 'ncol')
   return(DF)
 }
 
@@ -123,42 +135,54 @@ df_avg_tp<- function(df, keep_0.22 = F){
 df_sr_tp<- function(df, keep_0.22 = F){
   DF<- df_sr(df)
   
-  TP<- unique(DF$Timepoint) #temporary variable
-  
-  colnames<- c() #temporary variable
-  
+  TP<- unique(DF$Timepoint)
+  colnames<- c()
   for (col in 2: length(TP)){
-    colnames[length(colnames)+1] <- paste("T", TP[1], "_T", TP[col], sep = "")
+    a<- paste("T", TP[1], "_T", TP[col], sep = "")
+    colnames[length(colnames)+1]<- a
+  }
+  colvalues<- c()
+  for (col in 2: length(TP)){
+    a<- paste("T", TP[1], ":T", TP[col], sep = "")
+    colvalues[length(colvalues)+1]<- a
   }
   
-  DF<- DF%>%
-    mutate("T0_T3" = case_when(Timepoint == '0' ~ "T0:T3",
-                               Timepoint == '3' ~ "T0:T3"))%>%
-    
-    mutate("T0_T6" = case_when(Timepoint == '0' ~ "T0:T6",
-                               Timepoint == '3' ~ "T0:T6", 
-                               Timepoint == '6' ~ "T0:T6"))%>%
-    
-    mutate("T0_T17" = case_when(Timepoint == '0' ~ "T0:T17",
-                                Timepoint == '3' ~ "T0:T17", 
-                                Timepoint == '6' ~ "T0:T17",
-                                Timepoint == '17' ~ "T0:T17"))%>%
-    
-    mutate("T0_T20" = case_when(Timepoint == '0' ~ "T0:T20",
-                                Timepoint == '3' ~ "T0:T20",
-                                Timepoint == '6' ~ "T0:T20",
-                                Timepoint == '17' ~ "T0:T20",
-                                Timepoint == '20' ~ "T0:T20"))%>%
-    
-    mutate("T0_T24" = case_when(Timepoint == '0' ~ "T0:T24",
-                                Timepoint == '3' ~ "T0:T24",
-                                Timepoint == '6' ~ "T0:T24",
-                                Timepoint == '17' ~ "T0:T24",
-                                Timepoint == '20' ~ "T0:T24",
-                                Timepoint == '24' ~ "T0:T24")) %>%
+  ncol<- ncol(DF)
+  DF[colnames]<- NA
+  
+  
+  DF[,ncol+1]<- case_when(DF$Timepoint == TP[1] ~ colvalues[1],
+                          DF$Timepoint == TP[2] ~ colvalues[1])
+  
+  
+  DF[,ncol+2]<- case_when(DF$Timepoint == TP[1] ~ colvalues[2],
+                          DF$Timepoint == TP[2] ~ colvalues[2],
+                          DF$Timepoint == TP[3] ~ colvalues[2])
+  
+  DF[,ncol+3]<- case_when(DF$Timepoint == TP[1] ~ colvalues[3],
+                          DF$Timepoint == TP[2] ~ colvalues[3],
+                          DF$Timepoint == TP[3] ~ colvalues[3],
+                          DF$Timepoint == TP[4] ~ colvalues[3])
+  
+  DF[,ncol+4]<- case_when(DF$Timepoint == TP[1] ~ colvalues[4],
+                          DF$Timepoint == TP[2] ~ colvalues[4],
+                          DF$Timepoint == TP[3] ~ colvalues[4],
+                          DF$Timepoint == TP[4] ~ colvalues[4],
+                          DF$Timepoint == TP[5] ~ colvalues[4])
+  
+  DF[,ncol+5]<- case_when(DF$Timepoint == TP[1] ~ colvalues[5],
+                          DF$Timepoint == TP[2] ~ colvalues[5],
+                          DF$Timepoint == TP[3] ~ colvalues[5],
+                          DF$Timepoint == TP[4] ~ colvalues[5],
+                          DF$Timepoint == TP[5] ~ colvalues[5],
+                          DF$Timepoint == TP[6] ~ colvalues[5])
+  
+  
+  DF<- DF %>%
     pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
     drop_na()
   
+  rm('colnames', 'colvalues', 'TP', 'colnames_mean', 'colnames_sd', 'a', 'ncol')
   return(DF)
 }
 

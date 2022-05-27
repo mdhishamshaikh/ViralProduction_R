@@ -53,7 +53,10 @@ if ('VPC' %in% df$Sample_Type){
 df<- merge(df_mean, df_sd, by= c('Location', 'Expt_No', 'Depth',
                                     'Timepoint', 'count', 'n', 'Sample_Type')) %>%
   mutate(Microbe = if_else(count == 'c_Bacteria' | count == 'c_HNA' | count == 'c_LNA', "Bacteria", "Viruses"))%>%
-  mutate(Subgroup = if_else(count == 'c_Bacteria' | count == 'c_Viruses', "Parent", "Subgroup"))
+  mutate(Subgroup = if_else(count == 'c_Bacteria' | count == 'c_Viruses', "Parent", "Subgroup"))%>%
+  arrange(Location, Expt_No, Depth, Timepoint, count, n, Sample_Type)
+
+
 
 rm(df_mean)
 rm(df_sd)
@@ -66,34 +69,57 @@ for (col in 2: length(TP)){
   a<- paste("T", TP[1], "_T", TP[col], sep = "")
   colnames[length(colnames)+1]<- a
 }
-df<- df%>%
-  mutate("T0_T3" = case_when(Timepoint == '0' ~ "T0:T3",
-                             Timepoint == '3' ~ "T0:T3"))%>%
-  
-  mutate("T0_T6" = case_when(Timepoint == '0' ~ "T0:T6",
-                             Timepoint == '3' ~ "T0:T6", 
-                             Timepoint == '6' ~ "T0:T6"))%>%
-  
-  mutate("T0_T17" = case_when(Timepoint == '0' ~ "T0:T17",
-                              Timepoint == '3' ~ "T0:T17", 
-                              Timepoint == '6' ~ "T0:T17",
-                              Timepoint == '17' ~ "T0:T17"))%>%
-  
-  mutate("T0_T20" = case_when(Timepoint == '0' ~ "T0:T20",
-                              Timepoint == '3' ~ "T0:T20",
-                              Timepoint == '6' ~ "T0:T20",
-                              Timepoint == '17' ~ "T0:T20",
-                              Timepoint == '20' ~ "T0:T20"))%>%
-  
-  mutate("T0_T24" = case_when(Timepoint == '0' ~ "T0:T24",
-                              Timepoint == '3' ~ "T0:T24",
-                              Timepoint == '6' ~ "T0:T24",
-                              Timepoint == '17' ~ "T0:T24",
-                              Timepoint == '20' ~ "T0:T24",
-                              Timepoint == '24' ~ "T0:T24")) %>%
+colvalues<- c()
+for (col in 2: length(TP)){
+  a<- paste("T", TP[1], ":T", TP[col], sep = "")
+  colvalues[length(colvalues)+1]<- a
+}
+
+ncol<- ncol(df)
+df[colnames]<- NA
+
+df2<- df
+
+#df<- df%>%
+
+df2[,ncol+1]<- case_when(df2$Timepoint == TP[1] ~ colvalues[1],
+                         df2$Timepoint == TP[2] ~ colvalues[1])
+
+
+df2[,ncol+2]<- case_when(df2$Timepoint == TP[1] ~ colvalues[2],
+                         df2$Timepoint == TP[2] ~ colvalues[2],
+                         df2$Timepoint == TP[3] ~ colvalues[2])
+
+df2[,ncol+3]<- case_when(df2$Timepoint == TP[1] ~ colvalues[3],
+                         df2$Timepoint == TP[2] ~ colvalues[3],
+                         df2$Timepoint == TP[3] ~ colvalues[3],
+                         df2$Timepoint == TP[4] ~ colvalues[3])
+
+df2[,ncol+4]<- case_when(df2$Timepoint == TP[1] ~ colvalues[4],
+                         df2$Timepoint == TP[2] ~ colvalues[4],
+                         df2$Timepoint == TP[3] ~ colvalues[4],
+                         df2$Timepoint == TP[4] ~ colvalues[4],
+                         df2$Timepoint == TP[5] ~ colvalues[4])
+
+df2[,ncol+5]<- case_when(df2$Timepoint == TP[1] ~ colvalues[5],
+                         df2$Timepoint == TP[2] ~ colvalues[5],
+                         df2$Timepoint == TP[3] ~ colvalues[5],
+                         df2$Timepoint == TP[4] ~ colvalues[5],
+                         df2$Timepoint == TP[5] ~ colvalues[5],
+                         df2$Timepoint == TP[6] ~ colvalues[5])
+
+
+df2<- df2 %>%
   pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
   drop_na()
 
+rm('colnames', 'colvalues', 'TP', 'colnames_mean', 'colnames_sd', 'a', 'ncol')
+ 
+  
+  
 
-return(df)
+return(df2)
 }
+
+
+print()
