@@ -122,6 +122,16 @@ But doing that dramatically increases the Vp in some cases. \
 \\
 
 First, we can calculate viral production rates on separate replicate dataframe. 
-I will have to create SR dataframe and Avg Dataframes from metadata, TE-corrected dataframe.
+I will have to create SR dataframe and Avg Dataframes from metadata, TE-corrected dataframe.\
 
+
+\
+\
+
+**Viral Production SD time point sloughing**
+
+**ATTEMPTING VIRAL PRODUCTION PLOTS**\
+Steps:\
+1. LM viral production Lytic T24.\
+2. VIPCAL VP
 

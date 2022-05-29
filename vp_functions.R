@@ -127,7 +127,7 @@ df_avg_tp<- function(df, keep_0.22 = F){
     pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
     drop_na()
   
-  rm('colnames', 'colvalues', 'TP', 'colnames_mean', 'colnames_sd', 'a', 'ncol')
+  rm('colnames', 'colvalues', 'TP', 'a', 'ncol')
   return(DF)
 }
 
@@ -182,7 +182,7 @@ df_sr_tp<- function(df, keep_0.22 = F){
     pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
     drop_na()
   
-  rm('colnames', 'colvalues', 'TP', 'colnames_mean', 'colnames_sd', 'a', 'ncol')
+  rm('colnames', 'colvalues', 'TP',  'a', 'ncol')
   return(DF)
 }
 
@@ -422,4 +422,43 @@ plots_lm_tp<- function(df, ...){
   }
   #https://ojkftyk.blogspot.com/2019/01/r-ggplot2-change-colour-of-font-and.html
   grid::grid.draw(o)
+}
+
+
+
+#####Slope Functions####
+slope_lm_sr<- function(df_sr){ #takes SR dataframe as an input
+  
+  lm_vp<- list()
+  slope_df <- data.frame()
+  for (location in unique(df_sr$Location)){
+    for (expt_no in unique(df_sr$Expt_No)){
+      for (depth in unique(df_sr$Depth)){
+        for (time in unique(df_sr$Time_Range)){
+          for (viruses in unique(df_sr$count)[4:7]){
+            for (prod in unique(df_sr$Sample_Type)){
+              for (rep in unique(df_sr$Replicate)){
+                
+                df2<- df_sr[df_sr$Location == location,]
+                df2<- df2[df2$Expt_No == expt_no,]
+                df2<- df2[df2$Depth == depth,]
+                df2<- df2[df2$Time_Range == time,]
+                df2<- df2[df2$count == viruses,]
+                df2<- df2[df2$Sample_Type == prod,]
+                df2<- df2[df2$Replicate == rep,]
+                
+                lm<- lm(data = df2, value ~ Timepoint)
+                print(summary(lm))
+                slope<- c(location, expt_no, depth, time, viruses, prod, rep, lm$coefficients[[2]])
+                lm_vp[[length(lm_vp)+1]] <- slope  
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  slope_lm_sr<- data.frame(t(sapply(lm_vp, c)))
+  colnames(slope_lm_sr)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'count', 'Sample_Type', 'Replicate', 'LM_SR_slope')
 }

@@ -62,7 +62,7 @@ rm(df_mean)
 rm(df_sd)
 
 
-
+TP<-c()
 TP<- unique(df$Timepoint)
 colnames<- c()
 for (col in 2: length(TP)){
@@ -74,13 +74,37 @@ for (col in 2: length(TP)){
   a<- paste("T", TP[1], ":T", TP[col], sep = "")
   colvalues[length(colvalues)+1]<- a
 }
-
-ncol<- ncol(df)
+ncol<-c()
+ncol<- ncol(df2)
 df[colnames]<- NA
 
 df2<- df
 
+
 #df<- df%>%
+
+for (i in 1:5){
+  for(j in 1:5){
+  
+    return(df2[, ncol+i] <- case_when(df2$Timepoint == TP[j] ~ colvalues[i]))
+  
+  if(j==1+i){
+    next
+  }
+  
+  }
+  
+}
+
+for(i in 1:5){
+  
+  return(df2[, 12] <- case_when(df2$Timepoint == TP[i] ~ colvalues[i]))
+  
+  next
+}
+
+
+
 
 df2[,ncol+1]<- case_when(df2$Timepoint == TP[1] ~ colvalues[1],
                          df2$Timepoint == TP[2] ~ colvalues[1])

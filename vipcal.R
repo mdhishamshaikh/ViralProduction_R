@@ -16,8 +16,8 @@ data<- as.data.frame(read_excel("viralproduction_R.xlsx"))
 data$VP_mean <- apply(data[,2:4], 1, mean)
 data$VPC_mean <- apply(data[,5:7], 1, mean)
 data$Diff_mean <- apply(data[,8:10], 1, mean)
-data<- rbind (c(-1e+2, rep(1e+10, times=12)), data)
-data<- rbind (data,c(1e+2, rep(-1e+10, times=12)))
+data<- rbind (c(-Inf, rep(Inf, times=12)), data)
+data<- rbind (data,c(Inf, rep(-Inf, times=12)))
 data$VP_sd <- apply(data[,2:4], 1, sd)
 data$VPC_sd <- apply(data[,5:7], 1, sd)
 data$Diff_sd <- apply(data[,8:10], 1, sd)
@@ -139,3 +139,8 @@ vp_name<- c("viralproduction_VP","viralproduction_sd_VP","viralproduction_Diff",
 vp<- c(128102.31, 162261.64,  59510.85, 415142.72)
 vp_df<- data.frame(vp_name, vp)
 ggplot(vp_df, aes(x=vp_name, y=vp)) + geom_point()
+
+
+
+####LM viral production #####
+
