@@ -66,9 +66,9 @@ df_avg<- function(df, keep_0.22 = F) {
   }
   
   DF<- merge(DF_mean, DF_sd, by= c('Location', 'Expt_No', 'Depth',
-                                   'Timepoint', 'count', 'n', 'Sample_Type')) 
-  
-  
+                                   'Timepoint', 'count', 'n', 'Sample_Type')) %>%
+    mutate(Microbe = if_else(count == 'c_Bacteria' | count == 'c_HNA' | count == 'c_LNA', "Bacteria", "Viruses"))%>%
+    mutate(Subgroup = if_else(count == 'c_Bacteria' | count == 'c_Viruses', "Parent", "Subgroup"))
   rm('DF_mean', 'DF_sd', 'colnames_mean', 'colnames_sd')
   
   
@@ -76,7 +76,7 @@ df_avg<- function(df, keep_0.22 = F) {
 }
 
 
-#df average replciates timepoints
+#df average replicates timepoints
 
 df_avg_tp<- function(df, keep_0.22 = F){
   DF<- df_avg(df)
@@ -307,6 +307,9 @@ plots_lm<- function(df){
           title = element_text(face = 'bold'))
 }
 
+
+####Overview Plots####
+
 df_lm_tp<- function(df, ...){
   df<- df[df$Sample_Type != '0.22',] #Lose 0.22 values
   
@@ -314,7 +317,7 @@ df_lm_tp<- function(df, ...){
     group_by(Location, Expt_No, Depth, Sample_Type, Timepoint, count ) %>%
     summarise(n =n(), mean=mean(value), sd=sd(value)) #calculating means and sd
   
-  df_mean<- df[,1:8] %>% #splitting the datfram cause I haven't figure out how to spread teh table without adding NAs
+  df_mean<- df[,1:8] %>% #splitting the dataframe cause I haven't figure out how to spread the table without adding NAs
     spread('Sample_Type', 'mean')
   colnames(df_mean)[7:8]<- c("VP_mean", "VPC_mean")
   df_mean$Diff_mean <- with(df_mean, VPC_mean-VP_mean) #calcualting Diff mean
@@ -322,7 +325,7 @@ df_lm_tp<- function(df, ...){
   df_sd<- df[,c(1:7,9)] %>%
     spread('Sample_Type', 'sd')
   colnames(df_sd)[7:8]<- c("VP_sd", "VPC_sd")
-  df_sd$Diff_sd <- with(df_sd, VPC_sd+VP_sd) #Calculating Diff sd, whcih si addition of the other sds
+  df_sd$Diff_sd <- with(df_sd, VPC_sd+VP_sd) #Calculating Diff sd, which is addition of the other sds
   
   
   df<- merge(df_mean, df_sd, by= c('Location', 'Expt_No', 'Depth',

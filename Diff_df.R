@@ -55,7 +55,7 @@ print("Viral Production means and standard deviations were calculated")
 
 
 #Plotting function
-#I want to give it a datafram ewith means and sd. This could be just for VP or VPC (including Diff)
+#I want to give it a dataframe with means and sd. This could be just for VP or VPC (including Diff)
 
 NJ1<-  mutate(NJ1, Subgroup = case_when(NJ1$count == 'c_Bacteria' ~ "Total",
                               NJ1$count == 'c_Viruses' ~ "Total",

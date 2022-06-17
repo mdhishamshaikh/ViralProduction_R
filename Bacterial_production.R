@@ -1,3 +1,7 @@
+###IMPORTANT
+####Calculates bacterial production rates and generation time
+
+
 {
   library(tidyverse)
   

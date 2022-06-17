@@ -226,70 +226,70 @@ write.csv(NJ1, "NJ1.csv", row.names=F)
 
 ##### Everything below this, we don't need for the moment
 
-
-
-#Need to figure out how to remove duplicates, and only take one value forward.
-
-length(which(abundance$Location == "NJ2020"))
-length(which(abundance$Location == "PE477"))
-length(which(abundance$Location == "PE486"))
-
-
-#for now I am manually deleting the ones that don't belong
-#first only take the depths needed.
-NJ2020<- abundance[abundance$Location == 'NJ2020',] #all good, no depth
-
-cruises<-abundance[abundance$Depth %in% c(7.0, 15.0, 30.0),]
-
-
-to_delete<- c("BA210507.008", "VI210507.013", "VI210507.016")
-for (delete in to_delete){
-  cruises<- cruises[!(cruises$Sample_Name == delete),]
-}
-
-{
-  viruses<- cruises[which(cruises$Staining_Protocol == 'Viruses'),] %>%
-    select(-c(Staining_Protocol, c_Bacteria, c_HNA, c_LNA, Comments)) %>%
-    stats::setNames(c("Viral_Sample_Name", "Expt_Date", "Location", "Expt_No", "Depth", "Total_Viruses", "V1", "V2", "V3"))
-  bacteria<- cruises[which(cruises$Staining_Protocol == 'Bacteria'),] %>%
-    select(-c(Staining_Protocol, c_Viruses, c_V1, c_V2, c_V3, Comments)) %>%
-    stats::setNames(c("Bacterial_Sample_Name", "Expt_Date", "Location", "Expt_No", "Depth", "Total_Bacteria", "HNA", "LNA"))
-  cruise_abundance<- merge(viruses, bacteria, by = c("Location", "Expt_No", "Depth", "Expt_Date")) %>%
-    select("Bacterial_Sample_Name", "Viral_Sample_Name", "Location", "Expt_No", 
-           "Depth", "Expt_Date", "Total_Bacteria", "HNA", "LNA", "Total_Viruses", "V1", "V2", "V3")
-  rm(viruses)
-  rm(bacteria)
-}
-
-{
-  viruses<- NJ2020[which(NJ2020$Staining_Protocol == 'Viruses'),] %>%
-    select(-c(Staining_Protocol, Depth, c_Bacteria, c_HNA, c_LNA, Comments)) %>%
-    stats::setNames(c("Viral_Sample_Name", "Expt_Date", "Location", "Expt_No", "Total_Viruses", "V1", "V2", "V3"))
-  bacteria<- NJ2020[which(NJ2020$Staining_Protocol == 'Bacteria'),] %>%
-    select(-c(Staining_Protocol, Depth, c_Viruses, c_V1, c_V2, c_V3, Comments)) %>%
-    stats::setNames(c("Bacterial_Sample_Name", "Expt_Date", "Location", "Expt_No", "Total_Bacteria", "HNA", "LNA"))
-  NJ2020_abundance<- merge(viruses, bacteria, by = c("Location", "Expt_No", "Expt_Date")) %>%
-    select("Bacterial_Sample_Name", "Viral_Sample_Name", "Location", "Expt_No",
-           "Expt_Date", "Total_Bacteria", "HNA", "LNA", "Total_Viruses", "V1", "V2", "V3")
-  rm(viruses)
-  rm(bacteria)
-} 
-
-#Calculate VBR. For the same, you'll have to combine the tables of viruses and bacteria 
-
-cruise_abundance$VBR<- cruise_abundance$Total_Viruses/cruise_abundance$Total_Bacteria
-NJ2020_abundance$VBR<- NJ2020_abundance$Total_Viruses/NJ2020_abundance$Total_Bacteria
-
-
-#Adding coordinates and nutrients to the data sets
-coordinates <- read_excel("Metadata/Metadata_Microbial_Abundances_NJ2020_PE477_PE486.xlsx", 
-                          sheet = "Coordinates")
-nutrients_ts<- read_excel("Metadata/Metadata_Microbial_Abundances_NJ2020_PE477_PE486.xlsx", 
-                          sheet = "Nutrients")
-
-NJ2020_abundance<- merge(NJ2020_abundance, coordinates[coordinates$Location == 'NJ2020', c(1,3,4)], by = "Location")
-cruise_abundance<- merge(cruise_abundance, coordinates[coordinates$Location %in% c('PE477', 'PE486'),]  )
-
-NJ2020_abundance<- merge(NJ2020_abundance, nutrients_ts[nutrients_ts$Location == 'NJ2020',], by = "Expt_No")
-cruise_abundance<- merge(cruise_abundance, nutrients_ts[nutrients_ts$Location %in% c('PE477', 'PE486'),])
+# 
+# 
+# #Need to figure out how to remove duplicates, and only take one value forward.
+# 
+# length(which(abundance$Location == "NJ2020"))
+# length(which(abundance$Location == "PE477"))
+# length(which(abundance$Location == "PE486"))
+# 
+# 
+# #for now I am manually deleting the ones that don't belong
+# #first only take the depths needed.
+# NJ2020<- abundance[abundance$Location == 'NJ2020',] #all good, no depth
+# 
+# cruises<-abundance[abundance$Depth %in% c(7.0, 15.0, 30.0),]
+# 
+# 
+# to_delete<- c("BA210507.008", "VI210507.013", "VI210507.016")
+# for (delete in to_delete){
+#   cruises<- cruises[!(cruises$Sample_Name == delete),]
+# }
+# 
+# {
+#   viruses<- cruises[which(cruises$Staining_Protocol == 'Viruses'),] %>%
+#     select(-c(Staining_Protocol, c_Bacteria, c_HNA, c_LNA, Comments)) %>%
+#     stats::setNames(c("Viral_Sample_Name", "Expt_Date", "Location", "Expt_No", "Depth", "Total_Viruses", "V1", "V2", "V3"))
+#   bacteria<- cruises[which(cruises$Staining_Protocol == 'Bacteria'),] %>%
+#     select(-c(Staining_Protocol, c_Viruses, c_V1, c_V2, c_V3, Comments)) %>%
+#     stats::setNames(c("Bacterial_Sample_Name", "Expt_Date", "Location", "Expt_No", "Depth", "Total_Bacteria", "HNA", "LNA"))
+#   cruise_abundance<- merge(viruses, bacteria, by = c("Location", "Expt_No", "Depth", "Expt_Date")) %>%
+#     select("Bacterial_Sample_Name", "Viral_Sample_Name", "Location", "Expt_No", 
+#            "Depth", "Expt_Date", "Total_Bacteria", "HNA", "LNA", "Total_Viruses", "V1", "V2", "V3")
+#   rm(viruses)
+#   rm(bacteria)
+# }
+# 
+# {
+#   viruses<- NJ2020[which(NJ2020$Staining_Protocol == 'Viruses'),] %>%
+#     select(-c(Staining_Protocol, Depth, c_Bacteria, c_HNA, c_LNA, Comments)) %>%
+#     stats::setNames(c("Viral_Sample_Name", "Expt_Date", "Location", "Expt_No", "Total_Viruses", "V1", "V2", "V3"))
+#   bacteria<- NJ2020[which(NJ2020$Staining_Protocol == 'Bacteria'),] %>%
+#     select(-c(Staining_Protocol, Depth, c_Viruses, c_V1, c_V2, c_V3, Comments)) %>%
+#     stats::setNames(c("Bacterial_Sample_Name", "Expt_Date", "Location", "Expt_No", "Total_Bacteria", "HNA", "LNA"))
+#   NJ2020_abundance<- merge(viruses, bacteria, by = c("Location", "Expt_No", "Expt_Date")) %>%
+#     select("Bacterial_Sample_Name", "Viral_Sample_Name", "Location", "Expt_No",
+#            "Expt_Date", "Total_Bacteria", "HNA", "LNA", "Total_Viruses", "V1", "V2", "V3")
+#   rm(viruses)
+#   rm(bacteria)
+# } 
+# 
+# #Calculate VBR. For the same, you'll have to combine the tables of viruses and bacteria 
+# 
+# cruise_abundance$VBR<- cruise_abundance$Total_Viruses/cruise_abundance$Total_Bacteria
+# NJ2020_abundance$VBR<- NJ2020_abundance$Total_Viruses/NJ2020_abundance$Total_Bacteria
+# 
+# 
+# #Adding coordinates and nutrients to the data sets
+# coordinates <- read_excel("Metadata/Metadata_Microbial_Abundances_NJ2020_PE477_PE486.xlsx", 
+#                           sheet = "Coordinates")
+# nutrients_ts<- read_excel("Metadata/Metadata_Microbial_Abundances_NJ2020_PE477_PE486.xlsx", 
+#                           sheet = "Nutrients")
+# 
+# NJ2020_abundance<- merge(NJ2020_abundance, coordinates[coordinates$Location == 'NJ2020', c(1,3,4)], by = "Location")
+# cruise_abundance<- merge(cruise_abundance, coordinates[coordinates$Location %in% c('PE477', 'PE486'),]  )
+# 
+# NJ2020_abundance<- merge(NJ2020_abundance, nutrients_ts[nutrients_ts$Location == 'NJ2020',], by = "Expt_No")
+# cruise_abundance<- merge(cruise_abundance, nutrients_ts[nutrients_ts$Location %in% c('PE477', 'PE486'),])
 
