@@ -12,15 +12,15 @@ output: html_document
 **2. Installing libraries**\
 \
 We can simply source the `0_vp_source.R` script\
-
-    source(0_vp_source.R)
-
+```{r}
+source("0_vp_source.R")
+```
 \
 \
 **3. Extracting Counts from FCS files**\
 \
 The script, `1_input_data_counts.R`, reads the FCS files and extracts count information on the following:\
-1. Total\
+1. Total Count\
 2. Total Bacteria\
 3. Total Viruses\
 4. HNA Bacteria\
@@ -43,8 +43,14 @@ This `.csv` file can be used for plotting and extracting downstream information.
 **5. Generating Plots**\
 Here we try to get an overview plot from the `.csv` generated in Step 4. \
 We'll first generate a plot from averaged values for VP and VPC. We'll subtract VP from VPC
-to calculate the Difference curve.\
+to calculate the Difference curve. We will then add the SD to get the SD for the Diff curve.\
 
-df_avg_tp(NJ1) %>%
-plots_lm_tp()
+Th function `overview_df_tp_avg` converts the `.csv` file into a dataframe 
+that could be used by the overview plot function. 
+I still need to work on this function. I need to figure out the bacterial 
+production endpoint first for this.
 
+```{r echo=TRUE, fig.height=12, fig.width=8}
+NJ1<- read.csv("NJ1.csv")
+overview_df_tp_avg(NJ1)%>%
+  overview_plots_tp_avg()

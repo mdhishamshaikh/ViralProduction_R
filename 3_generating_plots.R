@@ -1,37 +1,9 @@
-#A script to install and load required packages, and to source global functions
-
-####1. Installing and loading libraries####
-
-#Installing BiocManager
-{
-  if (!requireNamespace("BiocManager"))
-  install.packages("BiocManager")
-}
-
-#List of packages to install
-packages_to_load<- c("tidyverse", 
-                     "flowWorkspace",
-                     "scales",
-                     "readxl")
-
-
-#Checking if packages are already present. If absent, then installing packages from BiocManager 
-for (pack in packages_to_load){
-  if(!requireNamespace(pack))
-    BiocManager::install(pack, force = T)
-  }
-
-#Loading libraries  
-for (pack in packages_to_load){
-   library(pack, character.only = T)
-}
+#Importing .csv file
+NJ1<- read.csv("NJ1.csv")
 
 
 
-####2. Overview plot functions ####
-
-#To create an overview table with time ranges. Needed for overview plotting
-overview_df_tp_avg<- function(df, keep_0.22 = F) {
+overview_df_avg_tp<- function(df, keep_0.22 = F) {
   #only works if we remove 0.22
   DF<- df[df$Sample_Type != '0.22',]
   
@@ -79,13 +51,15 @@ overview_df_tp_avg<- function(df, keep_0.22 = F) {
                                    'Timepoint', 'count', 'n', 'Sample_Type'))
   
   DF<-  mutate(DF, Subgroup = case_when(DF$count == 'c_Bacteria' ~ "Total",
-                                        DF$count == 'c_Viruses' ~ "Total",
-                                        DF$count == 'c_HNA' ~ "Bacteria",
-                                        DF$count == 'c_LNA' ~ "Bacteria",
-                                        DF$count == 'c_V1' ~ "Viruses",
-                                        DF$count == 'c_V2' ~ "Viruses",
-                                        DF$count == 'c_V3' ~ "Viruses")) %>%
+                                          DF$count == 'c_Viruses' ~ "Total",
+                                          DF$count == 'c_HNA' ~ "Bacteria",
+                                          DF$count == 'c_LNA' ~ "Bacteria",
+                                          DF$count == 'c_V1' ~ "Viruses",
+                                          DF$count == 'c_V2' ~ "Viruses",
+                                          DF$count == 'c_V3' ~ "Viruses")) %>%
     arrange(Timepoint)
+  
+  
   
   rm('DF_mean', 'DF_sd', 'colnames_mean', 'colnames_sd')
   
@@ -138,10 +112,13 @@ overview_df_tp_avg<- function(df, keep_0.22 = F) {
     drop_na()
   
   rm('colnames', 'colvalues', 'TP', 'a', 'ncol')
+  
+  
   return(DF)
 }
 
-#To create an overview plot with time ranges
+
+
 overview_plots_tp_avg<- function(df, ...){
   n<- ggplot(df, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
     geom_point(size= 1.5)+
@@ -182,13 +159,19 @@ overview_plots_tp_avg<- function(df, ...){
     guides(color = guide_legend(nrow = 2, byrow = TRUE))
   
   return(n)
-  
+ 
 }
 
+o<- ggplot_gtable(ggplot_build(n))
+strip_both<- which(grepl('strip-', o$layout$name))
+fills<- c(rep("white", 14))
+fills[bp_endpoint]<- "#E489A6" #Change the index to that of the time range after bacterial generation time
+k <- 1
 
-#### Bacterial Generation Time####
-Ba_gt<- function(x){
-  GT<- (log10(2)*(Ba$Timepoint[x]-Ba$Timepoint[1]))/(log10(Ba$VP_mean[x])-log10(Ba$VP_mean[1]))
-  print(GT) 
+for (i in strip_both) {
+  j<- which(grepl('rect', o$grobs[[i]]$grobs[[1]]$childrenOrder))
+  o$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
+  k<- k+1
 }
-
+#https://ojkftyk.blogspot.com/2019/01/r-ggplot2-change-colour-of-font-and.html
+grid::grid.draw(o)

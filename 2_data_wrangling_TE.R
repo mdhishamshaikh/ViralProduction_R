@@ -212,9 +212,9 @@ for (cols in c( "c_Bacteria", "c_HNA", "c_LNA", "c_Viruses", "c_V1", "c_V2", "c_
            NJ1[, 'Location'],
            NJ1[, 'Expt_No'],
            NJ1[, 'Depth'],
-           NJ1[, 'Sample_Type'],
            NJ1[, 'Timepoint'],
-           NJ1[, 'Replicate']
+           NJ1[, 'Replicate'],
+           NJ1[, 'Sample_Type']
            
          )),
   ]
