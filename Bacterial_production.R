@@ -69,7 +69,6 @@ Bacterial_GT <- plot[1:5]
 HNA_GT <- plot[6:10]
 LNA_GT <- plot[11:15]
 bp_df<- data.frame(Bacterial_GT, HNA_GT, LNA_GT) #in hours
-
 bp_endpoint<- intersect(which(Bacterial_GT>0), which(Bacterial_GT<24))[1] #use this as the index for highlighting on plot
 bp<- Bacterial_GT[bp_endpoint]
 intersect(which(HNA_GT>0), which(HNA_GT<24))[1]

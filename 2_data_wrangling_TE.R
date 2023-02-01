@@ -38,7 +38,7 @@ BiocManager::install(c("tidyverse", "magrittr", "readxl"))
 
 #Import metadata which is saved as an Excel sheet
 {
-  metadata <- read_excel("Metadata/Metadata_NJ2020_1.xlsx")
+  metadata <- read_excel("./Metadata/Metadata_NJ2020_1.xlsx")
   #adding flowrate
   # flowrate<- read_excel("Metadata/Metadata_Microbial_Abundances_NJ2020_PE477_PE486.xlsx", 
   #                       sheet = "flowrate")
@@ -117,14 +117,14 @@ for (name in counts_metadata$Sample_Name){ #Here I added TE value for both virus
   if (counts_metadata[counts_metadata$Sample_Name == name,]$Staining_Protocol == 'Viruses'
       #selecting rows with the specified file name that also had viral staining protocol
   ) {
-    if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE == 'TE') {
+    if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE  == 'TE') {
       print("TE") #we don't want this. so we move on and look for a count file
-    } else if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE == 'count') {
-      if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$Counts_TE == 'TE'
+    } else if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE  != 'TE') {
+      if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$Counts_TE  == 'TE'
           #looking to see if there is a TE above this count file. if yes, we record it as 'a'
       ){
         a<- counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$HNALNA
-        if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$Counts_TE == 'TE'
+        if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$Counts_TE  == 'TE'
             #here we see if there is a TE above our first TE. we record this as 'b'
         ){
           b<- counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$HNALNA
@@ -135,14 +135,14 @@ for (name in counts_metadata$Sample_Name){ #Here I added TE value for both virus
       #adding the output to TE_value column
     }
     
-    if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE == 'TE') {
+    if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE  == 'TE') {
       print("TE") #we don't want this. so we move on and look for a count file
-    } else if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE == 'count') {
-      if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$Counts_TE == 'TE'
+    } else if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE  != 'TE') {
+      if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$Counts_TE  == 'TE'
           #looking to see if there is a TE above this count file. if yes, we record it as 'a'
       ){
         c<- counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$V1V2V3
-        if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$Counts_TE == 'TE'
+        if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$Counts_TE  == 'TE'
             #here we see if there is a TE above our first TE. we record this as 'b'
         ){
           d<- counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$V1V2V3
@@ -153,17 +153,17 @@ for (name in counts_metadata$Sample_Name){ #Here I added TE value for both virus
     }
   } else { #THIS PART WILL NOT RUN AS ALL MY SAMPLES ARE VIRAL 
     if (counts_metadata[counts_metadata$Sample_Name == name,]$Staining_Protocol == 'Bacteria') {
-      if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE == 'TE') {
+      if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE  == 'TE') {
         print("yes")
-      } else if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE == 'count') {
-        if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$Counts_TE == 'TE'){
+      } else if (counts_metadata[counts_metadata$Sample_Name == name,]$Counts_TE != 'TE') {
+        if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$Counts_TE  == 'TE'){
           a<- counts_metadata[which(counts_metadata$Sample_Name == name) + c(-1), ]$HNALNA
-          if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$Counts_TE == 'TE'){
+          if (counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$Counts_TE  == 'TE'){
             b<- counts_metadata[which(counts_metadata$Sample_Name == name) + c(-2), ]$HNALNA
           }
         }
         print(paste(name, a, b, mean(c(a,b))))
-        counts_metadata[counts_metadata$Sample_Name == name,]$TE_value <- mean(c(a,b))
+        counts_metadata[counts_metadata$Sample_Name == name,]$TE_Vi <- mean(c(a,b))
       }}}
 }
 
@@ -201,9 +201,9 @@ for (cols in c( "c_Bacteria", "c_HNA", "c_LNA", "c_Viruses", "c_V1", "c_V2", "c_
 
 
 {
-  NJ1<- counts_metadata[counts_metadata$Counts_TE== 'count',]
+  NJ1<- counts_metadata[counts_metadata$Counts_TE != 'TE',]
   NJ1<- NJ1[, c('Sample_Name', 'Staining_Protocol', 'Expt_Date', 
-                            'Location', 'Expt_No','Depth', 'Sample_Type', 'Timepoint', 'Replicate', 'c_Bacteria', 'c_HNA', 'c_LNA', 
+                            'Location', 'Expt_No', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', 'c_Bacteria', 'c_HNA', 'c_LNA', 
                             'c_Viruses', 'c_V1', 'c_V2', 'c_V3', 'VBR', 'Comments')]
   NJ1<- NJ1[
     with(NJ1,

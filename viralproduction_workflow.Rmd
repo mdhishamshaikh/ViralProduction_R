@@ -2,7 +2,9 @@
 title: "ViralProduction_Workflow"
 author: "Hisham M Shaikh"
 date: '2022-06-17'
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 **1. Setting up working directory**\
@@ -45,12 +47,11 @@ Here we try to get an overview plot from the `.csv` generated in Step 4. \
 We'll first generate a plot from averaged values for VP and VPC. We'll subtract VP from VPC
 to calculate the Difference curve. We will then add the SD to get the SD for the Diff curve.\
 
-Th function `overview_df_tp_avg` converts the `.csv` file into a dataframe 
+Th function `overview_vp_plots` converts the `.csv` file into a dataframe 
 that could be used by the overview plot function. 
 I still need to work on this function. I need to figure out the bacterial 
 production endpoint first for this.
 
 ```{r echo=TRUE, fig.height=12, fig.width=8}
 NJ1<- read.csv("NJ1.csv")
-overview_df_tp_avg(NJ1)%>%
-  overview_plots_tp_avg()
+overview_vp_plots(NJ1)

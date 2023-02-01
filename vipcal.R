@@ -10,6 +10,8 @@
 
 {
 data<- as.data.frame(read_excel("viralproduction_R.xlsx")) 
+  data <- read_excel("viralproduction_R.xlsx",range = "A1:J7")
+ 
 
   #VIPCAL works on mean values only. So let's calculate the mean.
 
@@ -108,10 +110,15 @@ for ( i in c(11,13)){
   print (i)
   
   if (identical(length(p),length(q))) {
-    print("great")
+    print("Number of peaks and valleys are identical. Proceeding to calculating viral production ")
+  } else {
+    print("Number of peaks and valleys aren't identical")
   }
   
-  if (length(p)==1) {
+  if (length(p)==0) {
+    print("No viral production")
+  } else if (length(p)==1) {
+    
     vp<- (data[p[1],i] - data[v[1],i])/(data[p[1],1] - data[v[1],1])
     
   } else if (length(p)==2) {

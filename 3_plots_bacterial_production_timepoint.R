@@ -1,4 +1,3 @@
-source("vp_functions.R")
 
 df<- read.csv("NJ1.csv")
 pull<-df_lm_tp(NJ1)

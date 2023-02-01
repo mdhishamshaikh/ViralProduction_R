@@ -49,8 +49,8 @@ read_transform_fs_bv <- function(x){ #function to read and transform fcs files
 }
 
 #was just checking if the function works
-#gsbv<- read_transform_fs_bv(data)
-#ggcyto(gsbv[1], aes(x= "SSC-H", y= "FL1-H")) +geom_hex(bins=800)
+gsbv<- read_transform_fs_bv(data)
+ggcyto(gsbv[1], aes(x= "SSC-H", y= "FL1-H")) +geom_hex(bins=200)
 
 
 #Writing a gatingset function
@@ -131,6 +131,8 @@ x<-data.frame(file_name = "test_file_name", pop = "pop", count = "count")
 x<-  x[-c(1),]
 #View(x)  
 write.table(x,file= "counts.csv", sep = ",", col.names = c("file_name", "pop", "count"))
+
+
 
 {
   error_files_stats<- NULL
@@ -222,3 +224,4 @@ for (missing_file in all_missing_files) {
   library(readr)
   counts <- read_csv("counts.csv")
 }
+

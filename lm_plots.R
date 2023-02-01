@@ -1,7 +1,7 @@
 source("vp_functions.R")
 
 
-#creating different time point plots against VP, VOPC and Diff. Then make them separate for total, bacteria, and viruses
+#creating different time point plots against VP, VPC and Diff. Then make them separate for total, bacteria, and viruses
 {
 
 for (colnames in 2:length(TP)) {
@@ -89,10 +89,10 @@ n<- ggplot(NJ1a, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
   scale_color_manual(name= 'Populations',
                      labels=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
                               "Total Viruses", "V1 Viruses", "V2 Viruses", "V3 Viruses"),
-                     values= c(c_Bacteria = "#AD002A99", 
+                     values= c(c_Bacteria = "#00468B99", #AD002A99
                                c_HNA = "#00468B99",
                                c_LNA = "#0099B499",
-                               c_Viruses = "#ED000099",
+                               c_Viruses = "#AD002A99",  #ED000099
                                c_V1 = "#1B191999",
                                c_V2 = "#7E6148B2",
                                c_V3 = "#9C9C9C"))+

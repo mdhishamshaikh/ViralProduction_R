@@ -59,7 +59,7 @@ df_avg<- function(df, keep_0.22 = F) {
   } 
   
   if ('VPC' %in% DF$Sample_Type){
-    DF_mean$Diff <- with(DF_mean, VPC-VP) #calcualting Diff mean
+    DF_mean$Diff <- with(DF_mean, VPC-VP) #calculating Diff mean
     DF_mean<- pivot_longer(DF_mean, cols = c("VP", "VPC", "Diff"), names_to= 'Sample_Type', values_to='mean_value')
     DF_sd$Diff <- with(DF_sd, VPC+VP) #Calculating Diff sd, which is addition of the other sds
     DF_sd<- pivot_longer(DF_sd, cols = c("VP", "VPC", "Diff"), names_to='Sample_Type', values_to= 'sd_value')
@@ -282,10 +282,12 @@ plots_lm<- function(df){
     scale_color_manual(name= 'Populations',
                        labels=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
                                 "Total Viruses", "V1 Viruses", "V2 Viruses", "V3 Viruses"),
+                       breaks=c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
+                                "Total Viruses", "V1 Viruses", "V2 Viruses", "V3 Viruses"),
                        values= c(c_Bacteria = "#AD002A99", 
                                  c_HNA = "#00468B99",
                                  c_LNA = "#0099B499",
-                                 c_Viruses = "#ED000099",
+                                 c_Viruses = "#ff8a8a",
                                  c_V1 = "#1B191999",
                                  c_V2 = "#7E6148B2",
                                  c_V3 = "#9C9C9C"))+
@@ -434,7 +436,7 @@ plots_lm_tp<- function(df, ...){
 slope_lm_sr<- function(df_sr){ #takes SR dataframe as an input
   
   lm_vp<- list()
-  slope_df <- data.frame()
+  slope_lm_sr_df<- data.frame()
   for (location in unique(df_sr$Location)){
     for (expt_no in unique(df_sr$Expt_No)){
       for (depth in unique(df_sr$Depth)){
@@ -463,6 +465,43 @@ slope_lm_sr<- function(df_sr){ #takes SR dataframe as an input
     }
   }
   
-  slope_lm_sr<- data.frame(t(sapply(lm_vp, c)))
-  colnames(slope_lm_sr)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'count', 'Sample_Type', 'Replicate', 'LM_SR_slope')
+  slope_lm_sr_df<- data.frame(t(sapply(lm_vp, c)))
+  colnames(slope_lm_sr_df)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'LM_SR_Slope')
+  return(slope_lm_sr_df)
+}
+
+slope_lm_avg<- function(df_avg){ #takes SR dataframe as an input
+  
+  lm_vp<- list()
+  slope_lm_avg_df<- data.frame()
+  for (location in unique(df_avg$Location)){
+    for (expt_no in unique(df_avg$Expt_No)){
+      for (depth in unique(df_avg$Depth)){
+        for (time in unique(df_avg$Time_Range)){
+          for (viruses in unique(df_avg$count)[4:7]){
+            for (prod in unique(df_avg$Sample_Type)){
+            
+                df2<- df_avg[df_avg$Location == location,]
+                df2<- df2[df2$Expt_No == expt_no,]
+                df2<- df2[df2$Depth == depth,]
+                df2<- df2[df2$Time_Range == time,]
+                df2<- df2[df2$count == viruses,]
+                df2<- df2[df2$Sample_Type == prod,]
+                df2<- df2[df2$Replicate == rep,]
+                
+                lm<- lm(data = df2, value ~ Timepoint)
+                print(summary(lm))
+                slope<- c(location, expt_no, depth, time, viruses, prod, rep, lm$coefficients[[2]])
+                lm_vp[[length(lm_vp)+1]] <- slope  
+              }
+            }
+          }
+        }
+      }
+    }
+
+  
+  slope_lm_avg_df<- data.frame(t(sapply(lm_vp, c)))
+  colnames(slope_lm_avg_df)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'LM_SR_Slope')
+  return(slope_lm_avg_df)
 }

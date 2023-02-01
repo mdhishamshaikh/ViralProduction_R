@@ -30,7 +30,7 @@ for (pack in packages_to_load){
 
 ####2. Overview plot functions ####
 
-#To create an overview table with time ranges. Needed for overview plotting
+####2.1 To create an overview table with time ranges. Needed for overview plotting####
 overview_df_tp_avg<- function(df, keep_0.22 = F) {
   #only works if we remove 0.22
   DF<- df[df$Sample_Type != '0.22',]
@@ -89,6 +89,9 @@ overview_df_tp_avg<- function(df, keep_0.22 = F) {
   
   rm('DF_mean', 'DF_sd', 'colnames_mean', 'colnames_sd')
   
+  
+  
+  
   #For the time ranges
   TP<- unique(DF$Timepoint) #identifying the timepoints present
   colnames<- c()
@@ -141,7 +144,7 @@ overview_df_tp_avg<- function(df, keep_0.22 = F) {
   return(DF)
 }
 
-#To create an overview plot with time ranges
+####2.2 To create an overview plot with time ranges####
 overview_plots_tp_avg<- function(df, ...){
   n<- ggplot(df, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
     geom_point(size= 1.5)+
@@ -171,8 +174,8 @@ overview_plots_tp_avg<- function(df, ...){
                        limits = c(-4e+6, 14e+6))+
     theme_bw()+
     geom_errorbar(aes(ymin=mean_value + sd_value, ymax= mean_value - sd_value), width = 0.5, size = 0.5)+
-    scale_x_continuous(breaks = unique(NJ1$Timepoint))+
-    labs(title = 'NJ1 - Viral Production - Timepoint Sloughing', subtitle = 'Overview - Bacterial and Viral counts for Lytic and Lysogenic inductions',
+    scale_x_continuous(breaks = unique(df$Timepoint))+
+      labs(title = paste(paste(unique(df$Location), "St", unique(df$Expt_No), "Depth", unique(df$Depth), sep = "_"), "- Viral Production - Timepoint Sloughing"), subtitle = 'Overview - Bacterial and Viral counts for Lytic and Lysogenic inductions',
          x= 'Sampling Timepoints\n (in hours)', y='FCM Counts\n (in millions)')+
     theme(strip.text = element_text(face = "bold"),
           strip.background = element_rect( color = 'black', fill = 'white'),
@@ -180,15 +183,111 @@ overview_plots_tp_avg<- function(df, ...){
           title = element_text(face = 'bold'),
           legend.position = "bottom")+
     guides(color = guide_legend(nrow = 2, byrow = TRUE))
-  
+
   return(n)
   
 }
 
+####2.3 For bacterial generation time end point####
+bacterial_endpoint<- function (df){ 
+  
+  #creating the dataframe required for calculating bacterial generation time
+  DF<- df[df$Sample_Type != '0.22',] #Lose 0.22 values
+  
+  DF<- gather(DF, 'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3', key="count", value="value") %>%
+    group_by(Location, Expt_No, Depth, Sample_Type, Timepoint, count ) %>%
+    summarise(n =n(), mean=mean(value), sd=sd(value)) #calculating means and sd
+  
+  DF_mean<- DF[,1:8] %>% #splitting the datfram cause I haven't figure out how to spread teh table without adding NAs
+    spread('Sample_Type', 'mean')
+  colnames(DF_mean)[7:8]<- c("VP_mean", "VPC_mean")
+  DF_mean$Diff_mean <- with(DF_mean, VPC_mean-VP_mean) #calculating Diff mean
+  
+  DF_sd<- DF[,c(1:7,9)] %>%
+    spread('Sample_Type', 'sd')
+  colnames(DF_sd)[7:8]<- c("VP_sd", "VPC_sd")
+  DF_sd$Diff_sd <- with(DF_sd, VPC_sd+VP_sd) #Calculating Diff sd, whcih si addition of the other sds
+  
+  
+  DF<- merge(DF_mean, DF_sd, by= c('Location', 'Expt_No', 'Depth',
+                                      'Timepoint', 'count', 'n')) %>%
+    mutate(Microbe = if_else(count == 'c_Bacteria' | count == 'c_HNA' | count == 'c_LNA', "Bacteria", "Viruses"))%>%
+    mutate(Subgroup = if_else(count == 'c_Bacteria' | count == 'c_Viruses', "Parent", "Subgroup"))
+  
+  rm(DF_mean)
+  rm(DF_sd)
+  
+#Calculating Bacterial Generation time
+  gt<- c()
+  bp<- c()
+  
+  for (bacteria in c('c_Bacteria', 'c_HNA', 'c_LNA')){
+    for (x in 2:6){ #2:6 should be adjusted for more timepoints. Here it is for 6 tps.
+      Ba<- DF[DF$count== bacteria,] %>%
+        arrange(Timepoint)
+      y<- (log10(2)*(Ba$Timepoint[x]-Ba$Timepoint[1]))/(log10(Ba$VP_mean[x])-log10(Ba$VP_mean[1]))
+      
+      gt[length(gt)+1]<- y
+      #if (y > 24){
+       # print("Low bacterial production") }
+      #if (y < 0){
+       # print("Low bacterial production") }
+      # plot(plot, x=c(3,6,17,20,24))
+      # abline(h=24)
+      # abline(h=48, col=2)
+      
+    
+  }}
+  
+  #Interesting! LNA bacterial growth isn't that significant
+  
+  Bacterial_GT <- gt[1:5] #Need to find a way to save these values.
+  HNA_GT <- gt[6:10]
+  LNA_GT <- gt[11:15]
+  bp_df<- data.frame(Bacterial_GT, HNA_GT, LNA_GT) #in hours
+  
+  bp_endpoint<- intersect(which(Bacterial_GT>0), which(Bacterial_GT<24))[1] - 1 #use this as the index for highlighting on plot
+  bp<- Bacterial_GT[bp_endpoint] #Bacterial production at the endpoint
+  #intersect(which(HNA_GT>0), which(HNA_GT<24))[1]
+  #intersect(which(LNA_GT>0), which(LNA_GT<24))[1]
+  
 
-#### Bacterial Generation Time####
-Ba_gt<- function(x){
-  GT<- (log10(2)*(Ba$Timepoint[x]-Ba$Timepoint[1]))/(log10(Ba$VP_mean[x])-log10(Ba$VP_mean[1]))
-  print(GT) 
+  return(bp_endpoint)
+  
 }
 
+####2.4 Highlighting bacterial end point on the verview plot####
+bp_endpoint_highlight <- function(plot) {
+  n<- ggplot_gtable(ggplot_build(plot))
+  strip_both<- which(grepl('strip-', n$layout$name))
+  fills<- c(rep("white", 14))
+  fills[bp]<- "#E489A6" #Change the index to that of the time range after bacterial generation time
+  k <- 1
+  
+  for (i in strip_both) {
+    j<- which(grepl('rect', n$grobs[[i]]$grobs[[1]]$childrenOrder))
+    n$grobs[[i]]$grobs[[1]]$children[[j]]$gp$fill <- fills[k]
+    k<- k+1
+  }
+  #https://ojkftyk.blogspot.com/2019/01/r-ggplot2-change-colour-of-font-and.html
+  n<- grid::grid.draw(n)
+  return (n)
+}
+
+
+
+####2.5 Function that combines the functions from #2 ####
+overview_vp_plots <- function(x){
+  
+  bp<- bacterial_endpoint(x)
+  
+  skeleton_plot<- overview_df_tp_avg(x)%>%
+    overview_plots_tp_avg()
+  
+    skeleton_plot<- bp_endpoint_highlight(skeleton_plot)
+    
+  
+  print(skeleton_plot)
+}
+
+ 
