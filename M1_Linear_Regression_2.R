@@ -27,7 +27,13 @@ slopes_LM_AP<- slopes_LM_AP%>%
 
 ####1.2 Slope through every replicate####
 #we use data_sr for this
-slopes_LM_SR<- slope_lm_sr(data_sr) #3 slopes per sample type
+slopes_LM_SR<- slope_lm_sr(data_sr)%>%
+  arrange('Location',
+          'Expt_No',
+          'Depth',
+          factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+          factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+          factor(Time_Range, levels = c('T0_T3', 'T0_T6', 'T0_T9', 'T0_17', 'T0_T24')))#3 slopes per sample type
 #i need to average the replicates here, and then i can calculate Diff
 
 slopes_LM_SR_avg<- slopes_LM_SR %>%
@@ -36,14 +42,14 @@ slopes_LM_SR_avg<- slopes_LM_SR %>%
   arrange('Location',
           'Expt_No',
           'Depth',
-          'Sample_Type',
-          'Population',
-          factor(Time_Range, levels = c('T0_T3', 'T0_T6', 'T0_T9', 'T0_17', 'T0_T24'))) 
+          factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+          factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+          factor(Time_Range, levels = c('T0_T3', 'T0_T6', 'T0_T9', 'T0_17', 'T0_T24')))
 
 
 
-plot(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_SR_avg$LM_SR_Slope_Mean)
-summary(lm(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_SR_avg$LM_SR_Slope_Mean))
+#plot(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_SR_avg$LM_SR_Slope_Mean)
+#summary(lm(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_SR_avg$LM_SR_Slope_Mean))
 
 
 
@@ -68,12 +74,12 @@ slopes_LM_AR<- calc_diff_lm_AR(slopes_LM_AR) %>%
           factor(Time_Range, levels = c('T0_T3', 'T0_T6', 'T0_T9', 'T0_17', 'T0_T24')))
 
 
-plot(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_AR$LM_AVG_Slope)
-summary(lm(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_AR$LM_AVG_Slope))
+#plot(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_AR$LM_AVG_Slope)
+#summary(lm(slopes_LM_AP$LM_AP_Slope ~ slopes_LM_AR$LM_AVG_Slope))
 
 
-plot(slopes_LM_SR_avg$LM_SR_Slope_Mean ~ slopes_LM_AR$LM_AVG_Slope)
-summary(lm(slopes_LM_SR_avg$LM_SR_Slope_Mean ~ slopes_LM_AR$LM_AVG_Slope))
+#plot(slopes_LM_SR_avg$LM_SR_Slope_Mean ~ slopes_LM_AR$LM_AVG_Slope)
+#summary(lm(slopes_LM_SR_avg$LM_SR_Slope_Mean ~ slopes_LM_AR$LM_AVG_Slope))
 
 ggplot()+
   geom_point(aes( x= slopes_LM_SR_avg$LM_SR_Slope_Mean , y = slopes_LM_AR$LM_AVG_Slope, col = slopes_LM_AP$Sample_Type, shape = slopes_LM_AP$Population ))
@@ -113,7 +119,7 @@ summary(lm(slopes_LM_Diff$LM_AVG_Slope ~ slopes_LM_AR$LM_AVG_Slope))
 
 lmer_model(data_sr)
 
-slope_lm_sr_diff<- function(df_sr){ #takes SR dataframe as an input
+slope_lm_ar_diff_lmer<- function(df_sr){ #takes SR dataframe as an input
   
   lm_vp<- list()
   slope_lm_sr_df<- data.frame()
@@ -159,8 +165,8 @@ slope_lm_sr_diff<- function(df_sr){ #takes SR dataframe as an input
   }
   
   slope_lm_sr_df<- data.frame(t(sapply(lm_vp, c)))
-  colnames(slope_lm_sr_df)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'LM_Diff_Slope', 'LM_Diff_SE', 'LM_Diff_R_squared')
-  slope_lm_sr_df[, c('LM_Diff_Slope', 'LM_Diff_SE', 'LM_Diff_R_squared')]<- lapply(slope_lm_sr_df[, c('LM_Diff_Slope', 'LM_Diff_SE', 'LM_Diff_R_squared')], as.numeric)
+  colnames(slope_lm_sr_df)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Slope', 'VP_SE', 'VP_R_squared')
+  slope_lm_sr_df[, c('VP_Slope', 'VP_SE', 'VP_R_squared')]<- lapply(slope_lm_sr_df[, c('VP_Slope', 'VP_SE', 'VP_squared')], as.numeric)
   return(slope_lm_sr_df)
   rm(df3)
 }

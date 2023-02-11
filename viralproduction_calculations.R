@@ -13,7 +13,8 @@ NJ1_sr_slope<- df_sr_tp(NJ1) %>%
   df_avg_slope()
 
 
-#1.2 Averaged Replicates
+#1.2 Averaged Replicates #JUST WIRTING THIS HERE CAUSE i dont know wherelese to write it. 
+#I can't do separate replicates for VIPCAL-model, cause we need to avaergae the replicates
 
 NJ1_avg_slope<- df_avg_tp(NJ1)%>%
   slope_lm_avg()

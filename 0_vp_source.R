@@ -1,5 +1,6 @@
 #A script to install and load required packages, and to source global functions
 
+
 ####1. Installing and loading libraries####
 
 #Installing BiocManager
@@ -12,7 +13,9 @@
 packages_to_load<- c("tidyverse", 
                      "flowWorkspace",
                      "scales",
-                     "readxl")
+                     "readxl",
+                     "emmeans",
+                     "lme4")
 
 
 #Checking if packages are already present. If absent, then installing packages from BiocManager 
@@ -28,7 +31,10 @@ for (pack in packages_to_load){
 
 
 
+
+
 ####2. Overview plot functions ####
+
 
 ####2.1 To create an overview table with time ranges. Needed for overview plotting####
 overview_df_tp_avg<- function(df, keep_0.22 = F) {
@@ -144,6 +150,7 @@ overview_df_tp_avg<- function(df, keep_0.22 = F) {
   return(DF)
 }
 
+
 ####2.2 To create an overview plot with time ranges####
 overview_plots_tp_avg<- function(df, ...){
   n<- ggplot(df, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
@@ -175,7 +182,7 @@ overview_plots_tp_avg<- function(df, ...){
     theme_bw()+
     geom_errorbar(aes(ymin=mean_value + sd_value, ymax= mean_value - sd_value), width = 0.5, size = 0.5)+
     scale_x_continuous(breaks = unique(df$Timepoint))+
-      labs(title = paste(paste(unique(df$Location), "St", unique(df$Expt_No), "Depth", unique(df$Depth), sep = "_"), "- Viral Production - Timepoint Sloughing"), subtitle = 'Overview - Bacterial and Viral counts for Lytic and Lysogenic inductions',
+      labs(title = paste(paste(unique(df$Location), "St", unique(df$Expt_No), "Depth", unique(df$Depth), sep = "_"), "- Viral Production Assay - Timepoint Sloughing"), subtitle = 'Overview - Bacterial and Viral counts for Lytic and Lysogenic inductions',
          x= 'Sampling Timepoints\n (in hours)', y='FCM Counts\n (in millions)')+
     theme(strip.text = element_text(face = "bold"),
           strip.background = element_rect( color = 'black', fill = 'white'),
@@ -187,6 +194,7 @@ overview_plots_tp_avg<- function(df, ...){
   return(n)
   
 }
+
 
 ####2.3 For bacterial generation time end point####
 bacterial_endpoint<- function (df){ 
@@ -256,7 +264,8 @@ bacterial_endpoint<- function (df){
   
 }
 
-####2.4 Highlighting bacterial end point on the verview plot####
+
+####2.4 Highlighting bacterial end point on the overview plot####
 bp_endpoint_highlight <- function(plot) {
   n<- ggplot_gtable(ggplot_build(plot))
   strip_both<- which(grepl('strip-', n$layout$name))
@@ -276,6 +285,7 @@ bp_endpoint_highlight <- function(plot) {
 
 
 
+
 ####2.5 Function that combines the functions from #2 ####
 overview_vp_plots <- function(x){
   
@@ -291,3 +301,68 @@ overview_vp_plots <- function(x){
 }
 
  
+
+
+
+####3.0 LMER plots function####
+#writing a model plot function to make things easier.
+model_plot<- function(model, df){ #lmer input for model, and a data frame for observed values
+  a<- model
+  b<- 
+    par(mfrow= c(2,3))
+  #1. Observed data Histogram
+  hist(df$value,
+       xlab = "Observed Values",
+       main = "Observed Values"
+  )
+  
+  #2. Predicted Data Histogram
+  hist(predict(a),
+       xlab = "Predicted Values",
+       main = "Predicted Values"
+  ) 
+  
+  #3. Predicted vs Observed Values Line plot
+  plot(predict(a)~ df$value, 
+       ylim = c(0, 1.5e+07), 
+       xlim = c(0, 1.5e+07),
+       xlab = "Observed values", 
+       ylab = "Predicted Values", 
+       main = "Predicted vs Observed Values")
+  abline(0,1, lwd=2, col = "coral3")
+  
+  fit2<- lm(predict(model) ~ df$value)
+  lgd <- c(
+    paste("R^2 =", round(summary(fit2)$r.squared,3)),
+    paste("Intercept =", format(coef(fit2)[1], scientific = T, digits = 4)),
+    paste("Slope =", round(coef(fit2)[2],3))
+  )
+  legend("topleft", legend=lgd)
+  abline(fit2, lwd=2)
+  legend("bottomright", legend=c("predicted ~ observed", "1:1"), col=c(1,"coral3"), lty=1, lwd=2)
+  rm(fit2, lgd)
+  
+  
+  #4. Normalized Residuals vs Predicted Values
+  plot(resid(a) ~ fitted(a), 
+       xlab = "Predicted values", 
+       ylab = "Normalized residuals", 
+       main = "Normalized Residuals vs Predicted Values"
+  )
+  abline(h = 0, lty = 2, col = "coral3", lwd = 2)
+  
+  #5. Normalized Residuals vs Replicates
+  boxplot(resid(a) ~ Replicate, 
+          data = df, 
+          xlab = "Replicate",
+          ylab = "Normalized residuals",
+          main = "Normalized Residuals vs Replicates"
+  )
+  abline(h = 0, lty = 2, col = "coral3", lwd = 2)
+  
+  #6. QQ-plot
+  qqnorm(resid(a), pch = 16)
+  qqline(resid(a), col = "coral3", lwd = 2)
+  
+}
+
