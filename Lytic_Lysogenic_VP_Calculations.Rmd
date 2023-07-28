@@ -1,0 +1,30 @@
+---
+title: "Lytic + Lysogenic VP Calculations"
+author: "Hisham M Shaikh"
+date: '2023-01-12'
+output: html_document
+---
+
+The imported data frame will have samples from different Projects (`Location`), 
+Stations (`Expt_No`), and Depths (`Depth`). \
+Sample_Type can be either VP, VPC, or 0.22\
+We can have multiple time points. 6 in most cases.\
+3 replicates\
+\
+1 expt will be from a certain depth of a certain station of a certain location. 
+All data will be processed with this as a data set. We can then loop entirety of the
+script for depth.station/location combinations and save the output in one `.csv` file.\
+\
+We have three major methods.\
+1. Linear Regression.\
+2. VIPCAL.\
+3. VIPCAL-SD.\ 
+\
+\
+**1. Linear Regression**\
+This can be further divided into 
+1. Lytic
+2. Lytic + lysogenic
+
+
+
