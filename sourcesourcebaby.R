@@ -964,6 +964,7 @@ lmer_model<- function(df, value = count){
   
   
 }
+
 ####Bacterial End point####
 
 bacterial_endpoint_range<- function(data){ #Gives out an index of the timepoint where we should stop the assay

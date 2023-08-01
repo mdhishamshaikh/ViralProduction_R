@@ -1,5 +1,4 @@
-
-#A collection of functions that calculate viral production using different methods
+### A collection of functions that calculate viral production using different methods ###
 
 #1. Linear Regression - All Points (LM_AP)
 
@@ -292,4 +291,5 @@ vp_calc_funct_list<- list(vp_lm_ap, vp_lm_sr_avg, vp_lm_ar,
                           vp_vpcl_ar_diff_no_se, vp_vpcl_ar_se,
                           vp_vpcl_ar_diff_se, vp_vpcl_ar_diff_lmer_no_se,
                           vp_vpcl_ar_diff_lmer_se)
+
 vp_calc_funct_list_sr<- list(vp_lm_sr, vp_vpcl_sr)
