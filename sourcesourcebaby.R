@@ -53,7 +53,7 @@ tp<- function(DF){
                           DF$Timepoint == TP[4] ~ colvalues[5],
                           DF$Timepoint == TP[5] ~ colvalues[5],
                           DF$Timepoint == TP[6] ~ colvalues[5])
-  
+
   
   DF<- DF %>%
     pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time")%>%
@@ -86,7 +86,8 @@ df_AVG<- function(df, keep_0.22 = F) {
     gather('c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3', key="Population", value="count") %>%
     group_by(Location, Expt_No, Depth, Sample_Type, Timepoint, Population ) %>%
     summarise(n =n(), mean=mean(count), se=plotrix::std.error(count)) #calculating means and sd
-  
+ 
+  # I think this part is not necessary, since the spread function later on automatically gives VP and VPC as colnames for mean and se resp.
   if ('VPC' %in% DF$Sample_Type){
     colnames_mean<- c("VP", "VPC")
     colnames_se<- c("VP", "VPC")
@@ -140,6 +141,8 @@ df_AVG<- function(df, keep_0.22 = F) {
 
 
 #df average replicates timepoints
+# I don't think these extra two functions are necessary, you can just add one line of DF <- tp(DF) to add the timepoints i think?
+# If I try this myself I get exactly the same dataframe as with this code
 
 df_avg_tp<- function(df, keep_0.22 = F){
   DF3<- df_AVG(df)
@@ -166,6 +169,7 @@ df_sr_tp<- function(df, keep_0.22 = F){
   
   df_list<- list()
   
+  # Are these forloops necessary because in each of these columns has only one unique value?
   for (location in unique(DF3$Location)){
     for (expt_no in unique(DF3$Expt_No)){
       for (depth in unique(DF3$Depth)){

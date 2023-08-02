@@ -1,4 +1,5 @@
-### A collection of functions that calculate viral production using different methods ###
+###---Additional source file for viral_production_step2.R---###
+# Different methods for calculating viral production
 
 #1. Linear Regression - All Points (LM_AP)
 
