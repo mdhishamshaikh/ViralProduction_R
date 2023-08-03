@@ -413,7 +413,7 @@ slope_lm_ar_diff_lmer<- function(df_sr){ #takes SR dataframe as an input
                 for (prod in unique(df4$Sample_Type)){
                   
                   lm<- summary(lm(data = df4[df4$Sample_Type == prod,], Mean ~ as.numeric(Timepoint)))
-                  print(lm)
+                  #print(lm)
                   slope<- c(location, expt_no, depth, time, viruses, prod, lm$coefficients[c(2,4)], lm$r.squared)
                   #print(lm$coefficients[,3])
                   #print(lm$coefficients[[2]])
@@ -471,8 +471,10 @@ vipcal_sr<- function(df_sr){ #takes SR dataframe as an input
                   filter(Time_Range == time)
                 
                 try({
-                  p<- peaks(c(+10e+10, df3$count, -10e+10))-1
+                  p<- peaks(c(+10e+10, df3$count, -10e+10))-1 # To make sure that first and last element are not dismissed
                   v<- valleys(c(+10e+10, df3$count, -10e+10))-1
+                  print(p)
+                  print(v)
                   
                   if(identical(length(p), length(v))){
                     print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
@@ -865,7 +867,7 @@ vipcal_sr_diff_no_SE<- function(df_sr){ #takes SR dataframe as an input
   
 }
 
-####To calculate lysogeny from all points data####
+#### 4.0 To calculate lysogeny from all points data####
 calc_diff_lm_AP<- function(df){
   
   colnames(df)[colnames(df) == 'VP_Slope'] <- 'VP'
@@ -923,14 +925,15 @@ calc_diff_vpcl_AR<-function(df){
 
 
 ####5.0 LMER Model####
+# My LMER_model did not has the change of replicates for VPC and the same results are obtained
 
-lmer_model<- function(df, value = count){
+lmer_model<- function(df, value = count){ # variable value isn't used?
   
   lmer_data<- data.frame()
   #model_plots<- list()
   n<-0
   for (rep in c(1,2,3)){
-    df$Replicate[df$Replicate == rep & df$Sample_Type == 'VPC'] <- rep+3
+    df$Replicate[df$Replicate == rep & df$Sample_Type == 'VPC'] <- rep+3 # As I am understanding now: since we allow variation between the replicates but VPC and VP samples have now the same replicate references => change the ones of VPC so that the LMER model distinguishes them
   }
   
   for (virus in unique(df$Population)){
@@ -939,7 +942,7 @@ lmer_model<- function(df, value = count){
     #plot<- model_plot(model, df = df)
     emmeans<- emmeans::emmeans(model, ~ Sample_Type|as.factor(Timepoint))
     contrast<- pairs(emmeans) 
-    dataf1<- data.frame(rep(virus, length(unique(df$Timepoint))),
+    dataf1<- data.frame(rep(virus, length(unique(df$Timepoint))), # rep() = replicates the values in x, generic function
                         rep("Diff", length(unique(df$Timepoint))),
                         summary(contrast)$Timepoint, 
                         -(summary(contrast)$estimate),
@@ -969,7 +972,7 @@ lmer_model<- function(df, value = count){
   
 }
 
-####Bacterial End point####
+#### 6.0 Bacterial End point####
 
 bacterial_endpoint_range<- function(data){ #Gives out an index of the timepoint where we should stop the assay
   DF<- df_AVG(data)%>%

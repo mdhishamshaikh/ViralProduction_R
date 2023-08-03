@@ -6,4 +6,5 @@ source("vp_calc_functions.R")
 
 # Importing data from Step 1
 data <- read.csv("NJ1.csv")
+names(data)[names(data) == 'Expt_No'] <- 'Station_Number' # Changing column name to something more appropriate => you can also use index of column (5)
 
