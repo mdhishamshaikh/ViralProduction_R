@@ -1,4 +1,4 @@
-source("vp_calc_functions.R")
+#source("vp_calc_functions.R")
 library(tidyverse)
 library(ggsci)
 library(svglite)
@@ -473,8 +473,7 @@ vipcal_sr<- function(df_sr){ #takes SR dataframe as an input
                 try({
                   p<- peaks(c(+10e+10, df3$count, -10e+10))-1 # To make sure that first and last element are not dismissed
                   v<- valleys(c(+10e+10, df3$count, -10e+10))-1
-                  print(p)
-                  print(v)
+                
                   
                   if(identical(length(p), length(v))){
                     print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
@@ -482,6 +481,7 @@ vipcal_sr<- function(df_sr){ #takes SR dataframe as an input
                     print("Number peaks and valleys are not the same. This will lead to erroneous viral production calculations")
                   }
                   
+                  # This part can be optimised with just one if-else statement and in the else statement a for loop iterating through peak values
                   if(length(p)==0){
                     vp<- 0
                     
@@ -713,9 +713,7 @@ vipcal_sr_diff_SE<- function(df_sr){ #takes SR dataframe as an input
                   }else{
                     print("Number peaks and valleys are not the same. This will lead to erroneous viral production calculations")
                   }
-                  print(paste(location, expt_no, depth, time, viruses, prod))
-                  print(p)
-                  print(v)
+                  
                   if(length(p)==0){
                     vp<- 0
                     
@@ -896,7 +894,7 @@ calc_diff_lm_SR<- function(df){
   
   df<- full_join(df, Diff, by = NULL)
   return(df)
-}
+} # Function isn't used anywhere else?
 
 calc_diff_lm_AR<- function(df){
   colnames(df)[colnames(df) == 'VP_Slope'] <- 'VP'
@@ -906,10 +904,11 @@ calc_diff_lm_AR<- function(df){
   Diff[,'Sample_Type']<- "Diff"
   colnames(Diff)[7]<- 'VP'
   colnames(Diff)[8]<- 'VP_SE'
+  #Diff$VP_R_Squared <- NA
   
   df<- full_join(df, Diff, by = NULL)
   return(df)
-}
+} # Function is just the same as calc_diff_lm_AP?
 
 calc_diff_vpcl_AR<-function(df){
   
@@ -921,7 +920,7 @@ calc_diff_vpcl_AR<-function(df){
   
   df<- full_join(df, Diff, by = NULL)
   return(df)
-}
+} # Also the same function, only here no SE but this is also used in VPCL3 which has SE correction?
 
 
 ####5.0 LMER Model####

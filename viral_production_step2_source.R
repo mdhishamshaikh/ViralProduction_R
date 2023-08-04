@@ -128,7 +128,7 @@ df_AVG <- function(data, keep_0.22 = F){
     group_by(Location, Station_Number, Depth, Sample_Type, Timepoint, Population) %>%
     summarise(n = n(), Mean = mean(Count), SE = plotrix::std.error(Count)) # plotrix::std.error calculates the standard error of the mean
     
-  # Calculate the difference between VPC samples and VP samples since for some methods we will estimate the difference curve
+  # Calculate the difference between VPC samples and VP samples since for some methods viral production is determined based on the difference curve
   # We will consider the mean and se separately, so we will use two intermediate subdataframes
   DF_mean <- DF %>%
     select(-'SE') %>%
@@ -181,47 +181,52 @@ peaks <- function(values){
   for (i in 1:(length(values)-1)){ # -1 because we add +10e+10 and -10e+10 to values so that first and last count is not dismissed => if -1 is not presented, last element of list will be NA
     d <- sign(values[i+1] - values[i]) # Determine where the index changes by computing the next count with the current count
     list[length(list)+1] <- d # List with 3 possible values: -1,0,1
-    # 0 = no change of count; -1 = counts go down: 1 = counts go up
+    # 0 = no change of count; -1 = counts go down; 1 = counts go up
   }
-  # If value is -1, current index is a peak; If value is 1, next index is peak
-  return(which(diff(list) < 0)) # Which() looks where the diff(list) is smaller then 0 => diff(list) determines the difference between consecutive values of the list => if difference is negative it means that next value of the list is lower then current => PEAK
+  return(which(diff(list) < 0)) # PEAK if negative difference
 }
   
 # Determining valleys
 valleys <- function(values){
   list <- c()
   
-  for (i in 1:(length(values)-1)){
+  for (i in 1:(length(values)-1)){ 
     d <- sign(values[i+1] - values[i]) 
-    list[[length(list)+1]] <- d 
+    list[length(list)+1] <- d 
+    
   }
-  return(which(diff(as.numeric(list)) > 0))
+  return(which(diff(list) > 0)) # VALLEY if positive difference
 }
 
-# Taking the SE into account
-peaks_se <- function(values){
+# Taking the SE into account: only TRUE increments are kept
+# If the SE between a peak and valley overlaps, can't guarantee that this difference is sufficient => keep those out
+# Only peak of valley if there is a difference and standard errrors don't overlap
+# By doing this also the created valley/peak by adding 10e10 and -10e10 is filtered out
+# Negative evolution in viral production also filtered out => if you go from peak -> valley (downward) => only increments are kept
+peaks_se <- function(values, se){
+  list <- c()
+  
+  for (i in 1:(length(values)-1)){
+    d <- sign((values[i+1] - se[i+1]) - (values[i] + se[i])) # Take SE into account by adding it to current count and substract it of next count
+    list[length(list)+1] <- d # List with two possible values: -1 and 1
+    # Only a positive sign if increments with no overlapping standard errors
+  }
+  return(which(diff(list) < 0)) # PEAK if negative difference
+}
+
+valleys_se <- function(values, se){
   list <- c()
   
   for (i in 1:(length(values)-1)){
     d <- sign((values[i+1] - se[i+1]) - (values[i] + se[i])) 
-    list[[length(list)+1]] <- d 
+    list[length(list)+1] <- d 
   }
-  return(which(diff(as.numeric(list)) < 0))
-}
-
-valleys_se <- function(values){
-  list <- c()
-  
-  for (i in 1:(length(values)-1)){
-    d <- sign((values[i+1] - se[i+1]) - (values[i] + se[i])) 
-    list[[length(list)+1]] <- d 
-  }
-  return(which(diff(as.numeric(list)) > 0))
+  return(which(diff(list) > 0)) # VALLEY if positive difference
 }
 
 ## 3. LMER model
-# Some of the methods use a difference curve to determine the lysogenic production => Lysogenic production = average of increments in difference curve
-# This difference curve can be easily calculated by subtracting the VP slope of the VPC slope or
+# To determine lysogenic production, a difference curve is used => Lysogenic production = average of increments in difference curve
+# This difference curve can be easily calculated by subtracting the VP slope of the VPC slope or a
 # LMER model can be used (Linear Mixed-Effects Model)
 LMER_model <- function(DF){ # Dataframe as input 
   lmer_data <- data.frame() # Initialize result dataframe
@@ -299,16 +304,16 @@ slope_LM_allpoints <- function(DF_SR){ # Takes separate replicate dataframe as i
   }
   # Changing nested list into dataframe
   S_LM_allpoints <- data.frame(t(sapply(lm_res, c))) # sapply will return a column vector of each nested list of lm_res, transposing this and setting to dataframe for result
-  colnames(S_LM_allpoints) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Slope', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_allpoints) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_allpoints[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_allpoints[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_allpoints[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_allpoints[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_allpoints)
 }
 
 # F2: Slope with separate replicate treatment
-slope_LM_rep <- function(DF_SR){ # Takes separate replicate dataframe as input, with filter on the replicates
+slope_LM_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, with filter on the replicates
   lm_res <- list()
   
   for (location in unique(DF_SR$Location)){
@@ -338,10 +343,10 @@ slope_LM_rep <- function(DF_SR){ # Takes separate replicate dataframe as input, 
   }
   # Changing nested list into dataframe
   S_LM_rep <- data.frame(t(sapply(lm_res, c))) 
-  colnames(S_LM_rep) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP_Slope', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_rep) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_rep[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_rep[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_rep[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_rep[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_rep)
 }
@@ -375,16 +380,16 @@ slope_LM_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
   }
   # Changing nested list into dataframe
   S_LM_avg <- data.frame(t(sapply(lm_res, c))) 
-  colnames(S_LM_avg) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Slope', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_avg) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_avg[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_avg[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_avg)
 }  
 
 # F4: Slope with LMER model for difference curve
-slope_LM_avg_diff_lmer <- function(DF_SR){# Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
+slope_LM_avg_lmer <- function(DF_SR){# Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
   lm_res <- list()
   
   for (location in unique(DF_SR$Location)){
@@ -415,17 +420,17 @@ slope_LM_avg_diff_lmer <- function(DF_SR){# Takes separate replicate dataframe a
   }
   # Changing nested list into dataframe
   S_LM_avg_diff_lmer <- data.frame(t(sapply(lm_res, c))) 
-  colnames(S_LM_avg_diff_lmer) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Slope', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_avg_diff_lmer) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_avg_diff_lmer[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg_diff_lmer[, c('VP_Slope', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_avg_diff_lmer[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg_diff_lmer[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_avg_diff_lmer)
 }
 
 ## 4.2 VIPCAL: 7 variants of methods => 5 different functions to determine increments
 # F1: Separate replicate treatment
-vipcal_rep <- function(DF_SR){ # Takes separate replicate dataframe as input, with filter on the replicates
+VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, with filter on the replicates
   vipcal_res <- list() # Initialize list for results
   
   for (location in unique(DF_SR$Location)){
@@ -442,8 +447,32 @@ vipcal_rep <- function(DF_SR){ # Takes separate replicate dataframe as input, wi
                 DF2 <- DF %>%
                   filter(Time_Range == time)
                 
-                # VIPCAL: determing average of increments based on peaks and valleys
+                # VIPCAL
+                # Determine peaks and valleys
+                p <- peaks(c(+10e+10, DF2$Count, -10e+10)) # Adding to make sure that first and last element are not dismissed
+                v <- valleys(c(+10e+10, DF2$Count, -10e+10))
                 
+                # Check if number of peaks and valleys correspond
+                if (identical(length(p), length(v))){
+                  print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+                } else {
+                  print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+                }
+                
+                # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
+                # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
+                if (length(p) == 0){
+                  vp <- 0 # No viral production if no peaks => constant viral abundance
+                } else {
+                  total_vp <- 0
+                  for (i in 1:length(p)){ # Iterate through the peaks and calculate the viral production of peak and corresponding value
+                    vp_i <- (DF2$Count[p[i]] - DF2$Count[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
+                    total_vp <- total_vp + vp_i
+                  }
+                  vp <- total_vp / length(p) # Average of increments
+                }
+                res <- c(location, station, depth, time, virus, sample, rep, vp)
+                vipcal_res[[length(vipcal_res)+1]] <- res
               }
             }
           }
@@ -451,29 +480,295 @@ vipcal_rep <- function(DF_SR){ # Takes separate replicate dataframe as input, wi
       }
     }
   }
+  # Changing nested list into dataframe
+  VPCL_sr <- data.frame(t(sapply(vipcal_res, c)))
+  colnames(VPCL_sr)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP')
+  VPCL_sr$VP <- as.numeric(VPCL_sr$VP) # Transform viral production to a numeric value instead a character
+  
+  return(VPCL_sr)
 }
 
-
 # F2: Average replicate treatment
+VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
+  vipcal_res <- list()
+  
+  for (location in unique(DF_AVG$Location)){
+    for (station in unique(DF_AVG$Station_Number)){
+      for (depth in unique(DF_AVG$Depth)){
+        for (virus in unique(DF_AVG[DF_AVG$Microbe == 'Viruses',]$Population)){
+          for (sample in unique(DF_AVG$Sample_Type)){
+            DF <- DF_AVG %>%
+              filter(Location == location & Station_Number == station & Depth == depth,
+                     Population == virus, Sample_Type == sample)
+            
+            for (time in unique(DF$Time_Range)){
+              DF2 <- DF %>%
+                filter(Time_Range == time)
+              
+              # VIPCAL
+              # Determine peaks and valleys
+              p <- peaks(c(+10e+10, DF2$Mean, -10e+10))
+              v <- valleys(c(+10e+10, DF2$Mean, -10e+10))
+              
+              # Check if number of peaks and valleys correspond
+              if (identical(length(p), length(v))){
+                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+              } else {
+                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+              }
+              
+              # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
+              # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
+              if (length(p) == 0){
+                vp <- 0 
+              } else {
+                total_vp <- 0
+                for (i in 1:length(p)){ 
+                  vp_i <- (DF2$Mean[p[i]] - DF2$Mean[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
+                  total_vp <- total_vp + vp_i
+                }
+                vp <- total_vp / length(p)
+              }
+              res <- c(location, station, depth, time, virus, sample, vp)
+              vipcal_res[[length(vipcal_res)+1]] <- res
+            }
+          }
+        }
+      }
+    }
+  }
+  # Changing nested list into dataframe
+  VPCL_avg <- data.frame(t(sapply(vipcal_res, c)))
+  colnames(VPCL_avg)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
+  VPCL_avg$VP <- as.numeric(VPCL_avg$VP)
+  
+  return(VPCL_avg)
+}
 
 # F3: Average replicate treatment with SE
+VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
+  vipcal_res <- list()
+  
+  for (location in unique(DF_AVG$Location)){
+    for (station in unique(DF_AVG$Station_Number)){
+      for (depth in unique(DF_AVG$Depth)){
+        for (virus in unique(DF_AVG[DF_AVG$Microbe == 'Viruses',]$Population)){
+          for (sample in unique(DF_AVG$Sample_Type)){
+            DF <- DF_AVG %>%
+              filter(Location == location & Station_Number == station & Depth == depth,
+                     Population == virus, Sample_Type == sample)
+            
+            for (time in unique(DF$Time_Range)){
+              DF2 <- DF %>%
+                filter(Time_Range == time)
+              
+              # VIPCAL
+              # Determine peaks and valleys with SE taken into account
+              p <- peaks_se(c(+10e+10, DF2$Mean, -10e+10),
+                            c(0, DF2$SE, 0))
+              v <- valleys_se(c(+10e+10, DF2$Mean, -10e+10),
+                              c(0, DF2$SE, 0))
+              
+              # Check if number of peaks and valleys correspond
+              if (identical(length(p), length(v))){
+                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+              } else {
+                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+              }
+              
+              # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
+              # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
+              # Also calculating standard error on the viral production calculation
+              if (length(p) == 0){
+                vp <- 0 
+                se <- 0
+              } else {
+                total_vp <- 0
+                total_se <- 0
+                for (i in 1:length(p)){ 
+                  vp_i <- (DF2$Mean[p[i]] - DF2$Mean[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
+                  total_vp <- total_vp + vp_i
+                  
+                  se_i <- (DF2$SE[p[i]] + DF2$SE[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
+                  total_se <- total_se + se_i
+                }
+                vp <- total_vp / length(p)
+                se <- total_se / length(p)
+              }
+              res <- c(location, station, depth, time, virus, sample, vp, se)
+              vipcal_res[[length(vipcal_res)+1]] <- res
+            }
+          }
+        }
+      }
+    }
+  }
+  # Changing nested list into dataframe
+  VPCL_avg_se <- data.frame(t(sapply(vipcal_res, c)))
+  colnames(VPCL_avg_se)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
+  VPCL_avg_se[, c('VP', 'VP_SE')] <- lapply(VPCL_avg_se[, c('VP', 'VP_SE')], as.numeric)
+  
+  return(VPCL_avg_se)
+}
 
 # F4: Average replicate treatment with LMER model for difference curve
+VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
+  vipcal_res <- list()
+  
+  for (location in unique(DF_SR$Location)){
+    for (station in unique(DF_SR$Station_Number)){
+      for (depth in unique(DF_SR$Depth)){
+        for (virus in unique(DF_SR[DF_SR$Microbe == 'Viruses',]$Population)){
+          DF <- DF_SR %>%
+            filter(Location == location, Station_Number == station,
+                   Depth == depth, Population == virus) 
+          
+          for (time in unique(DF$Time_Range)){
+            DF2 <- DF %>%
+              filter(Time_Range == time)
+            
+            # Currently, still working with separate replicate dataframe => going to average by using LMER model and adding difference samples
+            DF3 <- LMER_model(DF2)
+            
+            # VIPCAL
+            for (sample in unique(DF3$Sample_Type)){
+              DF4 <- DF3 %>%
+                filter(Sample_Type == sample)
+              
+              # Determine peaks and valleys
+              p <- peaks(c(+10e+10, DF4$Mean, -10e+10))
+              v <- valleys(c(+10e+10, DF4$Mean, -10e+10))
+              
+              # Check if number of peaks and valleys correspond
+              if (identical(length(p), length(v))){
+                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+              } else {
+                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+              }
+              
+              # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
+              # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
+              if (length(p) == 0){
+                vp <- 0 
+              } else {
+                total_vp <- 0
+                for (i in 1:length(p)){ 
+                  vp_i <- (DF4$Mean[p[i]] - DF4$Mean[v[i]]) / (DF4$Timepoint[p[i]] - DF4$Timepoint[v[i]])
+                  total_vp <- total_vp + vp_i
+                }
+                vp <- total_vp / length(p)
+              }
+              res <- c(location, station, depth, time, virus, sample, vp)
+              vipcal_res[[length(vipcal_res)+1]] <- res
+            }
+          }
+        }
+      }
+    }
+  }
+  # Changing nested list into dataframe
+  VPCL_avg_lmer <- data.frame(t(sapply(vipcal_res, c)))
+  colnames(VPCL_avg_lmer)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
+  VPCL_avg_lmer$VP <- as.numeric(VPCL_avg_lmer$VP)
+  
+  return(VPCL_avg_lmer)
+}
 
 # F5: Average replicate treatment with LMER model for difference curve with SE
+VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
+  vipcal_res <- list()
+  
+  for (location in unique(DF_SR$Location)){
+    for (station in unique(DF_SR$Station_Number)){
+      for (depth in unique(DF_SR$Depth)){
+        for (virus in unique(DF_SR[DF_SR$Microbe == 'Viruses',]$Population)){
+          DF <- DF_SR %>%
+            filter(Location == location, Station_Number == station,
+                   Depth == depth, Population == virus) 
+          
+          for (time in unique(DF$Time_Range)){
+            DF2 <- DF %>%
+              filter(Time_Range == time)
+            
+            # Currently, still working with separate replicate dataframe => going to average by using LMER model and adding difference samples
+            DF3 <- LMER_model(DF2)
+            
+            # VIPCAL
+            for (sample in unique(DF3$Sample_Type)){
+              DF4 <- DF3 %>%
+                filter(Sample_Type == sample)
+              
+              # Determine peaks and valleys
+              p <- peaks_se(c(+10e+10, DF4$Mean, -10e+10),
+                            c(0, DF4$SE, 0))
+              v <- valleys_se(c(+10e+10, DF4$Mean, -10e+10),
+                              c(0, DF4$SE, 0))
+              
+              # Check if number of peaks and valleys correspond
+              if (identical(length(p), length(v))){
+                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+              } else {
+                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+              }
+              
+              # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
+              # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
+              # Also calculating standard error on the viral production calculation
+              if (length(p) == 0){
+                vp <- 0 
+                se <- 0
+              } else {
+                total_vp <- 0
+                total_se <- 0
+                for (i in 1:length(p)){ 
+                  vp_i <- (DF4$Mean[p[i]] - DF4$Mean[v[i]]) / (DF4$Timepoint[p[i]] - DF4$Timepoint[v[i]])
+                  total_vp <- total_vp + vp_i
+                  
+                  se_i <- (DF4$SE[p[i]] + DF4$SE[v[i]]) / (DF4$Timepoint[p[i]] - DF4$Timepoint[v[i]])
+                  total_se <- total_se + se_i
+                }
+                vp <- total_vp / length(p)
+                se <- total_se / length(p)
+              }
+              res <- c(location, station, depth, time, virus, sample, vp, se)
+              vipcal_res[[length(vipcal_res)+1]] <- res
+            }
+          }
+        }
+      }
+    }
+  }
+  # Changing nested list into dataframe
+  VPCL_avg_lmer_se <- data.frame(t(sapply(vipcal_res, c)))
+  colnames(VPCL_avg_lmer_se)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
+  VPCL_avg_lmer_se[, c('VP', 'VP_SE')] <- lapply(VPCL_avg_lmer_se[, c('VP', 'VP_SE')], as.numeric)
+  
+  return(VPCL_avg_lmer_se)
+}
 
+## 5. Lysogenic production
+# Above functions provide to calculate the viral production for each of the samples
+# VP samples represent lytic viral production there where VPC samples represent lytic and lysogenic viral production
+# Next function will make it able to calculate the lysogenic viral production for the methods that don't use a difference curve
 
+# I think it is possible to make one function instead of 4 and just add some variables which distinguish the different cases
+calc_DIFF <- function(DF){ # Input dataframe consist of output of slope functions for Linear regression or VIPCAL functions of VIPCAL
+  # Determine difference samples by subtraction
+  diff <- DF %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
+    summarize(
+      VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+      VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
+      VP_R_Squared = NA,
+      Sample_Type = "Diff")
+  
+  # Join diff samples to VP and VPC samples
+  joined_df <- full_join(DF, diff, by = NULL)
+  
+  return(joined_df)
+}
 
-
-
-
-
-
-
-
-
-
-
+### Function works for LM1 => Only problem is that order of Time_Range is gone starting from DIFF samples
 
 
 

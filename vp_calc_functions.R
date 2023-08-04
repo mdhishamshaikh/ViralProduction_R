@@ -1,7 +1,7 @@
 ###---Additional source file for viral_production_step2.R---###
 # Different methods for calculating viral production
 
-#1. Linear Regression - All Points (LM_AP)
+#1. Linear Regression - All Points (LM_AP) LM1
 
 vp_lm_ap <- function(data){
   
@@ -9,18 +9,19 @@ vp_lm_ap <- function(data){
   
   slopes_LM_AP<- slope_all_points(data_sr) %>%
     calc_diff_lm_AP()%>%
-    group_by(Location, Expt_No, Depth, Sample_Type, Population, Time_Range ) %>%
+    group_by(Location, Expt_No, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location',
             'Expt_No',
             'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')))
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24")))
   
   slopes_LM_AP$VP_Type<- 'LM_AP'
   return(slopes_LM_AP)
 }
 
-#2. Linear Regression - Separate Replicates (LM_SR)
+#2. Linear Regression - Separate Replicates (LM_SR) LM2
 
 vp_lm_sr<- function(data){
   
@@ -45,8 +46,8 @@ vp_lm_sr_avg<- function(data){
   slopes_LM_SR<- slope_lm_sr(data_sr)
   
   slopes_LM_SR_avg<- slopes_LM_SR %>%
-    group_by(Location, Expt_No, Depth, Sample_Type, Population, Time_Range ) %>%
-    summarise(VP_Mean=mean(VP_Slope), VP_SE=plotrix::std.error((VP_Slope))) %>%
+    group_by(Location, Expt_No, Depth, Time_Range, Population, Sample_Type) %>%
+    summarise(VP_Mean=mean(VP_Slope), VP_SE=plotrix::std.error((VP_Slope)), VP_R_Squared = mean(VP_R_Squared)) %>%
     rename(VP = VP_Mean)%>%
     calc_diff_lm_AR() %>%
     arrange('Location',
@@ -62,7 +63,7 @@ vp_lm_sr_avg<- function(data){
   return(slopes_LM_SR_avg)
 }
 
-#3. Linear Regression - Averaged Replicates (LM_AR)
+#3. Linear Regression - Averaged Replicates (LM_AR) LM3
 
 vp_lm_ar<- function(data){
   
@@ -82,7 +83,7 @@ vp_lm_ar<- function(data){
   return(slopes_LM_AR)
 }
 
-#4. Linear Regression - Averaged Replicate - Difference Curve (LM_AR_Diff)
+#4. Linear Regression - Averaged Replicate - Difference Curve (LM_AR_Diff) LM4 (DIFF = Subtraction)
 
 vp_lm_ar_diff<- function(data){
   
@@ -101,7 +102,7 @@ vp_lm_ar_diff<- function(data){
   return(slopes_LM_AR_Diff)
 }
 
-#5. Linear Regression - Averaged Replicate - Difference Curve - LMER (LM_AR_Diff_LMER)
+#5. Linear Regression - Averaged Replicate - Difference Curve - LMER (LM_AR_Diff_LMER) LM5 (DIFF = LMER)
 
 vp_lm_ar_diff_lmer<- function(data){
   
@@ -120,7 +121,7 @@ vp_lm_ar_diff_lmer<- function(data){
   return(slopes_LM_AR_Diff_LMER)
 }
 
-#6. VIPCAL - Separate Replicates (VPCL_SR)
+#6. VIPCAL - Separate Replicates (VPCL_SR) VPCL1
 
 vp_vpcl_sr<- function(data){
   data_sr<- df_sr_tp(data)
@@ -162,7 +163,7 @@ vp_vpcl_sr_avg<- function(data){
   return(VPCL_SR_AVG)
 }
 
-#7. VIPCAL - Averaged Replicate - No SE (VPCL_AR_No_SE)
+#7. VIPCAL - Averaged Replicate - No SE (VPCL_AR_No_SE) VPCL2
 
 vp_vpcl_ar_no_se<- function(data){
   
@@ -184,7 +185,7 @@ vp_vpcl_ar_no_se<- function(data){
   
 }
 
-#8. VIPCAL - Averaged Replicates - Difference Curve - No SE (VPCL_AR_Diff_No_SE)
+#8. VIPCAL - Averaged Replicates - Difference Curve - No SE (VPCL_AR_Diff_No_SE) VPCL4 (DIFF = Subtraction)
 
 vp_vpcl_ar_diff_no_se<- function(data){
   
@@ -204,7 +205,7 @@ vp_vpcl_ar_diff_no_se<- function(data){
   
 }
 
-#9. VIPCAL - Averaged Replicate - SE (VPCL_AR_SE)
+#9. VIPCAL - Averaged Replicate - SE (VPCL_AR_SE) VPCL3
 
 vp_vpcl_ar_se<- function(data){
   
@@ -226,7 +227,7 @@ vp_vpcl_ar_se<- function(data){
   
 }
 
-#10. VIPCAL - Averaged Replicates - Difference Curve - SE (VPCL_AR_Diff_SE)
+#10. VIPCAL - Averaged Replicates - Difference Curve - SE (VPCL_AR_Diff_SE) VPCL5 (DIFF = Substraction)
 
 vp_vpcl_ar_diff_se<- function(data){
   
@@ -246,7 +247,7 @@ vp_vpcl_ar_diff_se<- function(data){
   
 }
 
-#11. VIPCAL - Averaged Replicates - Difference Curve - LMER - No SE (VPCL_AR_Diff_LMER_No_SE)
+#11. VIPCAL - Averaged Replicates - Difference Curve - LMER - No SE (VPCL_AR_Diff_LMER_No_SE) VPCL6 (DIFF = LMER)
 
 vp_vpcl_ar_diff_lmer_no_se<- function(data){
   
@@ -265,7 +266,7 @@ vp_vpcl_ar_diff_lmer_no_se<- function(data){
   return(VIPCAL_SR_DIFF_LMER_No_SE)
 }
 
-#12. VIPCAL - Averaged Replicates - Difference Curve - LMER - SE (VPCL_AR_Diff_LMER_SE)
+#12. VIPCAL - Averaged Replicates - Difference Curve - LMER - SE (VPCL_AR_Diff_LMER_SE) VPCL7 (DIFF = LMER)
 
 vp_vpcl_ar_diff_lmer_se<- function(data){
   
