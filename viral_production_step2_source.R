@@ -9,7 +9,7 @@
 # VIPCAL has his own issues => standard error has big influence => VIPCAL-SE takes this into account and only looks at  those increments that don't have overlapping range of SE
 # If there is overlap we give a 0 => rather a zero than an uncertain number => VIPCAL-SE is more conservative
 
-# VIPCAL = online tool for estimating lytically and lysogenicaaly produced viruses
+# VIPCAL = online tool for estimating lyticaly and lysogenicaly produced viruses
 # Lytic VP as the slope between two peaks that occur in viral abundance during incubation, following function holds: VP = [(Vmax1 - Vmin1) + (Vmax2 - Vmin2)] / (Tmax2 - Tmin1) => average over all
 # Lysogenic VP computed from difference curve
 
@@ -75,8 +75,8 @@ tp <- function(DF){
   # Change the format => increase number of rows and decrease the number of columns with pivot_longer()
   DF <- DF %>%
     pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time") %>%
-    drop_na() # Drops all the NA's
-  # When running only this function as DF <- tp(data), an empty dataframe will be returned because of the column "Comments", which consits of all NA's
+    drop_na() # Drops all the rows which have a NA value
+  # When running only this function as DF <- tp(data), an empty dataframe will be returned because of the column "Comments", which consists of NA
   
   return(DF)
 }
@@ -117,7 +117,7 @@ df_SR <- function(data, keep_0.22 = F){
 
 # Average of replicates on same timepoint dataframe
 # Since for the control samples (0.22) we only have timepoints 0 and 24, we need to filter these out
-df_AVG <- function(data, keep_0.22 = F){
+df_AVG <- function(data){
   # Removing control samples
   DF <- data[data$Sample_Type != '0.22',]
   
@@ -231,11 +231,19 @@ valleys_se <- function(values, se){
 LMER_model <- function(DF){ # Dataframe as input 
   lmer_data <- data.frame() # Initialize result dataframe
   
+  # The LMER model will take the different replicates into account as random-effects terms
+  # Solely on replicates column, the model will have problems distinguishing VP and VPC samples: for both rep = 1, 2 or 3
+  # In order to make sure the LMER model distinguishes between them, change replicate reference of VPC samples
+  # By changing this, an effective separation between both VP and VPC samples are made. 
+  # The LMER model can now tike into account the Sample_Type factor but also the interaction between Sample_Type and the new replicate reference
+  for (rep in unique(DF$Replicate)){
+    DF$Replicate[DF$Replicate == rep & DF$Sample_Type == 'VPC'] <- rep + 3
+  }
+  
   for (spec in unique(DF$Population)){
     # Fit linear mixed-effects model
     # lm_function of form: resp ~ expr
     # lmer_function of form: resp ~ FEexpr + (REexpr1 | factor1) + (REexpr2 | factor2) => contain special random-effects terms
-    # The LMER model will take the different replicates into account as random-effects terms
     lmer_mod <- lmer(data = DF, Count ~ Sample_Type * as.factor(Timepoint) + (1 | Replicate)) # Does the count change in function of Sample_Type and Timepoint (interaction term) + random-effect: variability between different levels of Replicate => allowing variation between different Replicates
     
     # Compute estimate marginal means in LMER model => least-squares means
@@ -482,7 +490,7 @@ VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, wit
   }
   # Changing nested list into dataframe
   VPCL_sr <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_sr)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP')
+  colnames(VPCL_sr)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP')
   VPCL_sr$VP <- as.numeric(VPCL_sr$VP) # Transform viral production to a numeric value instead a character
   
   return(VPCL_sr)
@@ -539,7 +547,7 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
   }
   # Changing nested list into dataframe
   VPCL_avg <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
+  colnames(VPCL_avg)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
   VPCL_avg$VP <- as.numeric(VPCL_avg$VP)
   
   return(VPCL_avg)
@@ -605,7 +613,7 @@ VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
   }
   # Changing nested list into dataframe
   VPCL_avg_se <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg_se)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
+  colnames(VPCL_avg_se)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
   VPCL_avg_se[, c('VP', 'VP_SE')] <- lapply(VPCL_avg_se[, c('VP', 'VP_SE')], as.numeric)
   
   return(VPCL_avg_se)
@@ -668,7 +676,7 @@ VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as inpu
   }
   # Changing nested list into dataframe
   VPCL_avg_lmer <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg_lmer)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
+  colnames(VPCL_avg_lmer)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
   VPCL_avg_lmer$VP <- as.numeric(VPCL_avg_lmer$VP)
   
   return(VPCL_avg_lmer)
@@ -740,7 +748,7 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
   }
   # Changing nested list into dataframe
   VPCL_avg_lmer_se <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg_lmer_se)<- c('Location', 'Expt_No', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
+  colnames(VPCL_avg_lmer_se)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
   VPCL_avg_lmer_se[, c('VP', 'VP_SE')] <- lapply(VPCL_avg_lmer_se[, c('VP', 'VP_SE')], as.numeric)
   
   return(VPCL_avg_lmer_se)
@@ -752,30 +760,331 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
 # Next function will make it able to calculate the lysogenic viral production for the methods that don't use a difference curve
 
 # I think it is possible to make one function instead of 4 and just add some variables which distinguish the different cases
-calc_DIFF <- function(DF){ # Input dataframe consist of output of slope functions for Linear regression or VIPCAL functions of VIPCAL
+calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of output of slope functions for Linear regression or VIPCAL functions of VIPCAL
   # Determine difference samples by subtraction
-  diff <- DF %>%
-    group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
-    summarize(
-      VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
-      VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
-      VP_R_Squared = NA,
-      Sample_Type = "Diff")
-  
+  # For linear model always the same, for VIPCAL variants with and without SE. R_Squared values are only presented with linear regression, not with VIPCAL
+  if (VIPCAL == T){
+    if (SE == F){
+      diff <- DF %>%
+        group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
+        summarize(
+          VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+          Sample_Type = "Diff")
+    }else if (SE == T){
+      diff <- DF %>%
+        group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
+        summarize(
+          VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+          VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
+          Sample_Type = "Diff")
+    }
+  }else{ 
+    diff <- DF %>%
+      group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
+      summarize(
+        VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+        VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
+        VP_R_Squared = NA,
+        Sample_Type = "Diff")
+  }
   # Join diff samples to VP and VPC samples
   joined_df <- full_join(DF, diff, by = NULL)
   
   return(joined_df)
 }
 
-### Function works for LM1 => Only problem is that order of Time_Range is gone starting from DIFF samples
+## 6. Different methods for calculating viral production
+# The viral production is calculated by the means of two main methods: Linear Regression vs VIPCAL
+# Of these methods different variants are applied considering the replicate treatment, standard error taken into account or difference curve estimation
+# In total, there are 5 variants of linear regression and 7 of VIPCAL
 
+# 6.1 LM-1: Linear regression with no replicate treatment (LM_AP)
+LM_1 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_SR(data)
+  
+  # Calculate viral production
+  DF_VP <- slope_LM_allpoints(DF) %>% 
+    calc_DIFF()
+  
+  # Arrange dataframe
+  DF_LM1 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% # Added cause order for diff samples was gone (T17, T20, T24, T3, T6)
+    mutate(VP_Type = 'LM_AP')
+  
+  return(DF_LM1)
+}
 
+# 6.2 LM-2: Linear regression with separate replicate treatment (LM_SR)
+# In the end, we are interested in looking at lytic and lysogenic viral production. To accomplish this, difference samples are needed (lysogenic production)
+# This method uses a separate replicate treatment, for each sample (VP and VPC) it distinguishes between the separate replicates
+# Here, an additional parameter 'avg' is added. If avg = F: the output will consist only the VP and VPC samples with separate replicate treatment; if avg = T: after determining slopes with separate replicate treatment, data is averaged and difference samples are calculated
+LM_2 <- function(data, avg = F){
+  # Create correct type of dataframe
+  DF <- df_SR(data)
+  
+  # Calculate viral production
+  DF_VP <- slope_LM_sr(DF)
+  
+  # Arrange dataframe
+  if (avg == F){
+    DF_LM2 <- DF_VP %>%
+      group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+      arrange('Location', 'Station_Number', 'Depth',
+              factor(Sample_Type, levels = c('VP', 'VPC')),
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+      mutate(VP_Type = 'LM_SR')
+  } else if (avg == T){
+    DF_LM2 <- DF_VP %>%
+      group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+      summarise(VP_mean = mean(VP), VP_SE = plotrix::std.error(VP), VP_R_Squared = mean(VP_R_Squared)) %>%
+      rename(VP = VP_mean) %>% # Necessary to name VP_mean in previous step so that SE is calculated correctly
+      calc_DIFF() %>%
+      arrange('Location', 'Station_Number', 'Depth',
+              factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+      mutate(VP_Type = 'LM_SR_AVG')
+  }
+  
+  return(DF_LM2)
+}
 
+# 6.3 LM-3: Linear regression with averaged replicate treatment (LM_AR)
+LM_3 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_AVG(data) %>%
+    subset(Sample_Type != 'Diff') # LM-3 has no difference curve estimation
+  
+  # Calculate viral production
+  DF_VP <- slope_LM_avg(DF) %>%
+    calc_DIFF()
+  
+  # Arrange dataframe
+  DF_LM3 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'LM_AR')
+  
+  return(DF_LM3)
+}
 
+# 6.4 LM-4: Linear regression with averaged replicate treatment and difference curve estimation by subtraction (LM_AR_DIFF)
+LM_4 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_AVG(data) 
+  
+  # Calculate viral production
+  DF_VP <- slope_LM_avg(DF)
+  
+  # Arrange dataframe
+  DF_LM4 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'LM_AR_DIFF')
+  
+  return(DF_LM4)
+}
 
+# 6.5 LM-5: Linear regression with averaged replicate treatment and difference curve estimation by LMER (LM_AR_DIFF_LMER)
+LM_5 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_SR(data) 
+  
+  # Calculate viral production
+  DF_VP <- slope_LM_avg_lmer(DF)
+  
+  # Arrange dataframe
+  DF_LM5 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'LM_AR_DIFF_LMER')
+  
+  return(DF_LM5)
+}
 
+# 6.6 VPCL-1: VIPCAL with separate replicate treatment (VPCL_SR)
+# Here the same as with LM-2, an additional parameter to determine if you want to see the separate replicate results or the averaged ones
+VPCL_1 <- function(data, avg = F){
+  # Create correct type of dataframe
+  DF <- df_SR(data)
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_sr(DF)
+  
+  # Arrange dataframe
+  if (avg == F){
+    DF_VPCL1 <- DF_VP %>%
+      group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+      arrange('Location', 'Station_Number', 'Depth',
+              factor(Sample_Type, levels = c('VP', 'VPC')),
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+      mutate(VP_Type = 'VPCL_SR')
+  }else if (avg == T){
+    DF_VPCL1 <- DF_VP %>%
+      group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+      summarise(VP_mean = mean(VP), VP_SE = plotrix::std.error(VP)) %>%
+      rename(VP = VP_mean) %>% # Necessary to name VP_mean in previous step so that SE is calculated correctly
+      calc_DIFF(VIPCAL = T) %>%
+      arrange('Location', 'Station_Number', 'Depth',
+              factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+      mutate(VP_Type = 'VPCL_SR_AVG')
+  }
+  
+  return(DF_VPCL1)
+}
 
+# 6.7 VPCL-2: VIPCAL with averaged replicate treatment (VPCL_AR)
+VPCL_2 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_AVG(data) %>%
+    subset(Sample_Type != 'Diff') # VPCL-2 has no difference curve estimation
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_avg(DF) %>%
+    calc_DIFF(VIPCAL = T)
+  
+  # Arrange dataframe
+  VPCL2 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'VPCL_AR')
+  
+  return(VPCL2)
+}
 
+# 6.8 VPCL-3: VIPCAL with averaged replicate treatment with SE (VPCL_AR_SE)
+VPCL_3 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_AVG(data) %>%
+    subset(Sample_Type != 'Diff') # VPCL-3 has no difference curve estimation
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_avg_se(DF) %>%
+    calc_DIFF(VIPCAL = T, SE = T)
+  
+  # Arrange dataframe
+  VPCL3 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'VPCL_AR_SE')
+  
+  return(VPCL3)
+}
 
+# 6.9 VPCL-4: VIPCAL with averaged replicate treatment with difference curve estimation by subtraction (VPCL_AR_DIFF)
+VPCL_4 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_AVG(data)
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_avg(DF)
+  
+  # Arrange dataframe
+  VPCL4 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'VPCL_AR_DIFF')
+  
+  return(VPCL4)
+}
+
+# 6.10 VPCL-5: VIPCAL with averaged replicate treatment with difference curve estimation by subtraction and with SE (VPCL_AR_DIFF_SE)
+VPCL_5 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_AVG(data)
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_avg_se(DF)
+  
+  # Arrange dataframe
+  VPCL5 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'VPCL_AR_DIFF_SE')
+  
+  return(VPCL5)
+}
+
+# 6.11 VPCL-6: VIPCAL with averaged replicate treatment with difference curve estimation by LMER (VPCL_AR_DIFF_LMER)
+VPCL_6 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_SR(data)
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_avg_lmer(DF)
+  
+  # Arrange dataframe
+  VPCL6 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'VPCL_AR_DIFF_LMER')
+  
+  return(VPCL6)
+}
+
+# 6.12 VPCL-7: VIPCAL with averaged replicate treatment with difference curve estimation by LMER and with SE (VPCL_AR_DIFF_LMER)
+VPCL_7 <- function(data){
+  # Create correct type of dataframe
+  DF <- df_SR(data)
+  
+  # Calculate viral production
+  DF_VP <- VIPCAL_avg_lmer_se(DF)
+  
+  # Arrange dataframe
+  VPCL7 <- DF_VP %>%
+    group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+    mutate(VP_Type = 'VPCL_AR_DIFF_LMER_SE')
+  
+  return(VPCL7)
+}
+
+# List of all different methods
+calculate_VP_list <- list(LM_1, LM_2, LM_3, LM_4, LM_5,
+                          VPCL_1, VPCL_2, VPCL_3, VPCL_4,
+                          VPCL_5, VPCL_6, VPCL_7)
+names(calculate_VP_list) <- c('LM_1', 'LM_2', 'LM_3', 'LM_4', 'LM_5',
+                              'VPCL_1', 'VPCL_2', 'VPCL_3', 'VPCL_4',
+                              'VPCL_5', 'VPCL_6', 'VPCL_7')
+
+# 7. Bacterial Endpoint
+# Estimating moment where we should stop the assay
+# Bacterial growth can induce an increase in collision rates
+bacterial_endpoint <- function(data){ # Returns timepoint, where we should stop the assay
+  
+}
 

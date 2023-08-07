@@ -40,7 +40,7 @@ viral_production<- function(data, method = c(1:12), SR_calc = T, method_sr = c(1
     
     tryCatch(
       expr = {
-        print(paste("Processing using method", mtd))
+        print(paste0("Processing using method: ", names(calculate_VP_list)[mtd]))
         
         try(output_df<- output_df %>% 
           full_join(vp_calc_funct_list[[mtd]](data)))

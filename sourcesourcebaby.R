@@ -924,7 +924,7 @@ calc_diff_vpcl_AR<-function(df){
 
 
 ####5.0 LMER Model####
-# My LMER_model did not has the change of replicates for VPC and the same results are obtained
+# My LMER_model did not has the change of replicates for VPC and the same results are obtained => In the end, SE was not the same for the diff samples when looking at all data in once (VPCL7)=> Think is necessary to have the change of rep in it for VPC samples
 
 lmer_model<- function(df, value = count){ # variable value isn't used?
   
