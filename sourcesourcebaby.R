@@ -136,7 +136,7 @@ df_AVG<- function(df, keep_0.22 = F) {
             as.numeric(Timepoint))
    
   
-  return(DF)
+  return(DF) # is dataframe
 }
 
 
@@ -161,7 +161,7 @@ df_avg_tp<- function(df, keep_0.22 = F){
   }
   
   DF_tp<-  data.table::rbindlist(df_list)
-  return(DF_tp)
+  return(DF_tp) # is table
 }
 
 df_sr_tp<- function(df, keep_0.22 = F){
@@ -981,7 +981,7 @@ bacterial_endpoint_range<- function(data){ #Gives out an index of the timepoint 
   bp<- c()
   timepoint<- unique(DF$Timepoint)
   len<-length(timepoint)
-  for (bacteria in c('c_Bacteria', 'c_HNA', 'c_LNA')){
+  for (bacteria in c('c_Bacteria', 'c_HNA', 'c_LNA')){ # Change this to unique values, in the case later on there are more variants of bacteria
     for (x in 2:len){ 
       Ba<- DF[DF$Population== bacteria ,] %>%
         arrange(Timepoint)
@@ -1006,6 +1006,7 @@ bacterial_endpoint_range<- function(data){ #Gives out an index of the timepoint 
   bp_df<- data.frame(Bacterial_GT, HNA_GT, LNA_GT) #in hours
   
   bp_endpoint<- intersect(which(Bacterial_GT>0), which(Bacterial_GT<24))[1] #tp at which it decreases below 24
+  print(bp_endpoint)
   #use this as the index for highlighting on plot
   bp<- Bacterial_GT[bp_endpoint] #Bacterial production at the endpoint
   #intersect(which(HNA_GT>0), which(HNA_GT<24))[1]

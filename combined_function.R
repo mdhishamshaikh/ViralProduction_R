@@ -40,7 +40,7 @@ viral_production<- function(data, method = c(1:12), SR_calc = T, method_sr = c(1
     
     tryCatch(
       expr = {
-        print(paste0("Processing using method: ", names(calculate_VP_list)[mtd]))
+        print(paste0("Processing using method: ", names(vp_calc_funct_list)[mtd]))
         
         try(output_df<- output_df %>% 
           full_join(vp_calc_funct_list[[mtd]](data)))
@@ -218,7 +218,7 @@ viral_production<- function(data, method = c(1:12), SR_calc = T, method_sr = c(1
 
 
 
-vp_calc<- viral_production(data, output.dir ="V14", write_csv = F)
+vp_calc_H <- viral_production(data, output.dir ="vp_calc_H", write_csv = T)
 
 
 time_range_factor<- as.vector(c())

@@ -4,7 +4,7 @@
 ### Information
 # Viral production can be divided in two phases: Lytic and Lysogenic
 # VP replicates represent the lytic viral production, this can be calculated with linear regression (slope) or VIPCAL (average of increments)
-# Analoge for VPC samples => they represent both lytic and lysogenic viral production
+# Analoge for VPC samples => they represent both lytic and lysogenic viral production => treatment with antibiotic mitomycin C => selectively inhibits DNA synthesis in bacteria, phages in Lysogenic phase can't be measured => Mitomycin C reduces lysogenization => into lytic phase => able to measure
 # To determine only the lysogenic viral production: in linear regression VPC slope - VP slope, in VIPCAL average of increments of the difference curve
 # VIPCAL has his own issues => standard error has big influence => VIPCAL-SE takes this into account and only looks at  those increments that don't have overlapping range of SE
 # If there is overlap we give a 0 => rather a zero than an uncertain number => VIPCAL-SE is more conservative
@@ -82,9 +82,11 @@ tp <- function(DF){
 }
 
 # Separate replicate dataframe
-df_SR <- function(data, keep_0.22 = F){
+df_SR <- function(data, keep_0.22 = F, add_tp = T){
+  
   DF <- data %>%
-    select(4:16) %>% # In the understanding that the input dataframe always has the same format
+    select(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')) %>%
     # When looking up gather(), it suggested to switch to pivot_longer() function but when doing this, the arrange line doesn't work anymore
     # I left gather() in here but if the order of the rows is not that important => you could switch gather() to pivot_longer()
     #pivot_longer(cols = 7:13, names_to = 'Population', values_to = 'Count') %>%
@@ -97,14 +99,16 @@ df_SR <- function(data, keep_0.22 = F){
     DF <- DF[DF$Sample_Type != '0.22',]
   }
   
-  # Adding timepoints
-  for (location in unique(DF$Location)){
-    for (station in unique(DF$Station_Number)){
-      for (depth in unique(DF$Depth)){
-        DF <- DF %>%
-          filter(Location == location & Station_Number == station & Depth == depth) # Filter on location, station number and depth of sample
-        
-        DF <- tp(DF) # Add timepoints
+  # Option to add timepoints to dataframe, is necessary for all calculating methods so base case = T. For bacterial endpoint for example not wanted
+  if (add_tp == T){
+    for (location in unique(DF$Location)){
+      for (station in unique(DF$Station_Number)){
+        for (depth in unique(DF$Depth)){
+          DF <- DF %>%
+            filter(Location == location & Station_Number == station & Depth == depth) # Filter on location, station number and depth of sample
+          
+          DF <- tp(DF) # Add timepoints
+        }
       }
     }
   }
@@ -117,13 +121,15 @@ df_SR <- function(data, keep_0.22 = F){
 
 # Average of replicates on same timepoint dataframe
 # Since for the control samples (0.22) we only have timepoints 0 and 24, we need to filter these out
-df_AVG <- function(data){
+df_AVG <- function(data, add_tp = T){
+  
   # Removing control samples
   DF <- data[data$Sample_Type != '0.22',]
   
   # Calculating number, mean of replicates and standard error 
   DF <- DF %>%
-    select(4:16) %>%
+    select(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')) %>%
     gather(7:13, key = 'Population', value = 'Count') %>%
     group_by(Location, Station_Number, Depth, Sample_Type, Timepoint, Population) %>%
     summarise(n = n(), Mean = mean(Count), SE = plotrix::std.error(Count)) # plotrix::std.error calculates the standard error of the mean
@@ -152,14 +158,16 @@ df_AVG <- function(data){
     mutate(Subgroup = if_else(Population %in% c('c_Bacteria', 'c_Viruses'), 'Parent', 'Subgroup')) %>%
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Population', as.numeric(Timepoint))
   
-  # Adding timepoints
-  for (location in unique(DF$Location)){
-    for (station in unique(DF$Station_Number)){
-      for (depth in unique(DF$Depth)){
-        DF <- DF %>%
-          filter(Location == location & Station_Number == station & Depth == depth)
-        
-        DF <- tp(DF)
+  # Option to add timepoints to dataframe, is necessary for all calculating methods so base case = T. For bacterial endpoint for example not wanted
+  if (add_tp == T){
+    for (location in unique(DF$Location)){
+      for (station in unique(DF$Station_Number)){
+        for (depth in unique(DF$Depth)){
+          DF <- DF %>%
+            filter(Location == location & Station_Number == station & Depth == depth)
+          
+          DF <- tp(DF)
+        }
       }
     }
   }
@@ -176,6 +184,7 @@ df_AVG <- function(data){
 
 # Determining peaks
 peaks <- function(values){
+  
   list <- c()
 
   for (i in 1:(length(values)-1)){ # -1 because we add +10e+10 and -10e+10 to values so that first and last count is not dismissed => if -1 is not presented, last element of list will be NA
@@ -188,6 +197,7 @@ peaks <- function(values){
   
 # Determining valleys
 valleys <- function(values){
+  
   list <- c()
   
   for (i in 1:(length(values)-1)){ 
@@ -204,6 +214,7 @@ valleys <- function(values){
 # By doing this also the created valley/peak by adding 10e10 and -10e10 is filtered out
 # Negative evolution in viral production also filtered out => if you go from peak -> valley (downward) => only increments are kept
 peaks_se <- function(values, se){
+  
   list <- c()
   
   for (i in 1:(length(values)-1)){
@@ -215,6 +226,7 @@ peaks_se <- function(values, se){
 }
 
 valleys_se <- function(values, se){
+  
   list <- c()
   
   for (i in 1:(length(values)-1)){
@@ -229,6 +241,7 @@ valleys_se <- function(values, se){
 # This difference curve can be easily calculated by subtracting the VP slope of the VPC slope or a
 # LMER model can be used (Linear Mixed-Effects Model)
 LMER_model <- function(DF){ # Dataframe as input 
+  
   lmer_data <- data.frame() # Initialize result dataframe
   
   # The LMER model will take the different replicates into account as random-effects terms
@@ -278,6 +291,7 @@ LMER_model <- function(DF){ # Dataframe as input
 ## 4.1 Linear Regression: 5 variants of methods => 4 different functions to determine slope
 # F1: Slope of all points => no replicate treatment
 slope_LM_allpoints <- function(DF_SR){ # Takes separate replicate dataframe as input, but won't filter on replicates
+  
   lm_res <- list() # Initialize list for results
   
   for (location in unique(DF_SR$Location)){
@@ -322,6 +336,7 @@ slope_LM_allpoints <- function(DF_SR){ # Takes separate replicate dataframe as i
 
 # F2: Slope with separate replicate treatment
 slope_LM_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, with filter on the replicates
+  
   lm_res <- list()
   
   for (location in unique(DF_SR$Location)){
@@ -361,6 +376,7 @@ slope_LM_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, w
 
 # F3: Slope with average replicate treatment
 slope_LM_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
+  
   lm_res <- list()
   
   for (location in unique(DF_AVG$Location)){
@@ -398,6 +414,7 @@ slope_LM_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
 
 # F4: Slope with LMER model for difference curve
 slope_LM_avg_lmer <- function(DF_SR){# Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
+  
   lm_res <- list()
   
   for (location in unique(DF_SR$Location)){
@@ -439,6 +456,7 @@ slope_LM_avg_lmer <- function(DF_SR){# Takes separate replicate dataframe as inp
 ## 4.2 VIPCAL: 7 variants of methods => 5 different functions to determine increments
 # F1: Separate replicate treatment
 VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, with filter on the replicates
+  
   vipcal_res <- list() # Initialize list for results
   
   for (location in unique(DF_SR$Location)){
@@ -498,6 +516,7 @@ VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, wit
 
 # F2: Average replicate treatment
 VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
+  
   vipcal_res <- list()
   
   for (location in unique(DF_AVG$Location)){
@@ -555,6 +574,7 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
 
 # F3: Average replicate treatment with SE
 VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
+  
   vipcal_res <- list()
   
   for (location in unique(DF_AVG$Location)){
@@ -621,6 +641,7 @@ VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
 
 # F4: Average replicate treatment with LMER model for difference curve
 VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
+  
   vipcal_res <- list()
   
   for (location in unique(DF_SR$Location)){
@@ -684,6 +705,7 @@ VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as inpu
 
 # F5: Average replicate treatment with LMER model for difference curve with SE
 VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as input, but we still work with averaged replicates => averaging is in LMER model
+ 
   vipcal_res <- list()
   
   for (location in unique(DF_SR$Location)){
@@ -761,6 +783,7 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
 
 # I think it is possible to make one function instead of 4 and just add some variables which distinguish the different cases
 calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of output of slope functions for Linear regression or VIPCAL functions of VIPCAL
+  
   # Determine difference samples by subtraction
   # For linear model always the same, for VIPCAL variants with and without SE. R_Squared values are only presented with linear regression, not with VIPCAL
   if (VIPCAL == T){
@@ -800,6 +823,7 @@ calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of outp
 
 # 6.1 LM-1: Linear regression with no replicate treatment (LM_AP)
 LM_1 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_SR(data)
   
@@ -823,7 +847,8 @@ LM_1 <- function(data){
 # In the end, we are interested in looking at lytic and lysogenic viral production. To accomplish this, difference samples are needed (lysogenic production)
 # This method uses a separate replicate treatment, for each sample (VP and VPC) it distinguishes between the separate replicates
 # Here, an additional parameter 'avg' is added. If avg = F: the output will consist only the VP and VPC samples with separate replicate treatment; if avg = T: after determining slopes with separate replicate treatment, data is averaged and difference samples are calculated
-LM_2 <- function(data, avg = F){
+LM_2 <- function(data, avg = T){
+  
   # Create correct type of dataframe
   DF <- df_SR(data)
   
@@ -856,6 +881,7 @@ LM_2 <- function(data, avg = F){
 
 # 6.3 LM-3: Linear regression with averaged replicate treatment (LM_AR)
 LM_3 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_AVG(data) %>%
     subset(Sample_Type != 'Diff') # LM-3 has no difference curve estimation
@@ -878,6 +904,7 @@ LM_3 <- function(data){
 
 # 6.4 LM-4: Linear regression with averaged replicate treatment and difference curve estimation by subtraction (LM_AR_DIFF)
 LM_4 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_AVG(data) 
   
@@ -898,6 +925,7 @@ LM_4 <- function(data){
 
 # 6.5 LM-5: Linear regression with averaged replicate treatment and difference curve estimation by LMER (LM_AR_DIFF_LMER)
 LM_5 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_SR(data) 
   
@@ -918,7 +946,8 @@ LM_5 <- function(data){
 
 # 6.6 VPCL-1: VIPCAL with separate replicate treatment (VPCL_SR)
 # Here the same as with LM-2, an additional parameter to determine if you want to see the separate replicate results or the averaged ones
-VPCL_1 <- function(data, avg = F){
+VPCL_1 <- function(data, avg = T){
+  
   # Create correct type of dataframe
   DF <- df_SR(data)
   
@@ -951,6 +980,7 @@ VPCL_1 <- function(data, avg = F){
 
 # 6.7 VPCL-2: VIPCAL with averaged replicate treatment (VPCL_AR)
 VPCL_2 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_AVG(data) %>%
     subset(Sample_Type != 'Diff') # VPCL-2 has no difference curve estimation
@@ -973,6 +1003,7 @@ VPCL_2 <- function(data){
 
 # 6.8 VPCL-3: VIPCAL with averaged replicate treatment with SE (VPCL_AR_SE)
 VPCL_3 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_AVG(data) %>%
     subset(Sample_Type != 'Diff') # VPCL-3 has no difference curve estimation
@@ -995,6 +1026,7 @@ VPCL_3 <- function(data){
 
 # 6.9 VPCL-4: VIPCAL with averaged replicate treatment with difference curve estimation by subtraction (VPCL_AR_DIFF)
 VPCL_4 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_AVG(data)
   
@@ -1015,6 +1047,7 @@ VPCL_4 <- function(data){
 
 # 6.10 VPCL-5: VIPCAL with averaged replicate treatment with difference curve estimation by subtraction and with SE (VPCL_AR_DIFF_SE)
 VPCL_5 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_AVG(data)
   
@@ -1035,6 +1068,7 @@ VPCL_5 <- function(data){
 
 # 6.11 VPCL-6: VIPCAL with averaged replicate treatment with difference curve estimation by LMER (VPCL_AR_DIFF_LMER)
 VPCL_6 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_SR(data)
   
@@ -1055,6 +1089,7 @@ VPCL_6 <- function(data){
 
 # 6.12 VPCL-7: VIPCAL with averaged replicate treatment with difference curve estimation by LMER and with SE (VPCL_AR_DIFF_LMER)
 VPCL_7 <- function(data){
+  
   # Create correct type of dataframe
   DF <- df_SR(data)
   
@@ -1081,10 +1116,56 @@ names(calculate_VP_list) <- c('LM_1', 'LM_2', 'LM_3', 'LM_4', 'LM_5',
                               'VPCL_1', 'VPCL_2', 'VPCL_3', 'VPCL_4',
                               'VPCL_5', 'VPCL_6', 'VPCL_7')
 
-# 7. Bacterial Endpoint
-# Estimating moment where we should stop the assay
-# Bacterial growth can induce an increase in collision rates
+# 7. Bacterial Endpoint: estimating moment where we should stop the assay
+# An increase in collision rates between viruses and bacteria is noticed in VP samples, probably due to net increase in bacterial growth that was established
+# In VPC samples, this is not the case because these samples have the antibiotic Mitomycin-C treatment which inhibits the growth of the bacteria
+# Because of this increase in collision rates in VP samples, a higher lytic production is expected here. Ultimately, this can result in a negative lysogenic production
+# To achieve comparable results between VP and VPC samples, we define the bacterial endpoint
+
+# Bacterial Endpoint = moment where the doubling time (generation time) in bacteria is less then 24h, based of the net increase of bacteria in the VP samples
+# This is the moment we need to stop the assay
 bacterial_endpoint <- function(data){ # Returns timepoint, where we should stop the assay
   
+  # Filter data on VP and bacterial samples
+  DF <- df_AVG(data, add_tp = F) %>%
+    as.data.frame() %>% # Since I combined df_AVG and df_avg_tp => my result is a data.table, output of df_AVG should just be data.frame
+    filter(Sample_Type == 'VP' & Microbe == 'Bacteria') %>%
+    mutate(Timepoint = as.numeric(Timepoint))
+  
+  # Calculate generation time (GT) for each bacterial population, following function holds: Population_tx = Population_t0 * 2^(tx/T_double) => T_double = log(10)(2) * (tx - t0) / log(10)(Population_tx - Population_t0)
+  # Changed from log(2) to log(10): since working with real-world data => easier calculation and interpretations of results will be more intuitive (decimal nature of data = log(10))
+  bac_GT <- list()
+  timepoints <- unique(DF$Timepoint)
+  
+  for (bac in unique(DF$Population)){
+    for (t in 2:length(timepoints)){ # Start at 2nd timepoint, calculate the doubling time at each timepoint relative towards first timepoint
+      DF_bac <- DF[DF$Population == bac, ] %>% # Select current bacterial population
+        arrange(Timepoint) # Set timepoints in ascending order
+        
+      doubleT <- (log10(2)*(DF_bac$Timepoint[t] - DF_bac$Timepoint[1]))/(log10(DF_bac$Mean[t]) - log10(DF_bac$Mean[1]))
+      
+      res <- c(unique(DF$Timepoint)[t], bac, doubleT)
+      bac_GT[[length(bac_GT)+1]] <- res
+    }
+  }
+  # Changing nested list into dataframe
+  BP_res <- data.frame(t(sapply(bac_GT, c)))
+  colnames(BP_res) <- c('Timepoint', 'Population', 'GT') # Define columnnames for pivot_wider
+  BP_res <- pivot_wider(BP_res, names_from = 'Population', values_from = 'GT') # Better overview of GTs
+  colnames(BP_res) <- c('Timepoint', 'Bacterial_GT', 'HNA_GT', 'LNA_GT') # Change to correct columnnames
+  BP_res <- as.data.frame(BP_res) # Pivot_wider creates tibble
+  print(BP_res) # Show results
+  
+  # Find bacterial endpoint: GT between 0 and 24
+  # Index shows point where GT is less then 24 hours => take timepoint before to stop but since here first timepoint (= 0 hours) isn't present, the index can stay the same => this index will refer to the previous timepoint when looking through the unique values
+  BP_endpoint <- intersect(which(BP_res$Bacterial_GT > 0), which(BP_res$Bacterial_GT < 24))[1] # Is possible to have multiple timepoints, take first one
+  print(BP_endpoint)
+  if (NA %in% BP_endpoint){
+    stop_assay <- paste("T", timepoints[1], "_T", timepoints[length(timepoints)], sep = "")
+  }else {
+    stop_assay <- paste("T", timepoints[1], "_T", timepoints[BP_endpoint], sep = "")
+  }
+  
+  return(stop_assay)
 }
 
