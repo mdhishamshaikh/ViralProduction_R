@@ -153,7 +153,7 @@ overview_df_tp_avg<- function(df, keep_0.22 = F) {
 
 ####2.2 To create an overview plot with time ranges####
 overview_plots_tp_avg<- function(df, ...){
-  n<- ggplot(df, aes(x= Timepoint, y= mean_value, color= count , shape=count))+
+  n<- ggplot(df, aes(x= Timepoint, y= mean, color= count , shape=count))+
     geom_point(size= 1.5)+
     geom_smooth(size= 1.0, method = 'lm', se = F)+
     geom_line()+
@@ -180,7 +180,7 @@ overview_plots_tp_avg<- function(df, ...){
                        breaks= seq(-4e+6,13e+6, 4e+6),
                        limits = c(-4e+6, 14e+6))+
     theme_bw()+
-    geom_errorbar(aes(ymin=mean_value + sd_value, ymax= mean_value - sd_value), width = 0.5, size = 0.5)+
+    geom_errorbar(aes(ymin=mean + se, ymax= mean - se), width = 0.5, size = 0.5)+
     scale_x_continuous(breaks = unique(df$Timepoint))+
       labs(title = paste(paste(unique(df$Location), "St", unique(df$Expt_No), "Depth", unique(df$Depth), sep = "_"), "- Viral Production Assay - Timepoint Sloughing"), subtitle = 'Overview - Bacterial and Viral counts for Lytic and Lysogenic inductions',
          x= 'Sampling Timepoints\n (in hours)', y='FCM Counts\n (in millions)')+

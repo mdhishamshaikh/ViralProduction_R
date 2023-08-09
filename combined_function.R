@@ -218,7 +218,7 @@ viral_production<- function(data, method = c(1:12), SR_calc = T, method_sr = c(1
 
 
 
-vp_calc_H <- viral_production(data, output.dir ="vp_calc_H", write_csv = T)
+vp_calc_H <- viral_production(data, output.dir ="vp_calc_H")
 
 
 time_range_factor<- as.vector(c())

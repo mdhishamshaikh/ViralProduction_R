@@ -1,10 +1,10 @@
 # Test bep with different tags
-data <- read.csv("NJ2020.csv")
-names(data)[names(data) == 'Expt_No'] <- 'Station_Number' 
+data2 <- read.csv("NJ2020.csv") # For H_code
+names(data2)[names(data2) == 'Expt_No'] <- 'Station_Number'  # For My code
 
 
 # H_code
-bep_df<- data %>% unite(c('Location', 'Expt_No', 'Depth'), 
+bep_df<- data2 %>% unite(c('Location', 'Expt_No', 'Depth'), 
                         col = "tag", remove = F)
 
 endpoint_list<- list()
@@ -18,7 +18,7 @@ for (combi_tag in unique(bep_df$tag)){
 print(endpoint_list)
 
 # My code
-bep_df2<- data %>% unite(c('Location', 'Station_Number', 'Depth'), 
+bep_df2<- data2 %>% unite(c('Location', 'Station_Number', 'Depth'), 
                         col = "tag", remove = F)
 
 endpoint_list2<- list()

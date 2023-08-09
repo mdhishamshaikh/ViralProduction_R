@@ -4,9 +4,9 @@
 ### Information
 # Viral production can be divided in two phases: Lytic and Lysogenic
 # VP replicates represent the lytic viral production, this can be calculated with linear regression (slope) or VIPCAL (average of increments)
-# Analoge for VPC samples => they represent both lytic and lysogenic viral production => treatment with antibiotic mitomycin C => selectively inhibits DNA synthesis in bacteria, phages in Lysogenic phase can't be measured => Mitomycin C reduces lysogenization => into lytic phase => able to measure
-# To determine only the lysogenic viral production: in linear regression VPC slope - VP slope, in VIPCAL average of increments of the difference curve
-# VIPCAL has his own issues => standard error has big influence => VIPCAL-SE takes this into account and only looks at  those increments that don't have overlapping range of SE
+# Analoge for VPC samples => they represent both lytic and lysogenic viral production => treatment with antibiotic mitomycin C => selectively inhibits DNA synthesis in bacteria, phages in lysogenic phase can't be measured => Mitomycin C reduces lysogenization => into lytic phase => able to measure
+# To determine only the lysogenic viral production: in linear regression VPC_slope - VP_slope, in VIPCAL average of increments of the difference curve
+# VIPCAL has his own issues => standard error has big influence => VIPCAL-SE takes this into account and only looks at those increments that don't have overlapping range of SE
 # If there is overlap we give a 0 => rather a zero than an uncertain number => VIPCAL-SE is more conservative
 
 # VIPCAL = online tool for estimating lyticaly and lysogenicaly produced viruses
@@ -36,8 +36,6 @@ for(pack in packages_to_load){
 for (pack in packages_to_load){
   library(pack, character.only = T)
 }
-
-### Functions needed for different calculation methods of viral production (vp_calc_functions.R)
 
 ## 1. Dataframe functions: 
 # Each method requires a specific type of dataframe as input: an average of the replicates is taken or each replicate is evaluated separately 
@@ -87,10 +85,7 @@ df_SR <- function(data, keep_0.22 = F, add_tp = T){
   DF <- data %>%
     select(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
              'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')) %>%
-    # When looking up gather(), it suggested to switch to pivot_longer() function but when doing this, the arrange line doesn't work anymore
-    # I left gather() in here but if the order of the rows is not that important => you could switch gather() to pivot_longer()
-    #pivot_longer(cols = 7:13, names_to = 'Population', values_to = 'Count') %>%
-    gather(7:13, key = 'Population', value = 'Count') %>% # Taking index of columns instead of name, again beginning format needs to be the same every time
+    gather(7:13, key = 'Population', value = 'Count') %>% # Taking index of columns instead of name, since we select columns in first step => order will always be this one
     mutate(Microbe = if_else(Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>% # Adding an extra column defining if replicate is from bacterial or viral origin
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type','Replicate','Population', as.numeric(Timepoint)) # Reorder the rows by the values of the selected columns
   
@@ -101,22 +96,26 @@ df_SR <- function(data, keep_0.22 = F, add_tp = T){
   
   # Option to add timepoints to dataframe, is necessary for all calculating methods so base case = T. For bacterial endpoint for example not wanted
   if (add_tp == T){
+    df_list <- list()
+    
     for (location in unique(DF$Location)){
       for (station in unique(DF$Station_Number)){
         for (depth in unique(DF$Depth)){
-          DF <- DF %>%
+          DF2 <- DF %>%
             filter(Location == location & Station_Number == station & Depth == depth) # Filter on location, station number and depth of sample
           
-          DF <- tp(DF) # Add timepoints
+          DF2 <- tp(DF2) # Add timepoints
+          df_list [[length(df_list)+1]] <- DF2
         }
       }
     }
+    # Change to data table for further analyses
+    DF_tp <- data.table::rbindlist(df_list)
+  }else { # If no timepoints are added
+    DF_tp <- as.data.frame(DF)
   }
   
-  # Change to data table for further analyses
-  DF <- as.data.table(DF)
-  
-  return(DF)
+  return(DF_tp)
 }
 
 # Average of replicates on same timepoint dataframe
@@ -160,21 +159,26 @@ df_AVG <- function(data, add_tp = T){
   
   # Option to add timepoints to dataframe, is necessary for all calculating methods so base case = T. For bacterial endpoint for example not wanted
   if (add_tp == T){
+    df_list <- list()
+    
     for (location in unique(DF$Location)){
       for (station in unique(DF$Station_Number)){
         for (depth in unique(DF$Depth)){
-          DF <- DF %>%
+          DF2 <- DF %>%
             filter(Location == location & Station_Number == station & Depth == depth)
           
-          DF <- tp(DF)
+          DF2 <- tp(DF2)
+          df_list [[length(df_list)+1]] <- DF2
         }
       }
     }
+    # Change to data table for further analyses
+    DF_tp <- data.table::rbindlist(df_list)
+  }else { # If no timepoints are added
+    DF_tp <- as.data.frame(DF)
   }
-  # Change to data table for further analyses
-  DF <- as.data.table(DF)
   
-  return(DF)
+  return(DF_tp)
 }
 
 ## 2. Peaks and valleys
@@ -469,7 +473,7 @@ VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, wit
                 filter(Location == location & Station_Number == station & Depth == depth,
                        Population == virus, Sample_Type == sample, Replicate == rep)
               
-              for (time in unique(DF$Time_Range)) {
+              for (time in unique(DF$Time_Range)){
                 DF2 <- DF %>%
                   filter(Time_Range == time)
                 
@@ -780,13 +784,11 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
 # Above functions provide to calculate the viral production for each of the samples
 # VP samples represent lytic viral production there where VPC samples represent lytic and lysogenic viral production
 # Next function will make it able to calculate the lysogenic viral production for the methods that don't use a difference curve
-
-# I think it is possible to make one function instead of 4 and just add some variables which distinguish the different cases
 calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of output of slope functions for Linear regression or VIPCAL functions of VIPCAL
   
   # Determine difference samples by subtraction
   # For linear model always the same, for VIPCAL variants with and without SE. R_Squared values are only presented with linear regression, not with VIPCAL
-  if (VIPCAL == T){
+  if (VIPCAL == T){ # The variants of VIPCAL
     if (SE == F){
       diff <- DF %>%
         group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
@@ -801,7 +803,7 @@ calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of outp
           VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
           Sample_Type = "Diff")
     }
-  }else{ 
+  }else{ # The variants of Linear Regression
     diff <- DF %>%
       group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
       summarize(
@@ -1128,7 +1130,6 @@ bacterial_endpoint <- function(data){ # Returns timepoint, where we should stop 
   
   # Filter data on VP and bacterial samples
   DF <- df_AVG(data, add_tp = F) %>%
-    as.data.frame() %>% # Since I combined df_AVG and df_avg_tp => my result is a data.table, output of df_AVG should just be data.frame
     filter(Sample_Type == 'VP' & Microbe == 'Bacteria') %>%
     mutate(Timepoint = as.numeric(Timepoint))
   

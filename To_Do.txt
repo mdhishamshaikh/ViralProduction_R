@@ -1,0 +1,40 @@
+1. Bacterial Endpoint:
+
+	Fix bacterial endpoint for NJ2020.csv dataset
+
+2. Visualization
+
+	Overview of data to start with: Timepoint_SLOU & 0_vp_source.R/overview_plots_tp_avg
+
+	Collision rates visualization: Dia 37B, bep_cr_plotB & bacterial_enpoint_visuals.R
+
+
+3. Analysing viral production results
+
+Literature:
+
+	VIPCAL => paper about the online tool of VIPCAL => read for everything that needs to be calculated + go to online tool for some formulas
+
+Background experiment:
+
+	Started from seawater (WW, 100% Bacteria/ 100% Viruses) and undergo tangential flow filtration.
+
+	First filtration of WW to create 30 kDa virus free water (0% B/ 0% V) used for washing in second filtration.
+
+	Second filtration of WW to create 0.22 filtrate (control, 0% B/ 100% V) and T0_concentrate that undergoes VP and VPC treatment. This should be ideally 100% B and 0% V but 	in the end this is 40% B and 20% V.
+
+
+Analysing of VP_results:
+	
+	1. Transform results from T0 to WW: factorizing to transform 40% B and 20% V both to 100% for VP and VP_SE (propagation of error)
+	2. Lytic viral production
+	3. Percentage lytic cells
+	4. Lysogenic viral production
+	5. Percentage lysogeny
+	6. Lysis rate bacteria (lytic and lysogenic phase)
+	7. Percentage bacterial loss per day
+	8. C, N & P release for both bacteria and viruses: search average values in literature
+	9. Viral turnover rate
+
+	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below 	and above for low and high burst size. If nothing is found: 10, 25, 40 as burst size.
+

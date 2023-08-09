@@ -104,7 +104,7 @@ df_AVG<- function(df, keep_0.22 = F) {
     colnames(DF_mean)[7:8]<- colnames_mean
   } else if (length(colnames_mean)==1){
     colnames(DF_mean)[7]<- colnames_mean
-  } 
+  }
   
   DF_se<- select(DF, -c('mean')) %>%
     spread('Sample_Type', 'se')
@@ -866,6 +866,7 @@ vipcal_sr_diff_no_SE<- function(df_sr){ #takes SR dataframe as an input
 }
 
 #### 4.0 To calculate lysogeny from all points data####
+# I think it is possible to make one function instead of 4 and just add some variables which distinguish the different cases
 calc_diff_lm_AP<- function(df){
   
   colnames(df)[colnames(df) == 'VP_Slope'] <- 'VP'
@@ -1004,6 +1005,7 @@ bacterial_endpoint_range<- function(data){ #Gives out an index of the timepoint 
   HNA_GT <- gt[len:((len*2)-2)]
   LNA_GT <- gt[((len*2)-1):((len*3)-3)]
   bp_df<- data.frame(Bacterial_GT, HNA_GT, LNA_GT) #in hours
+  print(bp_df)
   
   bp_endpoint<- intersect(which(Bacterial_GT>0), which(Bacterial_GT<24))[1] #tp at which it decreases below 24
   print(bp_endpoint)

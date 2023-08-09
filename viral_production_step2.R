@@ -4,7 +4,7 @@
 source("viral_production_step2_source.R")
 
 ## 2. Importing data from Step 1
-data1 <- read.csv("NJ1.csv")
+data <- read.csv('NJ1.csv')
 names(data)[names(data) == 'Expt_No'] <- 'Station_Number' # Changing column name to something more appropriate => you can also use index of column (5)
 
 ## 3. Calculating viral production
@@ -13,17 +13,17 @@ names(data)[names(data) == 'Expt_No'] <- 'Station_Number' # Changing column name
 calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_calc = T, bp_endpoint = T){
   
   ## 1. Check if output directory is valid (variable: output_dir)
-  #if (output_dir == ''){
-    #print('No output directory is given!')
-    #stop('Please define output directory before proceeding.')
+  if (output_dir == ''){
+    print('No output directory is given!')
+    stop('Please define output directory before proceeding.')
     
-  #}else if (file.exists(output_dir)){
-    #print(paste0('The ', output_dir, ' folder already exists!'))
-    #stop('Please define another output directory before proceeding.')
+  }else if (file.exists(output_dir)){
+    print(paste0('The ', output_dir, ' folder already exists!'))
+    stop('Please define another output directory before proceeding.')
     
-  #}else {
-    #dir.create(output_dir)
-  #}
+  }else {
+    dir.create(output_dir)
+  }
   
   # Storing all errors and warnings in global environment
   .GlobalEnv$calc_vp_error_list <- list()
@@ -44,8 +44,10 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     tryCatch(
       expr = { 
         print(paste0('Processing using method: ', names(calculate_VP_list)[mtd]))
+        
+        res <- calculate_VP_list[[mtd]](data)
         output_df <- output_df %>%
-          full_join(calculate_VP_list[[mtd]](data))
+          full_join(res)
       },
       
       error = function(e){ # e represents a possible error
@@ -89,8 +91,10 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
       tryCatch(
         expr = { 
           print(paste0('Processing using method: ', names(calculate_VP_list)[mtd], ', only separate replicate results.'))
+          
+          res <- calculate_VP_list[[mtd]](data, avg = F)
           output_df_SR <- output_df_SR %>%
-            full_join(calculate_VP_list[[mtd]](data, avg = F))
+            full_join(res)
         },
         
         error = function(e){ # e represents a possible error
@@ -125,26 +129,39 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
                                Time_Range = character(), Population = character(), Sample_Type = character(),
                                VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
     
+    # Determine bacterial endpoint
+    bp_df <- data %>%
+      unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
+    endpoint_list <- list()
+    
+    for (combi_tag in unique(bp_df$tag)){
+      bp_df1 <- bp_df %>%
+        filter(tag == combi_tag)
+      
+      bp_range <- bacterial_endpoint(bp_df1)
+      endpoint_list[[length(endpoint_list)+1]] <- c(combi_tag, bp_range)
+    }
+    
+    # Select results from output_df based on the bp_range and add to output dataframe
+    for (i in 1:length(unique(bp_df$tag))){
+      res <- output_df %>%
+        unite('tag', c('Location', 'Station_Number', 'Depth'), remove = F) %>%
+        filter(tag == endpoint_list[[i]][1] & Time_Range == endpoint_list[[i]][2]) %>%
+        select(-tag)
+      
+      output_df_bp <- output_df_bp %>%
+        full_join(res)
+    }
+    
+    # Write results in csv. If no csv is wanted, set write_csv to F
+    if (write_csv == T){
+      write.csv(output_df_bp, file.path(res_path, 'vp_calc_BP.csv'), row.names = F)
+    } 
   }
-  
-  
-  
-  
-  
-  
-  
-  
   
   return(output_df)
 }
 
 # Running calc_VP function
 print(names(calculate_VP_list)) # Order of different methods possible to calculate viral production
-vp_calc_J <- calc_VP(data, output_dir = 'vp_calc_J', method = c(1))
-
-
-
-
-
-
-
+vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
