@@ -7,6 +7,9 @@ source("viral_production_step2_source.R")
 data <- read.csv('NJ1.csv')
 names(data)[names(data) == 'Expt_No'] <- 'Station_Number' # Changing column name to something more appropriate => you can also use index of column (5)
 
+data_all <- read.csv('NJ2020.csv')
+names(data_all)[names(data_all) == 'Expt_No'] <- 'Station_Number'
+
 ## 3. Calculating viral production
 # Main function for viral production calculation
 # Different variables are presented to adjust for the desired output
@@ -165,3 +168,4 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
 # Running calc_VP function
 print(names(calculate_VP_list)) # Order of different methods possible to calculate viral production
 vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
+vp_calc_NJ2020 <- calc_VP(data_all, output_dir = 'vp_calc_NJ2020')

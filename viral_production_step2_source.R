@@ -1126,7 +1126,7 @@ names(calculate_VP_list) <- c('LM_1', 'LM_2', 'LM_3', 'LM_4', 'LM_5',
 
 # Bacterial Endpoint = moment where the doubling time (generation time) in bacteria is less then 24h, based of the net increase of bacteria in the VP samples
 # This is the moment we need to stop the assay
-bacterial_endpoint <- function(data){ # Returns timepoint, where we should stop the assay
+bacterial_endpoint <- function(data, visual = F){ # Returns timepoint, where we should stop the assay
   
   # Filter data on VP and bacterial samples
   DF <- df_AVG(data, add_tp = F) %>%
@@ -1151,22 +1151,34 @@ bacterial_endpoint <- function(data){ # Returns timepoint, where we should stop 
   }
   # Changing nested list into dataframe
   BP_res <- data.frame(t(sapply(bac_GT, c)))
-  colnames(BP_res) <- c('Timepoint', 'Population', 'GT') # Define columnnames for pivot_wider
+  colnames(BP_res) <- c('Timepoint', 'Population', 'GT') # Define column names for pivot_wider
   BP_res <- pivot_wider(BP_res, names_from = 'Population', values_from = 'GT') # Better overview of GTs
-  colnames(BP_res) <- c('Timepoint', 'Bacterial_GT', 'HNA_GT', 'LNA_GT') # Change to correct columnnames
+  colnames(BP_res) <- c('Timepoint', 'Bacterial_GT', 'HNA_GT', 'LNA_GT') # Change to correct column names
   BP_res <- as.data.frame(BP_res) # Pivot_wider creates tibble
+  BP_res <- BP_res %>%
+    mutate_at(c('Bacterial_GT', 'HNA_GT', 'LNA_GT'), as.numeric) # Change from character to numeric for determining the index 
   print(BP_res) # Show results
   
   # Find bacterial endpoint: GT between 0 and 24
   # Index shows point where GT is less then 24 hours => take timepoint before to stop but since here first timepoint (= 0 hours) isn't present, the index can stay the same => this index will refer to the previous timepoint when looking through the unique values
   BP_endpoint <- intersect(which(BP_res$Bacterial_GT > 0), which(BP_res$Bacterial_GT < 24))[1] # Is possible to have multiple timepoints, take first one
   print(BP_endpoint)
+  
   if (NA %in% BP_endpoint){
     stop_assay <- paste("T", timepoints[1], "_T", timepoints[length(timepoints)], sep = "")
   }else {
     stop_assay <- paste("T", timepoints[1], "_T", timepoints[BP_endpoint], sep = "")
   }
   
-  return(stop_assay)
+  # For visualization, we need back the index and not the stop_assay
+  if (visual == T){
+    if (is.na(BP_endpoint)){
+      BP_endpoint <- length(timepoints)
+      return(BP_endpoint)
+    }else{
+      return(BP_endpoint)
+    }
+  }else{
+    return(stop_assay)
+  }
 }
-

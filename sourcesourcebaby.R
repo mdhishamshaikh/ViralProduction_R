@@ -1009,6 +1009,7 @@ bacterial_endpoint_range<- function(data){ #Gives out an index of the timepoint 
   
   bp_endpoint<- intersect(which(Bacterial_GT>0), which(Bacterial_GT<24))[1] #tp at which it decreases below 24
   print(bp_endpoint)
+  
   #use this as the index for highlighting on plot
   bp<- Bacterial_GT[bp_endpoint] #Bacterial production at the endpoint
   #intersect(which(HNA_GT>0), which(HNA_GT<24))[1]

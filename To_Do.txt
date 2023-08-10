@@ -1,3 +1,12 @@
+Week 1:
+
+1. Optimize code from step 2: viral production calculation
+	
+	Understanding the code, add documentation/comments and optimize the functions where possible
+	NJ1.csv dataset as start => test on NJ2020.csv which has the whole experiment
+
+Week 2: 
+
 1. Bacterial Endpoint:
 
 	Fix bacterial endpoint for NJ2020.csv dataset
@@ -21,20 +30,21 @@ Background experiment:
 
 	First filtration of WW to create 30 kDa virus free water (0% B/ 0% V) used for washing in second filtration.
 
-	Second filtration of WW to create 0.22 filtrate (control, 0% B/ 100% V) and T0_concentrate that undergoes VP and VPC treatment. This should be ideally 100% B and 0% V but 	in the end this is 40% B and 20% V.
+	Second filtration of WW to create 0.22 filtrate (control, 0% B/ 100% V) and T0_concentrate that undergoes VP and VPC treatment. This should be ideally 100% B and 0% V but in the end this is 40% B and 20% V.
 
 
 Analysing of VP_results:
 	
-	1. Transform results from T0 to WW: factorizing to transform 40% B and 20% V both to 100% for VP and VP_SE (propagation of error)
+	1. Transform results from T0 to WW: factorizing to transform 40% B to 100% for VP and VP_SE (propagation of error)
 	2. Lytic viral production
 	3. Percentage lytic cells
 	4. Lysogenic viral production
 	5. Percentage lysogeny
 	6. Lysis rate bacteria (lytic and lysogenic phase)
-	7. Percentage bacterial loss per day
-	8. C, N & P release for both bacteria and viruses: search average values in literature
-	9. Viral turnover rate
+	7. Percentage bacterial production lysed
+	8. Percentage bacterial loss per day
+	9. C, N & P release for both bacteria and viruses: search average values in literature
+	10. Viral turnover rate
 
-	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below 	and above for low and high burst size. If nothing is found: 10, 25, 40 as burst size.
+	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below and above for low and high burst size. If nothing is found: 	10, 25, 40 as burst size.
 

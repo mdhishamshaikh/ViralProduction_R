@@ -26,7 +26,7 @@ endpoint_list2<- list()
 for (combi_tag in unique(bep_df2$tag)){
   
   bep_df3<- bep_df2%>% filter(tag == combi_tag)
-  endpoint_list2[[length(endpoint_list2)+1]]<- c(combi_tag , bacterial_endpoint(bep_df3))
+  endpoint_list2[[length(endpoint_list2)+1]]<- c(combi_tag , bacterial_endpoint(bep_df3, visual = F))
   
 }
 print(endpoint_list2)
