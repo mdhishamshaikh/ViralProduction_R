@@ -24,7 +24,8 @@
 # List of packages
 packages_to_load<- c("tidyverse", "flowWorkspace", "scales",
                      "readxl", "emmeans", "lme4", "ggsci",
-                     "svglite", "tidyr", "data.table")
+                     "svglite", "tidyr", "data.table",
+                     "colorspace", "cowplot")
 
 # If package not presented, install with BiocManager 
 for(pack in packages_to_load){
@@ -1170,7 +1171,7 @@ bacterial_endpoint <- function(data, visual = F){ # Returns timepoint, where we 
     stop_assay <- paste("T", timepoints[1], "_T", timepoints[BP_endpoint], sep = "")
   }
   
-  # For visualization, we need back the index and not the stop_assay
+  # For visualization, we return the index and not the stop_assay
   if (visual == T){
     if (is.na(BP_endpoint)){
       BP_endpoint <- length(timepoints)

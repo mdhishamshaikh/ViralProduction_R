@@ -13,7 +13,7 @@ cr_df<- read.csv("NJ2020.csv")
 cr_df<- cr_df %>% select(c("Location", "Expt_No", "Sample_Type", "Timepoint",
                   "Replicate", "c_Bacteria", "c_Viruses", "VBR"))
 
-abundance<- read.csv("C:/Users/hisham.shaikh/OneDrive - UGent/Projects/Microbial_Abundances/Microbial_Abundances_NJ2020_PE477_PE486/Microbial Abundances/Microbial_Abundances/Microbial_Abundances/NJ2020_abundance.csv")
+abundance<- read.csv('NJ2020_abundance.csv')
 
 abundance1<- abundance %>%
   select(Location, Expt_No, Total_Bacteria, Total_Viruses, VBR) %>%
@@ -56,7 +56,6 @@ for (loc in unique(cr_df$Location)){
         for(time in unique(cr_df$Timepoint)){
           
           cr<-  (df10 %>% filter(Timepoint == time))$BV/(df10 %>% filter(Timepoint == 0))$BV
-          print(cr)
           cr_value<- c(loc, expt, type, rep, time, cr)
           
           cr_list[[length(cr_list)+1]]<- cr_value

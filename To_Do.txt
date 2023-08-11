@@ -15,7 +15,7 @@ Week 2:
 
 	Overview of data to start with: Timepoint_SLOU & 0_vp_source.R/overview_plots_tp_avg
 
-	Collision rates visualization: Dia 37B, bep_cr_plotB & bacterial_enpoint_visuals.R
+	Collision rates visualization: Dia 37B, bep_cr_plot/B & 13_contact_rates.R
 
 
 3. Analysing viral production results
