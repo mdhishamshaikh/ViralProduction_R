@@ -39,7 +39,7 @@ Analysing of VP_results:
 	2. Lytic viral production
 	3. Percentage lytic cells
 	4. Lysogenic viral production
-	5. Percentage lysogeny
+	5. Percentage lysogenic cells
 	6. Lysis rate bacteria (lytic and lysogenic phase)
 	7. Percentage bacterial production lysed
 	8. Percentage bacterial loss per day

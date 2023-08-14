@@ -10,6 +10,9 @@ names(data)[names(data) == 'Expt_No'] <- 'Station_Number' # Changing column name
 data_all <- read.csv('NJ2020.csv')
 names(data_all)[names(data_all) == 'Expt_No'] <- 'Station_Number'
 
+df_abundance <- read.csv('NJ2020_abundance.csv') # Consist of the abundances of all populations in original seawater sample for each experiment
+names(df_abundance)[names(df_abundance) == 'Expt_No'] <- 'Station_Number'
+
 ## 3. Calculating viral production
 # Main function for viral production calculation
 # Different variables are presented to adjust for the desired output
@@ -71,6 +74,13 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     )
   }
   
+  # Arrange output dataframe
+  output_df <- output_df %>%
+    arrange('Location', 'Station_Number', 'Depth',
+            factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T9", "T0_T12", "T0_T24")))
+  
   # Write results in csv. If no csv is wanted, set write_csv to F
   if (write_csv == T){
     write.csv(output_df, file.path(res_path, 'vp_calc_ALL.csv'), row.names = F)
@@ -118,6 +128,13 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
       )
     }
     
+    # Arrange output dataframe
+    output_df_SR <- output_df_SR %>%
+      arrange('Location', 'Station_Number', 'Depth',
+              factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T9", "T0_T12", "T0_T24")))
+    
     # Write results in csv. If no csv is wanted, set write_csv to F
     if (write_csv == T){
       write.csv(output_df_SR, file.path(res_path, 'vp_calc_SR.csv'), row.names = F)
@@ -156,6 +173,13 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
         full_join(res)
     }
     
+    # Arrange output dataframe
+    output_df_bp <- output_df_bp %>%
+      arrange('Location', 'Station_Number', 'Depth',
+              factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
+              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T9", "T0_T12", "T0_T24")))
+    
     # Write results in csv. If no csv is wanted, set write_csv to F
     if (write_csv == T){
       write.csv(output_df_bp, file.path(res_path, 'vp_calc_BP.csv'), row.names = F)
@@ -167,5 +191,11 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
 
 # Running calc_VP function
 print(names(calculate_VP_list)) # Order of different methods possible to calculate viral production
-vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
+#vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
 vp_calc_NJ2020 <- calc_VP(data_all, output_dir = 'vp_calc_NJ2020')
+
+## 4. Analyzing results
+# Three different input dataframes: 
+# 1. NJ2020: output of Step 1 => viral and bacterial abundances from flow cytometer
+# 2. vp_calc_NJ2020: output of Step 2 => viral production calculations based on different methods => VP = [VLP per mL per h] (VLP = virus-like particles)
+

@@ -277,7 +277,7 @@ collision_rates_plot <- function(data, abundance){
           axis.text = element_text(size = 10)) + 
     
     labs(title = paste0(unique(df_CR_plot$Location), '_Collision_Rates'),
-         subtitle = 'Difference in collision rates between VP and VPC samples over time',
+         subtitle = 'Difference in collision rates between VP and VPC samples over time\nPercentage represents decrease of collision rates in T0_sample compared to original seawater sample (WW_sample)',
          x = 'Sampling Timepoints\n (in hours)',
          y = 'Mean Relative Collision Rate') 
   
