@@ -15,8 +15,7 @@ if (!file.exists(folder_name)){ # Check if folder not exists already
 overview_plot_counts_over_time <- function(data){
   
   # Add tag column to data that represents the unique ID (Location_Station_Depth)
-  data_tag <- read.csv(data) %>%
-    rename(Station_Number = Expt_No) %>%
+  data_tag <- data %>%
     unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
   
   # Create dataframe for plot: averaging the sample replicates, calculate the differences by subtraction and add timepoints
@@ -111,7 +110,7 @@ overview_plot_counts_over_time <- function(data){
 }
 
 #overview_plot_counts_over_time('NJ1.csv')
-overview_plot_counts_over_time('NJ2020.csv')
+overview_plot_counts_over_time(data_all)
 
 # 3.2 Difference in collision rates between VP and VPC samples over time
 # To determine the collision rates: output csv.file from Step 1 + raw abundances in seawater sample (WW)
@@ -127,12 +126,11 @@ draw_key_cust <- function(data, params, size) {
 collision_rates_plot <- function(data, abundance){
   
   # Read in both files
-  df_contact_rates <- read.csv(data) %>%
-    rename(Station_Number = Expt_No) %>%
+  df_contact_rates <- data %>%
     select(c("Location", "Station_Number", "Sample_Type", "Timepoint", "Replicate", "c_Bacteria", "c_Viruses", "VBR"))
   
-  df_abundance <- read.csv(abundance) %>% # Consist of the abundances of all populations in original seawater sample for each experiment
-    rename(Station_Number = Expt_No, c_Bacteria = Total_Bacteria, c_Viruses = Total_Viruses) %>%
+  df_abundance <- abundance %>% # Consist of the abundances of all populations in original seawater sample for each experiment
+    rename(c_Bacteria = Total_Bacteria, c_Viruses = Total_Viruses) %>%
     select(c('Location', 'Station_Number', 'c_Bacteria', 'c_Viruses', 'VBR')) 
   
   # Abundance file consists of just one abundance per experiment => in flow cytometry, we analysed three sample types with each three replicates
@@ -180,9 +178,8 @@ collision_rates_plot <- function(data, abundance){
     group_by(Location, Station_Number, Sample_Type, Timepoint) %>%
     summarise(CR_Mean = mean(Collision_Rate), CR_SE = plotrix::std.error(Collision_Rate)) %>% # Average over the replicates
     arrange('Location', 'Station_Number',
-            factor(Timepoint, levels = c("-3", "0", "3", "6", "9", "12", "24"))) 
-  
-  
+            factor(Timepoint, levels = c("-3", "0", "3", "6", "17", "20", "24"))) 
+
   # Calculate the percentage of decrease of CR between seawater sample (WW) and T0
   decrease_res <- list()
   
@@ -207,7 +204,7 @@ collision_rates_plot <- function(data, abundance){
   df_CR_plot <- df_CR %>%
     filter(Timepoint != '-3')
   
-  # Calculate the differnce in collision rate between VP and VPC samples
+  # Calculate the difference in collision rate between VP and VPC samples
   df_CR_plot_diff <- df_CR_plot %>%
     select(-CR_SE) %>%
     pivot_wider(names_from = Sample_Type,
@@ -215,8 +212,7 @@ collision_rates_plot <- function(data, abundance){
     mutate(CR_Diff = VP - VPC)
   
   # Calculate the bacterial endpoint to show on plot
-  data_bp <- read.csv(data) %>%
-    rename(Station_Number = Expt_No) %>% 
+  data_bp <- data %>% 
     unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
   bp_res <- list()
   timepoints <- unique(data_bp$Timepoint)
@@ -229,6 +225,7 @@ collision_rates_plot <- function(data, abundance){
     timepoint <- timepoints[bp]
     bp_res[[length(bp_res)+1]] <- timepoint
   }
+  
   bp_df <- data.frame(t(as.data.frame(bp_res)))
   colnames(bp_df) <- c('Bacterial_Endpoint')
   rownames(bp_df) <- c(1:7)
@@ -285,7 +282,7 @@ collision_rates_plot <- function(data, abundance){
   ggsave(paste0('Figures/', unique(df_CR_plot$Location), '_Collision_Rates.svg'), plot = n, width = 15, height = 8)
 }
 
-collision_rates_plot('NJ2020.csv', 'NJ2020_abundance.csv')
+collision_rates_plot(data_all, df_abundance)
 
 
 

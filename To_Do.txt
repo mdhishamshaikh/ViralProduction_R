@@ -46,5 +46,5 @@ Analysing of VP_results:
 	9. C, N & P release for both bacteria and viruses: search average values in literature
 	10. Viral turnover rate
 
-	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below and above for low and high burst size. If nothing is found: 	10, 25, 40 as burst size.
+	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below and above for low and high burst size. If nothing is found: 10, 25, 40 as burst size.
 

@@ -7,11 +7,15 @@ source("viral_production_step2_source.R")
 data <- read.csv('NJ1.csv')
 names(data)[names(data) == 'Expt_No'] <- 'Station_Number' # Changing column name to something more appropriate => you can also use index of column (5)
 
-data_all <- read.csv('NJ2020.csv')
-names(data_all)[names(data_all) == 'Expt_No'] <- 'Station_Number'
+data_all <- read.csv('NJ2020.csv') %>%
+  rename(Station_Number = Expt_No) %>%
+  mutate_at(c('Timepoint'), as.numeric) %>%
+  mutate(Timepoint = case_when(Timepoint == 9 ~ 17,
+                               Timepoint == 12 ~ 20,
+                               TRUE ~ Timepoint))
 
-df_abundance <- read.csv('NJ2020_abundance.csv') # Consist of the abundances of all populations in original seawater sample for each experiment
-names(df_abundance)[names(df_abundance) == 'Expt_No'] <- 'Station_Number'
+df_abundance <- read.csv('NJ2020_abundance.csv') %>% # Consist of the abundances of all populations in original seawater sample for each experiment
+  rename(Station_Number = Expt_No)
 
 ## 3. Calculating viral production
 # Main function for viral production calculation
@@ -79,7 +83,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T9", "T0_T12", "T0_T24")))
+            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24")))
   
   # Write results in csv. If no csv is wanted, set write_csv to F
   if (write_csv == T){
@@ -133,7 +137,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
               factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T9", "T0_T12", "T0_T24")))
+              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24")))
     
     # Write results in csv. If no csv is wanted, set write_csv to F
     if (write_csv == T){
@@ -178,7 +182,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
               factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T9", "T0_T12", "T0_T24")))
+              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24")))
     
     # Write results in csv. If no csv is wanted, set write_csv to F
     if (write_csv == T){
@@ -198,4 +202,115 @@ vp_calc_NJ2020 <- calc_VP(data_all, output_dir = 'vp_calc_NJ2020')
 # Three different input dataframes: 
 # 1. NJ2020: output of Step 1 => viral and bacterial abundances from flow cytometer
 # 2. vp_calc_NJ2020: output of Step 2 => viral production calculations based on different methods => VP = [VLP per mL per h] (VLP = virus-like particles)
+# 3. NJ2020_abundance: consists of the viral and bacterial babundances of the original sample (seawater, WW_sample)
+analyze_vpres <- function(vpres, data, abundance){
+  
+  # 1. Correct viral production: VP_values are based of T0 which consists of 40% bacteria, ideally this should be 100% like in the original sample
+  # Current values represent thus 40%, factorize so that they represent 100%. Also, with propagation of error, take the SE into account
+  vpres_corrected <- vpres %>%
+    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) %>%
+    mutate(c_VP = VP / 0.4,
+           c_VP_SE = abs(c_VP) * (VP_SE / abs(VP))) %>%
+    filter(Sample_Type != 'VPC') %>% # Lytic fase = VP_samples; Lysogenic fase = Diff_Samples
+    arrange('tag', 'Sample_Type', 'Population', 'Time_Range', 'VP_Type')
+  
+  # 2. Lytic and lysogenic viral production: c_VP corresponds to the amount of virus-like particles (VLP) per mL per hour in the given Time_Range
+  # For each Time_Range, the percentage of infected cells will be calculated. VP_samples represent the lytic fase (% lytically infected cells), Diff_samples represent the lysogenic fase (% lysogenic cells)
+  # Therefore, the burst size is needed: Burst size = the number of viral particles released from an infected host cell during the lytic cycle of viral replication => how many new viral particles will be released when cell bursts
+  # A higher burst size will result in a lower percentage infected cells since more phages burst
+  
+  # Extract average bacterial abundance at T0 from original data
+  B0_df <- df_AVG(data) %>% # Average data over replicates and add tag => necessary to get the bacterial abundance at T0 for each sample
+    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) %>%
+    filter(Population == 'c_Bacteria', Timepoint == 0)
+  
+  # Add bacterial abundance at timepoint 0 as column B0 to dataframe
+  perc_df <- vpres_corrected %>%
+    left_join(select(B0_df, tag, Sample_Type, Mean), by = c('tag', 'Sample_Type')) %>%
+    rename(Bac_abun_T0 = Mean) %>%
+    distinct() # Remove duplicate rows (created by left join)
+  
+  # Calculate percentage lytic and lysogenic cells for each burst size
+  BS <- c(10,25,40) # Quick search online only returned burst sizes of laboratory environment => 25 as mid burst size and 15 below and above for range of three different burst sizes
+  
+  for (bs in BS){
+    col_name <- paste0('%Infected_Cells_BS_', bs)
+    perc_df[[col_name]] <- perc_df$c_VP * (100 / (perc_df$Bac_abun_T0 * bs))
+  }
+  
+  # 3. Lysis & Lysogenic rate of bacteria:
+  # Lysis rate = rate at which bacterial cells rupture; Lysogenic rate = rate at which bacterial cells become lysogenized
+  # First, calculate the lytic and lysogenic viral production in the original sample: VP * (B_OS / B_0) with B_OS the bacterial abundance in the original sample
+  
+  rate_df <- perc_df %>%
+    left_join(select(abundance, Station_Number, Total_Bacteria), by = c('Station_Number')) %>%
+    rename(Bac_abun_OS = Total_Bacteria) %>%
+    mutate(c_VP_OS = c_VP * (Bac_abun_OS / Bac_abun_T0))
+  
+  # Calculate the rate for each burst size
+  for (bs in BS){
+    col_name <- paste0('Rate_BS_', bs)
+    rate_df[[col_name]] <- rate_df$c_VP_OS / bs
+  }
+  
+  # 4. Percentage of bacterial production lysed and bacterial loss per day: 
+  # Bacterial production lysed = quantity of bacterial biomass or production that undergoes lysis due to viral infection
+  # Bacterial loss per day = rate at which bacteria are removed due to viral lysis
+  BSP_OS = 0.0027e6 # From DEMO VIPCAL; Bacterial secondary production in original sample
+  
+  bacterial_df <- rate_df %>%
+    mutate('%BP_Lysed_BS_10' = ifelse(Sample_Type == 'Diff', NA, Rate_BS_10 / BSP_OS),
+           '%BP_Lysed_BS_25' = ifelse(Sample_Type == 'Diff', NA,Rate_BS_25 / BSP_OS),
+           '%BP_Lysed_BS_40' = ifelse(Sample_Type == 'Diff', NA,Rate_BS_40 / BSP_OS),
+           '%B_Loss_BS_10' = ifelse(Sample_Type == 'Diff', NA,((Rate_BS_10 * 100) / Bac_abun_OS) * 24),
+           '%B_Loss_BS_25' = ifelse(Sample_Type == 'Diff', NA,((Rate_BS_25 * 100) / Bac_abun_OS) * 24),
+           '%B_Loss_BS_40' = ifelse(Sample_Type == 'Diff', NA,((Rate_BS_40 * 100) / Bac_abun_OS) * 24))
+  
+  # 5. Viral turnover time: Time it takes for new viral particles to be produced
+  # Just like the bacterial abundance in the original sample, need of adding the viral abundance of the original sample
+  viral_abundance <- df_abundance %>%
+    rename(c_Bacteria = Total_Bacteria, c_Viruses = Total_Viruses, c_V1 = V1, c_V2 = V2, c_V3 = V3) %>%
+    pivot_longer(cols = c(7:13), names_to = 'Population', values_to = 'Abundance')
+  
+  viral_df <- bacterial_df %>%
+    left_join(select(viral_abundance, Station_Number, Population, Abundance), by = c('Station_Number', 'Population')) %>%
+    rename(Viral_abun_OS = Abundance) %>%
+    mutate(Viral_Turnover_Time = c_VP_OS / Viral_abun_OS)
+  
+  # 6. Nutrient release in bacteria and viruses for C, N and P: 
+  # In literature, search for average content of these nutrients in bacteria and viruses
+  
+  # Data for bacteria from fjorden in Norway just behind North Sea (October 1993) => native aquatic sample => native bacteria
+  # 1 fg = 10-15 g
+  C_bac <- 19e-15
+  N_bac <- 5e-15
+  P_bac <- 0.8e-15
+  
+  # Based on sequence information of bacteriophages => elemental composition of Synechococcus ssp (only marine virus in article)
+  # Number of atoms are given in article => transform to amount of gram
+  C_vir <- (1664612 / 6.022e23) * 12.01 # ([atoms] / [atoms/mol]) * [g/mol]
+  N_vir <- (563058 / 6.022e23) * 14.01
+  P_vir <- (92428 / 6.022e23) * 30.97
+  
+  nutrient_df <- viral_df %>%
+    mutate(B_DOC_BS_10 = Rate_BS_10 * C_bac,
+           B_DOC_BS_25 = Rate_BS_25 * C_bac,
+           B_DOC_BS_40 = Rate_BS_40 * C_bac,
+           B_DON_BS_10 = Rate_BS_10 * N_bac,
+           B_DON_BS_25 = Rate_BS_25 * N_bac,
+           B_DON_BS_40 = Rate_BS_40 * N_bac,
+           B_DOP_BS_10 = Rate_BS_10 * P_bac,
+           B_DOP_BS_25 = Rate_BS_25 * P_bac,
+           B_DOP_BS_40 = Rate_BS_40 * P_bac,
+           V_DOC = Viral_Turnover_Time * C_vir,
+           V_DON = Viral_Turnover_Time * N_vir,
+           V_DOP = Viral_Turnover_Time * P_vir)
+
+  return(nutrient_df)
+}
+
+analyze_VP_NJ2020 <- analyze_vpres(vp_calc_ALL, data_all, df_abundance)
+
+
+
 

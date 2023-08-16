@@ -544,9 +544,9 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
               
               # Check if number of peaks and valleys correspond
               if (identical(length(p), length(v))){
-                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+                #print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
               } else {
-                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+                #print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
               }
               
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
