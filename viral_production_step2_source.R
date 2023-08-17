@@ -84,8 +84,8 @@ tp <- function(DF){
 df_SR <- function(data, keep_0.22 = F, add_tp = T){
   
   DF <- data %>%
-    select(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')) %>%
+    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
     gather(7:13, key = 'Population', value = 'Count') %>% # Taking index of columns instead of name, since we select columns in first step => order will always be this one
     mutate(Microbe = if_else(Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>% # Adding an extra column defining if replicate is from bacterial or viral origin
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type','Replicate','Population', as.numeric(Timepoint)) # Reorder the rows by the values of the selected columns
@@ -128,8 +128,8 @@ df_AVG <- function(data, add_tp = T){
   
   # Calculating number, mean of replicates and standard error 
   DF <- DF %>%
-    select(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')) %>%
+    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
     gather(7:13, key = 'Population', value = 'Count') %>%
     group_by(Location, Station_Number, Depth, Sample_Type, Timepoint, Population) %>%
     summarise(n = n(), Mean = mean(Count), SE = plotrix::std.error(Count)) # plotrix::std.error calculates the standard error of the mean
@@ -318,10 +318,13 @@ slope_LM_allpoints <- function(DF_SR){ # Takes separate replicate dataframe as i
               # Coefficient of Timepoint represents the average change in Count for each unit increase in Timepoint => if this coefficient is significant (pval < 0.05) => linear relation = Count significantly changes over Timepoint
               # Summary will provide other information such as standard errors, t- and p-values
               
+              # Add column with the absolute values: Take the VP_value and multiply with difference in time: T0_T3 = 3-0 = 3; T0_T24 = 24-0 = 24 
+              abs_vp <- lm$coefficients[2] * (DF2$Timepoint[length(DF2$Timepoint)]) # First timepoint is always 0
+              
               # Save the coefficient and its standard error together with the multiple R-squared value which is a measure of how well the linear regression model fits the data
               # A higher R-squared value indicates a better fit of the model to the data => the independent variable accounts for a larger proportion of the variability in the data
               # P-value = significance individual variable; R-squared = overall goodness-of-fit of linear model
-              res <- c(location, station, depth, time, virus, sample, lm$coefficients[c(2,4)], lm$r.squared)
+              res <- c(location, station, depth, time, virus, sample, lm$coefficients[2], abs_vp, lm$coefficients[4], lm$r.squared)
               lm_res[[length(lm_res)+1]] <- res
             }
           }
@@ -331,10 +334,10 @@ slope_LM_allpoints <- function(DF_SR){ # Takes separate replicate dataframe as i
   }
   # Changing nested list into dataframe
   S_LM_allpoints <- data.frame(t(sapply(lm_res, c))) # sapply will return a column vector of each nested list of lm_res, transposing this and setting to dataframe for result
-  colnames(S_LM_allpoints) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_allpoints) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_allpoints[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_allpoints[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_allpoints[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_allpoints[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_allpoints)
 }
@@ -360,7 +363,8 @@ slope_LM_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, w
                 
                 # Fit linear model
                 lm <- summary(lm(data = DF2, Count ~ as.numeric(Timepoint)))
-                res <- c(location, station, depth, time, virus, sample, rep, lm$coefficients[c(2,4)], lm$r.squared)
+                abs_vp <- lm$coefficients[2] * (DF2$Timepoint[length(DF2$Timepoint)])
+                res <- c(location, station, depth, time, virus, sample, rep, lm$coefficients[2], abs_vp, lm$coefficients[4], lm$r.squared)
                 lm_res[[length(lm_res)+1]] <- res
               }
             }
@@ -371,10 +375,10 @@ slope_LM_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, w
   }
   # Changing nested list into dataframe
   S_LM_rep <- data.frame(t(sapply(lm_res, c))) 
-  colnames(S_LM_rep) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_rep) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_rep[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_rep[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_rep[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_rep[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_rep)
 }
@@ -399,7 +403,8 @@ slope_LM_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
               
               # Fit linear model
               lm <- summary(lm(data = DF2, Mean ~ as.numeric(Timepoint)))
-              res <- c(location, station, depth, time, virus, sample, lm$coefficients[c(2,4)], lm$r.squared)
+              abs_vp <- lm$coefficients[2] * (DF2$Timepoint[length(DF2$Timepoint)])
+              res <- c(location, station, depth, time, virus, sample, lm$coefficients[2], abs_vp, lm$coefficients[4], lm$r.squared)
               lm_res[[length(lm_res)+1]] <- res
             }
           }
@@ -409,10 +414,10 @@ slope_LM_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
   }
   # Changing nested list into dataframe
   S_LM_avg <- data.frame(t(sapply(lm_res, c))) 
-  colnames(S_LM_avg) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_avg) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_avg[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_avg[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_avg)
 }  
@@ -440,7 +445,8 @@ slope_LM_avg_lmer <- function(DF_SR){# Takes separate replicate dataframe as inp
             # Fit linear model
             for (sample in unique(DF3$Sample_Type)){
               lm <- summary(lm(data = DF3[DF3$Sample_Type == sample, ], Mean ~ as.numeric(Timepoint)))
-              res <- c(location, station, depth, time, virus, sample, lm$coefficients[c(2,4)], lm$r.squared)
+              abs_vp <- lm$coefficients[2] * (DF3$Timepoint[length(DF3$Timepoint)])
+              res <- c(location, station, depth, time, virus, sample, lm$coefficients[2], abs_vp, lm$coefficients[4], lm$r.squared)
               lm_res[[length(lm_res)+1]] <- res
             }
           }
@@ -450,10 +456,10 @@ slope_LM_avg_lmer <- function(DF_SR){# Takes separate replicate dataframe as inp
   }
   # Changing nested list into dataframe
   S_LM_avg_diff_lmer <- data.frame(t(sapply(lm_res, c))) 
-  colnames(S_LM_avg_diff_lmer) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE', 'VP_R_Squared')
+  colnames(S_LM_avg_diff_lmer) <- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')
   
   # Results of linear model need to be changed to numeric instead of character
-  S_LM_avg_diff_lmer[, c('VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg_diff_lmer[, c('VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
+  S_LM_avg_diff_lmer[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')] <- lapply(S_LM_avg_diff_lmer[, c('VP', 'abs_VP', 'VP_SE', 'VP_R_Squared')], as.numeric)
   
   return(S_LM_avg_diff_lmer)
 }
@@ -494,15 +500,21 @@ VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, wit
                 # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
                 if (length(p) == 0){
                   vp <- 0 # No viral production if no peaks => constant viral abundance
+                  abs_vp <- 0 
                 } else {
                   total_vp <- 0
+                  total_abs_vp <- 0
                   for (i in 1:length(p)){ # Iterate through the peaks and calculate the viral production of peak and corresponding value
                     vp_i <- (DF2$Count[p[i]] - DF2$Count[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
                     total_vp <- total_vp + vp_i
+                    
+                    vp_j <- DF2$Count[p[i]] - DF2$Count[v[i]]
+                    total_abs_vp <- total_abs_vp + vp_j
                   }
-                  vp <- total_vp / length(p) # Average of increments
+                  vp <- total_vp / length(p) # Average of increments, viral production rate over Time_Range
+                  abs_vp <- total_abs_vp # Absolute viral production at this time
                 }
-                res <- c(location, station, depth, time, virus, sample, rep, vp)
+                res <- c(location, station, depth, time, virus, sample, rep, vp, abs_vp)
                 vipcal_res[[length(vipcal_res)+1]] <- res
               }
             }
@@ -513,8 +525,8 @@ VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, wit
   }
   # Changing nested list into dataframe
   VPCL_sr <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_sr)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP')
-  VPCL_sr$VP <- as.numeric(VPCL_sr$VP) # Transform viral production to a numeric value instead a character
+  colnames(VPCL_sr)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'Replicate', 'VP', 'abs_VP')
+  VPCL_sr[, c('VP', 'abs_VP')] <- lapply(VPCL_sr[, c('VP', 'abs_VP')], as.numeric)
   
   return(VPCL_sr)
 }
@@ -552,16 +564,22 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
               if (length(p) == 0){
-                vp <- 0 
+                vp <- 0
+                abs_vp <- 0
               } else {
                 total_vp <- 0
+                total_abs_vp <- 0
                 for (i in 1:length(p)){ 
                   vp_i <- (DF2$Mean[p[i]] - DF2$Mean[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
                   total_vp <- total_vp + vp_i
+                  
+                  vp_j <- DF2$Mean[p[i]] - DF2$Mean[v[i]]
+                  total_abs_vp <- total_abs_vp + vp_j
                 }
                 vp <- total_vp / length(p)
+                abs_vp <- total_abs_vp
               }
-              res <- c(location, station, depth, time, virus, sample, vp)
+              res <- c(location, station, depth, time, virus, sample, vp, abs_vp)
               vipcal_res[[length(vipcal_res)+1]] <- res
             }
           }
@@ -571,8 +589,8 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
   }
   # Changing nested list into dataframe
   VPCL_avg <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
-  VPCL_avg$VP <- as.numeric(VPCL_avg$VP)
+  colnames(VPCL_avg)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP')
+  VPCL_avg[, c('VP', 'abs_VP')] <- lapply(VPCL_avg[, c('VP', 'abs_VP')], as.numeric)
   
   return(VPCL_avg)
 }
@@ -614,21 +632,27 @@ VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
               # Also calculating standard error on the viral production calculation
               if (length(p) == 0){
                 vp <- 0 
+                abs_vp <- 0
                 se <- 0
               } else {
                 total_vp <- 0
+                total_abs_vp <- 0
                 total_se <- 0
                 for (i in 1:length(p)){ 
                   vp_i <- (DF2$Mean[p[i]] - DF2$Mean[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
                   total_vp <- total_vp + vp_i
                   
+                  vp_j <- DF2$Mean[p[i]] - DF2$Mean[v[i]]
+                  total_abs_vp <- total_abs_vp + vp_j
+                  
                   se_i <- (DF2$SE[p[i]] + DF2$SE[v[i]]) / (DF2$Timepoint[p[i]] - DF2$Timepoint[v[i]])
                   total_se <- total_se + se_i
                 }
                 vp <- total_vp / length(p)
+                abs_vp <- total_abs_vp
                 se <- total_se / length(p)
               }
-              res <- c(location, station, depth, time, virus, sample, vp, se)
+              res <- c(location, station, depth, time, virus, sample, vp, abs_vp, se)
               vipcal_res[[length(vipcal_res)+1]] <- res
             }
           }
@@ -638,8 +662,8 @@ VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
   }
   # Changing nested list into dataframe
   VPCL_avg_se <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg_se)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
-  VPCL_avg_se[, c('VP', 'VP_SE')] <- lapply(VPCL_avg_se[, c('VP', 'VP_SE')], as.numeric)
+  colnames(VPCL_avg_se)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP', 'VP_SE')
+  VPCL_avg_se[, c('VP', 'abs_VP', 'VP_SE')] <- lapply(VPCL_avg_se[, c('VP', 'abs_VP', 'VP_SE')], as.numeric)
   
   return(VPCL_avg_se)
 }
@@ -684,15 +708,21 @@ VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as inpu
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
               if (length(p) == 0){
                 vp <- 0 
+                abs_vp <- 0
               } else {
                 total_vp <- 0
+                total_abs_vp <- 0
                 for (i in 1:length(p)){ 
                   vp_i <- (DF4$Mean[p[i]] - DF4$Mean[v[i]]) / (DF4$Timepoint[p[i]] - DF4$Timepoint[v[i]])
                   total_vp <- total_vp + vp_i
+                  
+                  vp_j <- DF4$Mean[p[i]] - DF4$Mean[v[i]]
+                  total_abs_vp <- total_abs_vp + vp_j
                 }
                 vp <- total_vp / length(p)
+                abs_vp <- total_abs_vp
               }
-              res <- c(location, station, depth, time, virus, sample, vp)
+              res <- c(location, station, depth, time, virus, sample, vp, abs_vp)
               vipcal_res[[length(vipcal_res)+1]] <- res
             }
           }
@@ -702,8 +732,8 @@ VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as inpu
   }
   # Changing nested list into dataframe
   VPCL_avg_lmer <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg_lmer)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP')
-  VPCL_avg_lmer$VP <- as.numeric(VPCL_avg_lmer$VP)
+  colnames(VPCL_avg_lmer)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP')
+  VPCL_avg_lmer[, c('VP', 'abs_VP')] <- lapply(VPCL_avg_lmer[, c('VP', 'abs_VP')], as.numeric)
   
   return(VPCL_avg_lmer)
 }
@@ -750,22 +780,28 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
               # Also calculating standard error on the viral production calculation
               if (length(p) == 0){
-                vp <- 0 
+                vp <- 0
+                abs_vp <- 0
                 se <- 0
               } else {
                 total_vp <- 0
+                total_abs_vp <- 0
                 total_se <- 0
                 for (i in 1:length(p)){ 
                   vp_i <- (DF4$Mean[p[i]] - DF4$Mean[v[i]]) / (DF4$Timepoint[p[i]] - DF4$Timepoint[v[i]])
                   total_vp <- total_vp + vp_i
                   
+                  vp_j <- DF4$Mean[p[i]] - DF4$Mean[v[i]]
+                  total_abs_vp <- total_abs_vp + vp_j
+                  
                   se_i <- (DF4$SE[p[i]] + DF4$SE[v[i]]) / (DF4$Timepoint[p[i]] - DF4$Timepoint[v[i]])
                   total_se <- total_se + se_i
                 }
                 vp <- total_vp / length(p)
+                abs_vp <- total_abs_vp
                 se <- total_se / length(p)
               }
-              res <- c(location, station, depth, time, virus, sample, vp, se)
+              res <- c(location, station, depth, time, virus, sample, vp, abs_vp, se)
               vipcal_res[[length(vipcal_res)+1]] <- res
             }
           }
@@ -775,8 +811,8 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
   }
   # Changing nested list into dataframe
   VPCL_avg_lmer_se <- data.frame(t(sapply(vipcal_res, c)))
-  colnames(VPCL_avg_lmer_se)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'VP_SE')
-  VPCL_avg_lmer_se[, c('VP', 'VP_SE')] <- lapply(VPCL_avg_lmer_se[, c('VP', 'VP_SE')], as.numeric)
+  colnames(VPCL_avg_lmer_se)<- c('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP', 'VP_SE')
+  VPCL_avg_lmer_se[, c('VP', 'abs_VP', 'VP_SE')] <- lapply(VPCL_avg_lmer_se[, c('VP', 'abs_VP', 'VP_SE')], as.numeric)
   
   return(VPCL_avg_lmer_se)
 }
@@ -795,12 +831,14 @@ calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of outp
         group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
         summarize(
           VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+          abs_VP = sum(abs_VP[Sample_Type == "VPC"]) - sum(abs_VP[Sample_Type == "VP"]),
           Sample_Type = "Diff")
     }else if (SE == T){
       diff <- DF %>%
         group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
         summarize(
           VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+          abs_VP = sum(abs_VP[Sample_Type == "VPC"]) - sum(abs_VP[Sample_Type == "VP"]),
           VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
           Sample_Type = "Diff")
     }
@@ -809,6 +847,7 @@ calc_DIFF <- function(DF, VIPCAL = F, SE = F){ # Input dataframe consist of outp
       group_by(Location, Station_Number, Depth, Time_Range, Population) %>%
       summarize(
         VP = sum(VP[Sample_Type == "VPC"]) - sum(VP[Sample_Type == "VP"]), # Calculate viral production for difference samples
+        abs_VP = sum(abs_VP[Sample_Type == "VPC"]) - sum(abs_VP[Sample_Type == "VP"]),
         VP_SE = sum(VP_SE[Sample_Type == "VPC"]) + sum(VP_SE[Sample_Type == "VP"]), # Calculate the standard error on the viral production
         VP_R_Squared = NA,
         Sample_Type = "Diff")
@@ -839,8 +878,7 @@ LM_1 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% # Added cause order for diff samples was gone (T17, T20, T24, T3, T6)
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
     mutate(VP_Type = 'LM_AP')
   
   return(DF_LM1)
@@ -869,13 +907,12 @@ LM_2 <- function(data, avg = T){
   } else if (avg == T){
     DF_LM2 <- DF_VP %>%
       group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
-      summarise(VP_mean = mean(VP), VP_SE = plotrix::std.error(VP), VP_R_Squared = mean(VP_R_Squared)) %>%
-      rename(VP = VP_mean) %>% # Necessary to name VP_mean in previous step so that SE is calculated correctly
+      summarise(VP_mean = mean(VP), abs_VP_mean = mean(abs_VP), VP_SE = plotrix::std.error(VP), VP_R_Squared = mean(VP_R_Squared)) %>%
+      rename(VP = VP_mean, abs_VP = abs_VP_mean) %>% # Necessary to name VP_mean in previous step so that SE is calculated correctly
       calc_DIFF() %>%
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
       mutate(VP_Type = 'LM_SR_AVG')
   }
   
@@ -898,8 +935,7 @@ LM_3 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'LM_AR')
   
   return(DF_LM3)
@@ -919,8 +955,7 @@ LM_4 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'LM_AR_DIFF')
   
   return(DF_LM4)
@@ -940,8 +975,7 @@ LM_5 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'LM_AR_DIFF_LMER')
   
   return(DF_LM5)
@@ -968,13 +1002,12 @@ VPCL_1 <- function(data, avg = T){
   }else if (avg == T){
     DF_VPCL1 <- DF_VP %>%
       group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
-      summarise(VP_mean = mean(VP), VP_SE = plotrix::std.error(VP)) %>%
-      rename(VP = VP_mean) %>% # Necessary to name VP_mean in previous step so that SE is calculated correctly
+      summarise(VP_mean = mean(VP), abs_VP_mean = mean(abs_VP), VP_SE = plotrix::std.error(VP)) %>%
+      rename(VP = VP_mean, abs_VP = abs_VP_mean) %>% # Necessary to name VP_mean in previous step so that SE is calculated correctly
       calc_DIFF(VIPCAL = T) %>%
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-              factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+              factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
       mutate(VP_Type = 'VPCL_SR_AVG')
   }
   
@@ -997,8 +1030,7 @@ VPCL_2 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'VPCL_AR')
   
   return(VPCL2)
@@ -1020,8 +1052,7 @@ VPCL_3 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'VPCL_AR_SE')
   
   return(VPCL3)
@@ -1041,8 +1072,7 @@ VPCL_4 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'VPCL_AR_DIFF')
   
   return(VPCL4)
@@ -1062,8 +1092,7 @@ VPCL_5 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'VPCL_AR_DIFF_SE')
   
   return(VPCL5)
@@ -1083,8 +1112,7 @@ VPCL_6 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'VPCL_AR_DIFF_LMER')
   
   return(VPCL6)
@@ -1104,8 +1132,7 @@ VPCL_7 <- function(data){
     group_by(Location, Station_Number, Depth, Time_Range, Population, Sample_Type) %>%
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3')),
-            factor(Time_Range, levels = c("T0_T3", "T0_T6", "T0_T17", "T0_T20", "T0_T24"))) %>% 
+            factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
     mutate(VP_Type = 'VPCL_AR_DIFF_LMER_SE')
   
   return(VPCL7)

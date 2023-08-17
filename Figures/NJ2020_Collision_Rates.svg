@@ -59,8 +59,8 @@
 <polygon points='233.93,185.74 236.56,190.30 231.29,190.30 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='269.78,175.17 273.69,175.17 273.69,171.26 269.78,171.26 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='271.74,186.50 274.37,191.06 269.10,191.06 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='158.31' y='83.89' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 97.85 %</text>
-<text x='158.31' y='96.18' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 98.24 %</text>
+<text x='148.86' y='83.89' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 97.85 %</text>
+<text x='148.86' y='96.18' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 98.24 %</text>
 <polyline points='44.89,198.59 73.25,197.93 101.60,200.81 205.57,193.88 233.93,188.95 271.74,182.27 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='205.57' y1='208.01' x2='205.57' y2='68.77' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='33.55' y='68.77' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -103,8 +103,8 @@
 <polygon points='233.93,347.55 236.56,352.11 231.29,352.11 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='269.78,249.80 273.69,249.80 273.69,245.89 269.78,245.89 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='271.74,349.81 274.37,354.37 269.10,354.37 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='158.31' y='246.65' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 98.36 %</text>
-<text x='158.31' y='258.94' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 93.78 %</text>
+<text x='148.86' y='246.65' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 98.36 %</text>
+<text x='148.86' y='258.94' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 93.78 %</text>
 <polyline points='44.89,361.35 73.25,360.13 101.60,330.34 205.57,329.77 233.93,317.88 271.74,256.35 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='73.25' y1='370.76' x2='73.25' y2='231.52' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='33.55' y='231.52' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -147,8 +147,8 @@
 <polygon points='233.93,511.43 236.56,515.99 231.29,515.99 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='269.78,510.77 273.69,510.77 273.69,506.86 269.78,506.86 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='271.74,511.09 274.37,515.65 269.10,515.65 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='158.31' y='409.40' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 99.31 %</text>
-<text x='158.31' y='421.69' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='87.73px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 98.5 %</text>
+<text x='148.86' y='409.40' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 99.31 %</text>
+<text x='148.86' y='421.69' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='87.73px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 98.5 %</text>
 <polyline points='44.89,524.10 73.25,524.69 101.60,524.14 205.57,527.19 233.93,521.20 271.74,518.79 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='233.93' y1='533.52' x2='233.93' y2='394.27' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='33.55' y='394.27' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -191,8 +191,8 @@
 <polygon points='488.94,186.12 491.57,190.68 486.30,190.68 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='524.79,77.05 528.70,77.05 528.70,73.14 524.79,73.14 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='526.74,181.74 529.38,186.30 524.11,186.30 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='413.32' y='83.89' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 95.59 %</text>
-<text x='413.32' y='96.18' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 95.69 %</text>
+<text x='403.87' y='83.89' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 95.59 %</text>
+<text x='403.87' y='96.18' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 95.69 %</text>
 <polyline points='299.90,198.59 328.25,199.03 356.61,200.79 460.58,169.09 488.94,129.73 526.74,88.91 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='356.61' y1='208.01' x2='356.61' y2='68.77' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='288.56' y='68.77' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -235,8 +235,8 @@
 <polygon points='488.94,349.80 491.57,354.36 486.30,354.36 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='524.79,353.83 528.70,353.83 528.70,349.92 524.79,349.92 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='526.74,350.43 529.38,354.99 524.11,354.99 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='413.32' y='246.65' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 90.94 %</text>
-<text x='413.32' y='258.94' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='87.73px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 88.3 %</text>
+<text x='403.87' y='246.65' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 90.94 %</text>
+<text x='403.87' y='258.94' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='87.73px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 88.3 %</text>
 <polyline points='299.90,361.35 328.25,361.69 356.61,361.32 460.58,361.33 488.94,360.19 526.74,359.76 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='526.74' y1='370.76' x2='526.74' y2='231.52' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='288.56' y='231.52' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -288,8 +288,8 @@
 <polygon points='743.94,191.65 746.58,196.21 741.31,196.21 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='779.80,144.69 783.71,144.69 783.71,140.78 779.80,140.78 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='781.75,192.51 784.38,197.07 779.12,197.07 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='668.33' y='83.89' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 97.27 %</text>
-<text x='668.33' y='96.18' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='87.73px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 97.8 %</text>
+<text x='658.88' y='83.89' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 97.27 %</text>
+<text x='658.88' y='96.18' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='87.73px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 97.8 %</text>
 <polyline points='554.91,198.59 583.26,197.80 611.62,198.67 715.59,194.09 743.94,193.05 781.75,145.77 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='743.94' y1='208.01' x2='743.94' y2='68.77' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='543.57' y='68.77' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -332,8 +332,8 @@
 <polygon points='743.94,352.85 746.58,357.41 741.31,357.41 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
 <polygon points='779.80,353.29 783.71,353.29 783.71,349.38 779.80,349.38 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='781.75,353.01 784.38,357.57 779.12,357.57 ' style='stroke-width: 0.71; stroke: none; fill: #0000FF;' />
-<text x='668.33' y='246.65' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 95.04 %</text>
-<text x='668.33' y='258.94' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 95.15 %</text>
+<text x='658.88' y='246.65' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='86.16px' lengthAdjust='spacingAndGlyphs'>VP Decrease: 95.04 %</text>
+<text x='658.88' y='258.94' text-anchor='middle' style='font-size: 8.54px; font-family: "Arial";' textLength='92.48px' lengthAdjust='spacingAndGlyphs'>VPC Decrease: 95.15 %</text>
 <polyline points='554.91,361.35 583.26,360.90 611.62,360.18 715.59,360.62 743.94,358.83 781.75,356.63 ' style='stroke-width: 2.13; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <line x1='781.75' y1='370.76' x2='781.75' y2='231.52' style='stroke-width: 3.20; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <rect x='543.57' y='231.52' width='249.53' height='139.24' style='stroke-width: 4.27; stroke: #333333;' />
@@ -509,7 +509,6 @@
 <text x='831.79' y='267.48' style='font-size: 9.00px; font-family: "Arial";' textLength='12.01px' lengthAdjust='spacingAndGlyphs'>VP</text>
 <text x='831.79' y='284.76' style='font-size: 9.00px; font-family: "Arial";' textLength='18.51px' lengthAdjust='spacingAndGlyphs'>VPC</text>
 <rect x='804.05' y='306.62' width='270.47' height='59.77' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<text x='809.53' y='320.32' style='font-size: 10.00px; font-weight: bold; font-family: "Arial";' textLength='26.12px' lengthAdjust='spacingAndGlyphs'>Lines</text>
 <rect x='809.53' y='326.35' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
 <circle cx='818.17' cy='334.99' r='1.95' style='stroke-width: 0.71; fill: #000000;' />
 <line x1='818.17' y1='341.90' x2='818.17' y2='328.08' style='stroke-width: 2.13; stroke: #996633; stroke-opacity: 0.50; stroke-linecap: butt;' />

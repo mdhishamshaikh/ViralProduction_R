@@ -125,13 +125,13 @@ draw_key_cust <- function(data, params, size) {
 
 collision_rates_plot <- function(data, abundance){
   
-  # Read in both files
+  # Select correct data
   df_contact_rates <- data %>%
-    select(c("Location", "Station_Number", "Sample_Type", "Timepoint", "Replicate", "c_Bacteria", "c_Viruses", "VBR"))
+    select(all_of(c("Location", "Station_Number", "Sample_Type", "Timepoint", "Replicate", "c_Bacteria", "c_Viruses", "VBR")))
   
   df_abundance <- abundance %>% # Consist of the abundances of all populations in original seawater sample for each experiment
     rename(c_Bacteria = Total_Bacteria, c_Viruses = Total_Viruses) %>%
-    select(c('Location', 'Station_Number', 'c_Bacteria', 'c_Viruses', 'VBR')) 
+    select(all_of(c('Location', 'Station_Number', 'c_Bacteria', 'c_Viruses', 'VBR'))) 
   
   # Abundance file consists of just one abundance per experiment => in flow cytometry, we analysed three sample types with each three replicates
   # Expand abundance file so that dimensions match
@@ -145,8 +145,7 @@ collision_rates_plot <- function(data, abundance){
   df_abundance <- full_join(abundance_dims, df_abundance)
   df_contact_rates <- full_join(df_abundance, df_contact_rates)
   
-  # Calculate the collision rates
-  # Determine the collision rate: Bacterial_abundance * Viral_Abundance at a certain timepoint
+  # Calculate the collision rates: Bacterial_abundance * Viral_Abundance at a certain timepoint
   # The change in collision rate: CR_T / CR_T0
   df_contact_rates$BV <- df_contact_rates$c_Bacteria * df_contact_rates$c_Viruses
   cr_res <- list()
@@ -200,7 +199,7 @@ collision_rates_plot <- function(data, abundance){
                 values_from = Perc_Decrease) %>%
     mutate_at(c('VP', 'VPC'), as.numeric)
   
-  # For plotting, start from T0
+  # For plotting: original samples can be removed, start from T0
   df_CR_plot <- df_CR %>%
     filter(Timepoint != '-3')
   
@@ -214,6 +213,7 @@ collision_rates_plot <- function(data, abundance){
   # Calculate the bacterial endpoint to show on plot
   data_bp <- data %>% 
     unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
+  
   bp_res <- list()
   timepoints <- unique(data_bp$Timepoint)
   
@@ -226,6 +226,7 @@ collision_rates_plot <- function(data, abundance){
     bp_res[[length(bp_res)+1]] <- timepoint
   }
   
+  # Result dataframe consists of the bacterial endpoint for every unique tag (experiment)
   bp_df <- data.frame(t(as.data.frame(bp_res)))
   colnames(bp_df) <- c('Bacterial_Endpoint')
   rownames(bp_df) <- c(1:7)
@@ -237,7 +238,7 @@ collision_rates_plot <- function(data, abundance){
     
     geom_point(data = df_CR_plot, aes(x = as.numeric(Timepoint), y = CR_Mean,
                                       color = Sample_Type, shape = Sample_Type), show.legend = T) + 
-    geom_text(data = decrease_df, aes(x = 12, y = 12),
+    geom_text(data = decrease_df, aes(x = 11, y = 12),
               label = paste0('VP Decrease: ', round(decrease_df$VP,2), ' %\nVPC Decrease: ', round(decrease_df$VPC,2), ' %'),
               size = 3, color = 'black', show.legend = F) +
     
@@ -255,10 +256,10 @@ collision_rates_plot <- function(data, abundance){
     geom_vline(data = bp_df, aes(xintercept = Bacterial_Endpoint,
                color = "lineBP"), linewidth = 1.5, alpha = 0.5, key_glyph = 'cust') +
     
-    scale_color_manual(name = 'Lines',
-                       labels = c(lineCR = "Difference in collision rates between VP and VPC treatment", lineBP = "Bacterial Endpoint"),
-                       values = c(lineCR = "#333333", lineBP = "#996633"),
-                       guide = guide_legend(order = 2)) +
+    scale_color_manual(labels = c(lineCR = "Difference in collision rates between VP and VPC treatment", lineBP = "Bacterial Endpoint"),
+                       values = c(lineCR = "#333333", lineBP = "#996633")) +
+    
+    guides(color = guide_legend(title = '', order = 2)) +
     
     facet_wrap(~ Station_Number, ncol = 3) + 
     
