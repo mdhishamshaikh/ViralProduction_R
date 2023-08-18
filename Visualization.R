@@ -19,19 +19,19 @@ overview_plot_counts_over_time <- function(data){
     unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
   
   # Create dataframe for plot: averaging the sample replicates, calculate the differences by subtraction and add timepoints
-  df_plot_cot <- df_AVG(data_tag) %>%
+  df_plot_cot <- df_AVG(data) %>%
     mutate(Sample_Type = factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-           Time_Time = factor(Time_Time, levels = unique(Time_Time)),
            Subcrobe = ifelse(Subgroup == 'Parent', 'Total', as.character(Microbe)),
            Subcrobe = factor(Subcrobe, levels= c('Total', 'Bacteria', 'Viruses'))) %>% # Added a column for facet_grid later on => Subgroup and Microbe to one
-    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) # df_AVG() doesn't take the tag column with it
+    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) # Add unique tag
   
   # Filter data based on Location, Station_Number and Depth and make plot
-  for (combi_tag in unique(data_tag$tag)){
+  for (combi_tag in unique(df_plot_cot$tag)){
     
     # Dataframe for ggplot
     df_plot_cot_sub <- df_plot_cot %>%
-      filter(tag == combi_tag)
+      filter(tag == combi_tag) %>%
+      mutate(Time_Time = factor(Time_Time, levels = unique(Time_Time))) # Different Time_Ranges over experiments, so factor on subset and not on df_plot_cot
     
     # Original data for bacterial endpoint
     data_bp <- data_tag %>%
@@ -51,10 +51,8 @@ overview_plot_counts_over_time <- function(data){
       facet_grid(Subcrobe + Sample_Type ~ Time_Time) +
       
       # Scaling of axes, colors and shapes
-      scale_y_continuous(labels = unit_format(unit = NULL, scale = 1e-6),
-                         breaks = seq(-4e+6,16e+6, 4e+6),
-                         limits = c(-4e+6, 16e+6)) + 
-      scale_x_continuous(breaks = unique(df_plot_cot$Timepoint)) + 
+      scale_y_continuous(labels = unit_format(unit = NULL, scale = 1e-6)) + 
+      scale_x_continuous(breaks = unique(df_plot_cot_sub$Timepoint)) + 
       scale_shape_manual(name = 'Populations', 
                          labels = c("Total Bacteria", "HNA Bacteria", "LNA Bacteria",
                                     "V1 Viruses", "V2 Viruses", "V3 Viruses", "Total Viruses"),
@@ -112,7 +110,7 @@ overview_plot_counts_over_time <- function(data){
 #overview_plot_counts_over_time('NJ1.csv')
 overview_plot_counts_over_time(data_all)
 
-# 3.2 Difference in collision rates between VP and VPC samples over time
+# 2.2 Difference in collision rates between VP and VPC samples over time
 # To determine the collision rates: output csv.file from Step 1 + raw abundances in seawater sample (WW)
 # Custom Key Glyph
 draw_key_cust <- function(data, params, size) {
@@ -127,11 +125,11 @@ collision_rates_plot <- function(data, abundance){
   
   # Select correct data
   df_contact_rates <- data %>%
-    select(all_of(c("Location", "Station_Number", "Sample_Type", "Timepoint", "Replicate", "c_Bacteria", "c_Viruses", "VBR")))
+    select(all_of(c("Location", "Station_Number", "Sample_Type", "Timepoint", "Replicate", "c_Bacteria", "c_Viruses")))
   
   df_abundance <- abundance %>% # Consist of the abundances of all populations in original seawater sample for each experiment
     rename(c_Bacteria = Total_Bacteria, c_Viruses = Total_Viruses) %>%
-    select(all_of(c('Location', 'Station_Number', 'c_Bacteria', 'c_Viruses', 'VBR'))) 
+    select(all_of(c('Location', 'Station_Number', 'c_Bacteria', 'c_Viruses'))) 
   
   # Abundance file consists of just one abundance per experiment => in flow cytometry, we analysed three sample types with each three replicates
   # Expand abundance file so that dimensions match
@@ -158,7 +156,7 @@ collision_rates_plot <- function(data, abundance){
           df <- df_contact_rates %>%
             filter(Location == loc, Station_Number == station, Sample_Type == sample, Replicate == rep)
           
-          for(time in unique(df_contact_rates$Timepoint)){
+          for(time in unique(df$Timepoint)){
             
             CR <- (df %>% filter(Timepoint == time))$BV / (df %>% filter(Timepoint == 0))$BV
             res <- c(loc, station, sample, rep, time, CR)
@@ -176,8 +174,7 @@ collision_rates_plot <- function(data, abundance){
     filter(Sample_Type != '0.22') %>%
     group_by(Location, Station_Number, Sample_Type, Timepoint) %>%
     summarise(CR_Mean = mean(Collision_Rate), CR_SE = plotrix::std.error(Collision_Rate)) %>% # Average over the replicates
-    arrange('Location', 'Station_Number',
-            factor(Timepoint, levels = c("-3", "0", "3", "6", "17", "20", "24"))) 
+    arrange('Location', 'Station_Number') 
 
   # Calculate the percentage of decrease of CR between seawater sample (WW) and T0
   decrease_res <- list()
@@ -215,11 +212,12 @@ collision_rates_plot <- function(data, abundance){
     unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
   
   bp_res <- list()
-  timepoints <- unique(data_bp$Timepoint)
   
   for (combi_tag in unique(data_bp$tag)){
     data_bp_tag <- data_bp %>%
       filter(tag == combi_tag)
+    
+    timepoints <- unique(data_bp_tag$Timepoint)
     
     bp <- bacterial_endpoint(data_bp_tag, visual = T)
     timepoint <- timepoints[bp]
@@ -279,11 +277,29 @@ collision_rates_plot <- function(data, abundance){
          x = 'Sampling Timepoints\n (in hours)',
          y = 'Mean Relative Collision Rate') 
   
+  # Plot figure
+  n
+  
   # Save plot as svg file
   ggsave(paste0('Figures/', unique(df_CR_plot$Location), '_Collision_Rates.svg'), plot = n, width = 15, height = 8)
 }
 
 collision_rates_plot(data_all, df_abundance)
+
+# 2.3 Comparison of viral production values of the different methods
+compare_methods_vp <- function(data){
+  
+  # Create ggplot object
+  n <- ggplot(data, aes(x = VP_Type, y = VP, color = VP_Type)) + 
+    geom_jitter(height = 0, width = 0.1) + 
+    geom_violin(scale = 'width')
+  
+  # Print plot
+  n
+  
+}
+
+compare_methods_vp(vp_calc_NJ2020)
 
 
 

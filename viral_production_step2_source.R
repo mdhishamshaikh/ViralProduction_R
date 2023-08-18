@@ -83,9 +83,11 @@ tp <- function(DF){
 # Separate replicate dataframe
 df_SR <- function(data, keep_0.22 = F, add_tp = T){
   
+  columns_to_select <- c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+                         'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')
+  
   DF <- data %>%
-    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+    select(all_of(columns_to_select)) %>%
     gather(7:13, key = 'Population', value = 'Count') %>% # Taking index of columns instead of name, since we select columns in first step => order will always be this one
     mutate(Microbe = if_else(Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>% # Adding an extra column defining if replicate is from bacterial or viral origin
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type','Replicate','Population', as.numeric(Timepoint)) # Reorder the rows by the values of the selected columns
@@ -127,9 +129,11 @@ df_AVG <- function(data, add_tp = T){
   DF <- data[data$Sample_Type != '0.22',]
   
   # Calculating number, mean of replicates and standard error 
+  columns_to_select <- c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+                         'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')
+  
   DF <- DF %>%
-    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+    select(all_of(columns_to_select)) %>%
     gather(7:13, key = 'Population', value = 'Count') %>%
     group_by(Location, Station_Number, Depth, Sample_Type, Timepoint, Population) %>%
     summarise(n = n(), Mean = mean(Count), SE = plotrix::std.error(Count)) # plotrix::std.error calculates the standard error of the mean
@@ -556,9 +560,9 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
               
               # Check if number of peaks and valleys correspond
               if (identical(length(p), length(v))){
-                #print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
+                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
               } else {
-                #print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
+                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
               }
               
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance

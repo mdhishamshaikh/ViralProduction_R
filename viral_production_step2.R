@@ -40,7 +40,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
   res_path <- paste0('./', output_dir, '/') # output.dir needs to be in current working directory!
   output_df <- data.frame(Location = character(), Station_Number = character(), Depth = character(),
                           Time_Range = character(), Population = character(), Sample_Type = character(),
-                          VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
+                          VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
   
   # Run methods
   # Method is a vector consisting of numbers 1 to 12, this represents all the possible methods => see names(calculate_VP_list)
@@ -89,7 +89,9 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
   output_24_df <- output_df %>%
     filter(Time_Range == 'T0_T24')
   
-  write.csv(output_24_df, file.path(res_path, 'vp_calc_24.csv'), row.names = F)
+  if (write_csv == T){
+    write.csv(output_24_df, file.path(res_path, 'vp_calc_24.csv'), row.names = F)
+  }
   
   ## 3. Separate replicate treatment results
   # LM-2 and VPCL-1 have separate replicate treatment. In the end, the samples are averaged and difference is measured since we are interested in lytic and lysogenic production
@@ -98,8 +100,9 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     # Create output dataframe
     output_df_SR <- data.frame(Location = character(), Station_Number = character(), Depth = character(),
                                Time_Range = character(), Population = character(), Sample_Type = character(),
-                               Replicate = character(), VP = numeric(), VP_SE = numeric(), 
+                               Replicate = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
                                VP_R_Squared = numeric(), VP_Type = character())
+    
     # Select correct methods
     method_names <- c('LM_2', 'VPCL_1')
     method_SR <- which(names(calculate_VP_list) %in% method_names)
@@ -116,13 +119,13 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
         },
         
         error = function(e){ # e represents a possible error
-          err <- paste(Sys.time(), paste0('Error in analysis using method ', mtd, ':'), e)
+          err <- paste(Sys.time(), paste0('Error in analysis using method ', names(calculate_VP_list)[mtd], ':'), e)
           print(err)
           calc_vp_error_list[[length(calc_vp_error_list) + 1]] <<- err
         },
         
         warning = function(w){ # w represents a possible warning
-          warn <- paste(Sys.time(), paste0('Warning in analysis using method ', mtd, ':'), w)
+          warn <- paste(Sys.time(), paste0('Warning in analysis using method ', names(calculate_VP_list)[mtd], ':'), w)
           print(warn)
           calc_vp_warn_list[[length(calc_vp_warn_list) + 1]] <<- warn
         },
@@ -151,7 +154,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     # Create output dataframe
     output_df_bp <- data.frame(Location = character(), Station_Number = character(), Depth = character(),
                                Time_Range = character(), Population = character(), Sample_Type = character(),
-                               VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
+                               VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
     
     # Determine bacterial endpoint
     bp_df <- data %>%
@@ -194,119 +197,112 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
 
 # Running calc_VP function
 print(names(calculate_VP_list)) # Order of different methods possible to calculate viral production
-#vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
+vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
 vp_calc_NJ2020 <- calc_VP(data_all, output_dir = 'vp_calc_NJ2020')
 
 ## 4. Analyzing results
 # Three different input dataframes: 
-# 1. NJ2020: output of Step 1 => viral and bacterial abundances from flow cytometer
-# 2. vp_calc_NJ2020: output of Step 2 => viral production calculations based on different methods => VP = [VLP per mL per h] (VLP = virus-like particles)
-# 3. NJ2020_abundance: consists of the viral and bacterial abundances of the original sample (seawater, WW_sample)
-analyze_vpres <- function(vpres, data, abundance){
+# 1. data: output of Step 1 => viral and bacterial abundances from flow cytometer
+# 2. vpres: output of Step 2 => viral production calculations based on different methods => VP = [VLP per mL per h] (VLP = virus-like particles)
+# 3. abundance: consists of the viral and bacterial abundances of the original sample (seawater, WW_sample)
+analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient_content_B = list(), nutrient_content_V = list()){
   
-  # 1. Correct viral production: VP_values are based of T0 which consists of 40% bacteria, ideally this should be 100% like in the original sample
-  # Current values represent thus 40%, factorize so that they represent 100%. Also, with propagation of error, take the SE into account
-  vpres_corrected <- vpres %>%
-    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) %>%
-    mutate(c_VP = VP / 0.4363207,
-           c_VP_SE = abs(c_VP) * (VP_SE / abs(VP))) %>%
-    mutate_at(c('Station_Number'), as.integer) %>%
-    filter(Sample_Type != 'VPC') %>% # Lytic fase = VP_samples; Lysogenic fase = Diff_Samples
-    arrange('tag', 'Sample_Type', 'Population', 'Time_Range', 'VP_Type')
+  ## Setup
+  # Bacterial abundance at T0
+  B0_df <- df_AVG(data) %>%
+    filter(Timepoint == 0, Population == 'c_Bacteria', Sample_Type == 'VP') %>%
+    select(all_of(c('Station_Number', 'Timepoint', 'Population', 'Sample_Type', 'Mean'))) %>%
+    distinct() # Remove duplicate rows
   
-  # 2. Lytic and lysogenic viral production: c_VP corresponds to the amount of virus-like particles (VLP) per mL per hour in the given Time_Range
-  # For each Time_Range, the percentage of infected cells will be calculated. VP_samples represent the lytic fase (% lytically infected cells), Diff_samples represent the lysogenic fase (% lysogenic cells)
-  # Therefore, the burst size is needed: Burst size = the number of viral particles released from an infected host cell during the lytic cycle of viral replication => how many new viral particles will be released when cell bursts
-  # A higher burst size will result in a lower percentage infected cells since more phages burst
+  # Bacterial and viral abundance in the original sample
+  OS_df <- abundance %>%
+    select(all_of(c('Station_Number', 'Total_Bacteria', 'Total_Viruses')))
   
-  # Extract average bacterial abundance at T0 from original data
-  B0_df <- df_AVG(data) %>% # Average data over replicates and add tag => necessary to get the bacterial abundance at T0 for each sample
-    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) %>%
-    filter(Population == 'c_Bacteria', Timepoint == 0)
+  # Join both to vpres dataframe
+  vpres_df <- vpres %>%
+    left_join(select(B0_df, Station_Number, Mean), by = c('Station_Number')) %>%
+    rename(B_0 = Mean) %>%
+    left_join(select(OS_df, Station_Number, Total_Bacteria, Total_Viruses), by = c('Station_Number')) %>%
+    rename(B_OS = Total_Bacteria, V_OS = Total_Viruses)
   
-  # Add bacterial abundance at timepoint 0 as column B_T0 to dataframe
-  perc_df <- vpres_corrected %>%
-    left_join(select(B0_df, tag, Sample_Type, Mean), by = c('tag', 'Sample_Type')) %>%
-    rename(B_T0 = Mean) %>%
-    distinct() # Remove duplicate rows (created by left join)
+  # Give default values if burst size and bacterial secondary production are not given
+  if (is_empty(BS)){
+    BS <- c(10,25,40) 
+  }
+  if (is.null(BSP)){
+    BSP <- 0.0027e6 # Is in the same unit as the viral production values => VLP cells / mL h
+  }
+  if (is_empty(nutrient_content_B)){
+    # Article: Fagerbakke, KM & Heldal, Mikal & Norland, S. (1996). Content of Carbon, Nitrogen, Oxygen, Sulfur and Phosphorus in Native Aquatic and Cultured Bacteria. Aquatic Microbial Ecology - AQUAT MICROB ECOL. 10. 15-27. 10.3354/ame010015
+    nutrient_content_B <- list(C = 19e-15, N = 5e-15, V = 0.8e-15) # unit = g (C/N/P) / cell 
+  }
+  if (is_empty(nutrient_content_V)){
+    # Article: Jover, L., Effler, T., Buchan, A. et al. The elemental composition of virus particles: implications for marine biogeochemical cycles. Nat Rev Microbiol 12, 519–528 (2014). https://doi.org/10.1038/nrmicro3289
+    C_V <- (1664612 / 6.022e23) * 12.01 # ([atoms] / [atoms/mol]) * [g/mol]
+    N_V <- (563058 / 6.022e23) * 14.01
+    P_V <- (92428 / 6.022e23) * 30.97
+    nutrient_content_V <- list(C = C_V, N = N_V, P = P_V) # unit = g (C/N/P) / cell 
+  }
   
-  # Calculate percentage lytic and lysogenic cells for each burst size
-  BS <- c(10,25,40) # Quick search online only returned burst sizes of laboratory environment => 25 as mid burst size and 15 below and above for range of three different burst sizes
+  ## 1. Correct values:
+  # Viral production values are calculated based on T0_concentrate (after filtration), the amount of bacteria does not match the amount of the original sample (OS)
+  # Correction of the viral production rate (VP) and absolute viral production (abs_VP) by multiplying by B_OS/B_0
+  # With propagation of error, the standard error is also taken into account
+  vpres_corrected <- vpres_df %>%
+    mutate(c_VP = VP * (B_OS / B_0),
+           c_abs_VP = abs_VP * (B_OS / B_0),
+           c_VP_SE = abs(c_VP) * (VP_SE / abs(VP)))
+  
+  ## 2. Lytic and lysogenic viral production:
+  # abs_VP corresponds to the absolute viral production at that point of the experiment, VP takes the time range in account and refers to the mean viral production or viral production rate in that time range
+  # Given the burst size, the percentage of cells can be determined (VP_samples = percentage of lytically infected cells; Diff_samples = percentage of lysogenic cells; VPC_samples = both)
+  # A higher burst size, meaning that the bacteriophages will burst, will result in a lower percentage cells
+  
+  ## 3. Lysis & Lysogenic rate of bacteria:
+  # The rate at which bacterial cells rupture (lytic) or become lysogenized (lysogenic)
+  # Need to use the viral production rate of the original sample (c_VP)
+  
+  ## 4. Percentage of bacterial production lysed and bacterial loss per day:
+  # The quantity of bacterial biomass that undergoes lysis, depends on bacterial secondary production, and the rate at which bacteria are removed due to viral lysis
   
   for (bs in BS){
+    ## 2.
     col_name <- paste0('%Cells_BS_', bs)
-    perc_df[[col_name]] <- perc_df$VP * (100 / (perc_df$B_T0 * bs))
+    vpres_corrected[[col_name]] <- vpres_corrected$abs_VP * (100 / (vpres_corrected$B_0 * bs))
+    
+    ## 3.
+    col_name1 <- paste0('Rate_BS_', bs)
+    vpres_corrected[[col_name1]] <- vpres_corrected$c_VP / bs
+    
+    ## 4.
+    col_name2 <- paste0('%BP_Lysed_BS_', bs)
+    vpres_corrected[[col_name2]] <- vpres_corrected[[col_name1]] / BSP
+    
+    col_name3 <- paste0('%B_Loss_BS_', bs)
+    vpres_corrected[[col_name3]] <- ((vpres_corrected[[col_name1]] * 100) / vpres_corrected$B_OS) * 24
   }
   
-  # 3. Lysis & Lysogenic rate of bacteria:
-  # Lysis rate = rate at which bacterial cells rupture; Lysogenic rate = rate at which bacterial cells become lysogenized
-  # First, calculate the lytic and lysogenic viral production in the original sample: VP * (B_OS / B_T0) with B_OS the bacterial abundance in the original sample
+  ## 5. Viral turnover time: 
+  # Given x is the population of viruses right now, the viral turnover time describes the time it takes to replace x by new viruses => due to lysis new viral particles come free
   
-  rate_df <- perc_df %>%
-    left_join(select(abundance, Station_Number, Total_Bacteria), by = c('Station_Number')) %>%
-    rename(B_OS = Total_Bacteria) %>%
-    mutate(c_VP_OS = c_VP * (B_OS / B_T0))
+  vpres_corrected <- vpres_corrected %>%
+    mutate(V_TT = c_VP / V_OS)
   
-  # Calculate the rate for each burst size
-  for (bs in BS){
-    col_name <- paste0('Rate_BS_', bs)
-    rate_df[[col_name]] <- rate_df$c_VP_OS / bs
+  ## 6. Nutrient release in bacteria and viruses for C, N and P:
+  for (nutrient in 1:length(nutrient_content_B)){
+    for (bs in BS){
+      current_rate_column <- paste0('Rate_BS_', bs)
+      col_name <- paste0('DO', names(nutrient_content_B[nutrient]), '_B_BS_', bs)
+      vpres_corrected[[col_name]] <- vpres_corrected[[current_rate_column]] * nutrient_content_B[[nutrient]]
+    }
   }
   
-  # 4. Percentage of bacterial production lysed and bacterial loss per day: 
-  # Bacterial production lysed = quantity of bacterial biomass or production that undergoes lysis due to viral infection
-  # Bacterial loss per day = rate at which bacteria are removed due to viral lysis
-  BSP_OS = 0.0027e6 # From DEMO VIPCAL; Bacterial secondary production in original sample
-  
-  bacterial_df <- rate_df %>%
-    mutate('%BP_Lysed_BS_10' = ifelse(Sample_Type == 'Diff', NA, Rate_BS_10 / BSP_OS),
-           '%BP_Lysed_BS_25' = ifelse(Sample_Type == 'Diff', NA,Rate_BS_25 / BSP_OS),
-           '%BP_Lysed_BS_40' = ifelse(Sample_Type == 'Diff', NA,Rate_BS_40 / BSP_OS),
-           '%B_Loss_BS_10' = ifelse(Sample_Type == 'Diff', NA,((Rate_BS_10 * 100) / B_OS) * 24),
-           '%B_Loss_BS_25' = ifelse(Sample_Type == 'Diff', NA,((Rate_BS_25 * 100) / B_OS) * 24),
-           '%B_Loss_BS_40' = ifelse(Sample_Type == 'Diff', NA,((Rate_BS_40 * 100) / B_OS) * 24))
-  
-  # 5. Viral turnover time: Time it takes for new viral particles to be produced
-  # Just like the bacterial abundance in the original sample, need of adding the viral abundance of the original sample
-  viral_abundance <- df_abundance %>%
-    rename(c_Bacteria = Total_Bacteria, c_Viruses = Total_Viruses, c_V1 = V1, c_V2 = V2, c_V3 = V3) %>%
-    pivot_longer(cols = c(7:13), names_to = 'Population', values_to = 'Abundance')
-  
-  viral_df <- bacterial_df %>%
-    left_join(select(viral_abundance, Station_Number, Population, Abundance), by = c('Station_Number', 'Population')) %>%
-    rename(V_OS = Abundance) %>%
-    mutate(V_TT = c_VP_OS / V_OS)
-  
-  # 6. Nutrient release in bacteria and viruses for C, N and P: 
-  # In literature, search for average content of these nutrients in bacteria and viruses
-  
-  # Data for bacteria from fjorden in Norway just behind North Sea (October 1993) => native aquatic sample => native bacteria
-  # 1 fg = 10-15 g
-  C_B <- 19e-15
-  N_B <- 5e-15
-  P_B <- 0.8e-15
-  
-  # Based on sequence information of bacteriophages => elemental composition of Synechococcus ssp (only marine virus in article)
-  # Number of atoms are given in article => transform to amount of gram
-  C_V <- (1664612 / 6.022e23) * 12.01 # ([atoms] / [atoms/mol]) * [g/mol]
-  N_V <- (563058 / 6.022e23) * 14.01
-  P_V <- (92428 / 6.022e23) * 30.97
-  
-  nutrient_df <- viral_df %>%
-    mutate(B_DOC_BS_10 = Rate_BS_10 * C_B,
-           B_DOC_BS_25 = Rate_BS_25 * C_B,
-           B_DOC_BS_40 = Rate_BS_40 * C_B,
-           B_DON_BS_10 = Rate_BS_10 * N_B,
-           B_DON_BS_25 = Rate_BS_25 * N_B,
-           B_DON_BS_40 = Rate_BS_40 * N_B,
-           B_DOP_BS_10 = Rate_BS_10 * P_B,
-           B_DOP_BS_25 = Rate_BS_25 * P_B,
-           B_DOP_BS_40 = Rate_BS_40 * P_B,
-           V_DOC = V_TT * C_V,
-           V_DON = V_TT * N_V,
-           V_DOP = V_TT * P_V)
+  for (nutrient in 1:length(nutrient_content_V)){
+    col_name <- paste0('DO', names(nutrient_content_V[nutrient]), '_V')
+    vpres_corrected[[col_name]] <- vpres_corrected[[current_rate_column]] * nutrient_content_V[[nutrient]]
+  }
 
-  return(nutrient_df)
+  return(vpres_corrected)
 }
 
 analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020, data_all, df_abundance)
