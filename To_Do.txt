@@ -48,3 +48,13 @@ Analysing of VP_results:
 
 	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below and above for low and high burst size. If nothing is found: 10, 25, 40 as burst size.
 
+Week 3:
+
+1. Finalize the optimization of Step 2 + analyzing of step 2
+	
+Some minor bugs need to be fixed + output of analyzing step with legend and units
+
+2. Start look at ways to visualize the analyzing results/results between different methods
+
+3. Start on the making of Rpackage => see ppt Salva => make all the current functions Rpackage compatible
+

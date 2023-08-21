@@ -34,7 +34,7 @@ ggplot(data = lm_output,
   geom_violin()+
   geom_boxplot()
 
-lm_comp<- ggbetweenstats(
+lm_comp<- ggstatsplot::ggbetweenstats(
     data = lm_output,
     x = VP_Type,
     y = VP,
@@ -496,7 +496,7 @@ ggplot(df6,
   geom_split_violin(nudge = 0.02,
                     color = 'transparent')+
   theme_classic()+
-  scale_fill_manual(values = c("178b76ff", "#52495aff"),
+  scale_fill_manual(values = c("#178b76ff", "#52495aff"),
                     labels = c('VIPCAL-SE', 'VIPCAL'))+
   scale_color_manual(values<- NA)+
   theme(axis.line = element_line(linewidth = 1),

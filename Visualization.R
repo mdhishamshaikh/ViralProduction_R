@@ -16,14 +16,14 @@ overview_plot_counts_over_time <- function(data){
   
   # Add tag column to data that represents the unique ID (Location_Station_Depth)
   data_tag <- data %>%
-    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
+    unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
   
   # Create dataframe for plot: averaging the sample replicates, calculate the differences by subtraction and add timepoints
   df_plot_cot <- df_AVG(data) %>%
     mutate(Sample_Type = factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
            Subcrobe = ifelse(Subgroup == 'Parent', 'Total', as.character(Microbe)),
            Subcrobe = factor(Subcrobe, levels= c('Total', 'Bacteria', 'Viruses'))) %>% # Added a column for facet_grid later on => Subgroup and Microbe to one
-    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F) # Add unique tag
+    unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) # Add unique tag
   
   # Filter data based on Location, Station_Number and Depth and make plot
   for (combi_tag in unique(df_plot_cot$tag)){
@@ -108,7 +108,7 @@ overview_plot_counts_over_time <- function(data){
 }
 
 #overview_plot_counts_over_time('NJ1.csv')
-overview_plot_counts_over_time(data_all)
+overview_plot_counts_over_time(data)
 
 # 2.2 Difference in collision rates between VP and VPC samples over time
 # To determine the collision rates: output csv.file from Step 1 + raw abundances in seawater sample (WW)
@@ -209,7 +209,7 @@ collision_rates_plot <- function(data, abundance){
   
   # Calculate the bacterial endpoint to show on plot
   data_bp <- data %>% 
-    unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
+    unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
   
   bp_res <- list()
   
@@ -277,29 +277,60 @@ collision_rates_plot <- function(data, abundance){
          x = 'Sampling Timepoints\n (in hours)',
          y = 'Mean Relative Collision Rate') 
   
-  # Plot figure
-  n
-  
   # Save plot as svg file
   ggsave(paste0('Figures/', unique(df_CR_plot$Location), '_Collision_Rates.svg'), plot = n, width = 15, height = 8)
 }
 
-collision_rates_plot(data_all, df_abundance)
+collision_rates_plot(data, df_abundance)
 
-# 2.3 Comparison of viral production values of the different methods
-compare_methods_vp <- function(data){
+# 2.3 Comparison of viral production calculation by different methods
+# Compare the different variants of either linear regression and VIPCAL
+compare_variants_vp <- function(data){
+  
+  # Transform data
+  plot_data_LM <- data %>%
+    filter(str_starts(VP_Type, "LM")) 
+  
+  plot_data_VPCL <- data %>%
+    filter(str_starts(VP_Type, "VPCL"))
   
   # Create ggplot object
-  n <- ggplot(data, aes(x = VP_Type, y = VP, color = VP_Type)) + 
-    geom_jitter(height = 0, width = 0.1) + 
-    geom_violin(scale = 'width')
+  n1 <- ggstatsplot::ggbetweenstats(data = plot_data_LM,
+                                    x = VP_Type,
+                                    y = VP,
+                                    type = 'nonparametric',
+                                    plot.type = "violin",
+                                    pairswise.display = 'significant',
+                                    pairwise.comparisons = TRUE,
+                                    p.adjust.method = 'holm',
+                                    bf.message = FALSE,
+                                    centrality.plotting = FALSE,
+                                    title = 'Kruskal-Wallis Test: Linear Regression variants')
   
-  # Print plot
-  n
+  n2 <- ggstatsplot::ggbetweenstats(data = plot_data_VPCL,
+                                    x = VP_Type,
+                                    y = VP,
+                                    type = 'nonparametric',
+                                    plot.type = "violin",
+                                    pairswise.display = 'significant',
+                                    pairwise.comparisons = TRUE,
+                                    p.adjust.method = 'holm',
+                                    bf.message = FALSE,
+                                    centrality.plotting = FALSE,
+                                    title = 'Kruskal-Wallis Test: VIPCAL variants')
   
+  # Combine plots
+  n <- ggstatsplot::combine_plots(
+    list(n1,n2),
+    plotgrid.args = list(nrow = 2),
+    annotation.args = list(
+      title = "Comparison of viral production calculations by different methods"))
+  
+  # Save plot as svg file
+  ggsave(paste0('Figures/', unique(data$Location), '_Comparison_Methods.svg'), plot = n, width = 12, height = 15)
 }
 
-compare_methods_vp(vp_calc_NJ2020)
+compare_variants_vp(vp_calc_NJ2020)
 
 
 

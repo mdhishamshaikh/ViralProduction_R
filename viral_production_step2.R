@@ -4,10 +4,7 @@
 source("viral_production_step2_source.R")
 
 ## 2. Importing data from Step 1
-data <- read.csv('NJ1.csv') %>%
-  rename(Station_Number = Expt_No) # Changing column name to something more appropriate => you can also use index of column (5)
-
-data_all <- read.csv('NJ2020.csv') %>%
+data <- read.csv('NJ2020.csv') %>%
   rename(Station_Number = Expt_No)
 
 df_abundance <- read.csv('NJ2020_abundance.csv') %>% # Consist of the abundances of all populations in original seawater sample for each experiment
@@ -28,6 +25,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     stop('Please define another output directory before proceeding.')
     
   }else {
+    .GlobalEnv$output_dir <- output_dir
     dir.create(output_dir)
   }
   
@@ -38,7 +36,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
   ## 2. Calculate viral production
   # Create output dataframe
   res_path <- paste0('./', output_dir, '/') # output.dir needs to be in current working directory!
-  output_df <- data.frame(Location = character(), Station_Number = character(), Depth = character(),
+  output_df <- data.frame(Location = character(), Station_Number = integer(), Depth = character(),
                           Time_Range = character(), Population = character(), Sample_Type = character(),
                           VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
   
@@ -98,7 +96,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
   # If results of separate replicate treatment are not wished, set SR_calc to F
   if (SR_calc == T){
     # Create output dataframe
-    output_df_SR <- data.frame(Location = character(), Station_Number = character(), Depth = character(),
+    output_df_SR <- data.frame(Location = character(), Station_Number = integer(), Depth = character(),
                                Time_Range = character(), Population = character(), Sample_Type = character(),
                                Replicate = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
                                VP_R_Squared = numeric(), VP_Type = character())
@@ -152,13 +150,13 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
   # To take the bacterial endpoint into account and stop the assay earlier, avoiding biased results for VP samples. If not wanted, set bp_endpoint to F
   if (bp_endpoint == T){
     # Create output dataframe
-    output_df_bp <- data.frame(Location = character(), Station_Number = character(), Depth = character(),
+    output_df_bp <- data.frame(Location = character(), Station_Number = integer(), Depth = character(),
                                Time_Range = character(), Population = character(), Sample_Type = character(),
                                VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), VP_R_Squared = numeric(), VP_Type = character())
     
     # Determine bacterial endpoint
     bp_df <- data %>%
-      unite(c('Location', 'Station_Number', 'Depth'), col = 'tag', remove = F)
+      unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
     endpoint_list <- list()
     
     for (combi_tag in unique(bp_df$tag)){
@@ -172,7 +170,7 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
     # Select results from output_df based on the bp_range and add to output dataframe
     for (i in 1:length(unique(bp_df$tag))){
       res <- output_df %>%
-        unite('tag', c('Location', 'Station_Number', 'Depth'), remove = F) %>%
+        unite('tag', all_of(c('Location', 'Station_Number', 'Depth')), remove = F) %>%
         filter(tag == endpoint_list[[i]][1] & Time_Range == endpoint_list[[i]][2]) %>%
         select(-tag)
       
@@ -197,17 +195,25 @@ calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_c
 
 # Running calc_VP function
 print(names(calculate_VP_list)) # Order of different methods possible to calculate viral production
-vp_calc_NJ1 <- calc_VP(data, output_dir = 'vp_calc_NJ1')
-vp_calc_NJ2020 <- calc_VP(data_all, output_dir = 'vp_calc_NJ2020')
+vp_calc_NJ2020 <- calc_VP(data, output_dir = 'vp_calc_NJ2020')
 
 ## 4. Analyzing results
 # Three different input dataframes: 
 # 1. data: output of Step 1 => viral and bacterial abundances from flow cytometer
 # 2. vpres: output of Step 2 => viral production calculations based on different methods => VP = [VLP per mL per h] (VLP = virus-like particles)
 # 3. abundance: consists of the viral and bacterial abundances of the original sample (seawater, WW_sample)
-analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient_content_B = list(), nutrient_content_V = list()){
+analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient_content_B = list(), 
+                          nutrient_content_V = list(), write_output = T){
   
   ## Setup
+  # Check if output folder of step 2 is there (Step 2 needs to be runned)
+  if (!file.exists(output_dir)){
+    print(paste0('The ', output_dir, ' folder does not exists!'))
+    stop('Please run step 2 before proceeding.')
+  }
+  
+  res_path <- paste0('./', output_dir, '/') # output.dir needs to be in current working directory!
+  
   # Bacterial abundance at T0
   B0_df <- df_AVG(data) %>%
     filter(Timepoint == 0, Population == 'c_Bacteria', Sample_Type == 'VP') %>%
@@ -284,13 +290,12 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   
   ## 5. Viral turnover time: 
   # Given x is the population of viruses right now, the viral turnover time describes the time it takes to replace x by new viruses => due to lysis new viral particles come free
-  
   vpres_corrected <- vpres_corrected %>%
     mutate(V_TT = c_VP / V_OS)
   
   ## 6. Nutrient release in bacteria and viruses for C, N and P:
-  for (nutrient in 1:length(nutrient_content_B)){
-    for (bs in BS){
+  for (bs in BS){
+    for (nutrient in 1:length(nutrient_content_B)){
       current_rate_column <- paste0('Rate_BS_', bs)
       col_name <- paste0('DO', names(nutrient_content_B[nutrient]), '_B_BS_', bs)
       vpres_corrected[[col_name]] <- vpres_corrected[[current_rate_column]] * nutrient_content_B[[nutrient]]
@@ -301,11 +306,88 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
     col_name <- paste0('DO', names(nutrient_content_V[nutrient]), '_V')
     vpres_corrected[[col_name]] <- vpres_corrected[[current_rate_column]] * nutrient_content_V[[nutrient]]
   }
+  
+  # Write results in csv. If no csv is wanted, set write_csv to F
+  if (write_output == T){
+    
+    # Create data dictionary
+    data_dictionary <- data.frame(
+      Variable = colnames(vpres_corrected),
+      Unit = c('/', '/', 'm', 'h', '/', '/', '#VLP (virus-like particles)/mLh', '#VLP/mL', '/', '/', '/',
+               '#VLP/mL', '#VLP/mL', '#VLP/mL', '#VLP/mLh', '#VLP/mL', '/', '%', '#VLP/mLh', '%', '%',
+               '%', '#VLP/mLh', '%', '%', '%', '#VLP/mLh', '%', '%', '1/h', 'g C/mLh', 'g N/mLh', 'g P/mLh',
+               'g C/mLh', 'g N/mLh', 'g P/mLh', 'g C/mLh', 'g N/mLh', 'g P/mLh', 'g C/mLh', 'g N/mLh', 'g P/mLh'),
+      Description = c(
+        'Location of the experiment',
+        'Number of station where experiment is conducted',
+        'Depth at which experiment is performed',
+        'Timepoints of sampling data, expressed in a time range: starting at T = 0 until time of measuring X => T0_TX',
+        'Population Types: c_Viruses covers the entire virus population, while c_V1, c_V2, and c_V3 represent subpopulations',
+        'Sample Types: VP rfor lytic viral production, Diff for lysogenic viral production, VPC for both',
+        'Viral production rate: the mean viral production rate during the current Time_Range',
+        'Absolute viral production at current timepoint',
+        'The standard error on the viral production rate',
+        'R-squared value: goodness of fit of the linear regression model',
+        'Calculation method of viral production',
+        'Bacterial abundance at the beginning of the experiment (T0)',
+        'Bacterial abundance in the original sample',
+        'Viral abundance in the original sample',
+        'Corrected viral production rate: viral production rate in the original sample',
+        'Corrected absolute viral production: absolute viral production in the original sample',
+        'Corrected standard error on the viral production rate',
+        'Percentage of cells for given burst size: % lytically infected cells for VP samples, % lysogenic cells for Diff samples',
+        'Rate of bacteria for given burst size: lysis rate of bacteria for VP samples, lysogenic rate of bacteria for Diff samples',
+        'Percentage of bacterial production lysed: the quantity of bacterial biomass that undergoes lysis',
+        'Percentage of bacterial loss per day: the rate at which bacteria are removed due to viral lysis',
+        'Percentage of cells for given burst size: % lytically infected cells for VP samples, % lysogenic cells for Diff samples',
+        'Rate of bacteria for given burst size: lysis rate of bacteria for VP samples, lysogenic rate of bacteria for Diff samples',
+        'Percentage of bacterial production lysed: the quantity of bacterial biomass that undergoes lysis',
+        'Percentage of bacterial loss per day: the rate at which bacteria are removed due to viral lysis',
+        'Percentage of cells for given burst size: % lytically infected cells for VP samples, % lysogenic cells for Diff samples',
+        'Rate of bacteria for given burst size: lysis rate of bacteria for VP samples, lysogenic rate of bacteria for Diff samples',
+        'Percentage of bacterial production lysed: the quantity of bacterial biomass that undergoes lysis',
+        'Percentage of bacterial loss per day: the rate at which bacteria are removed due to viral lysis',
+        'Viral turnover time: time to replacte the current virus population by new viruses',
+        'Dissolved organic carbon release of bacteria for given burst size',
+        'Dissolved organic nitrogen release of bacteria for given burst size',
+        'Dissolved organic phosphorous release of bacteria for given burst size',
+        'Dissolved organic carbon release of bacteria for given burst size',
+        'Dissolved organic nitrogen release of bacteria for given burst size',
+        'Dissolved organic phosphorous release of bacteria for given burst size',
+        'Dissolved organic carbon release of bacteria for given burst size',
+        'Dissolved organic nitrogen release of bacteria for given burst size',
+        'Dissolved organic phosphorous release of bacteria for given burst size',
+        'Dissolved organic carbon release of viruses',
+        'Dissolved organic nitrogen release of viruses',
+        'Dissolved organic phosphorous release of viruses'
+      )
+    )
+    
+    # Create Workbook
+    wb <- createWorkbook()
+    
+    # Add data and dictionary as separate sheets
+    addWorksheet(wb, 'Data')
+    writeData(wb, sheet = 'Data', vpres_corrected)
+    
+    addWorksheet(wb, 'Data dictionary')
+    writeData(wb, sheet = 'Data dictionary', data_dictionary)
+    
+    # Set column width and bold column names
+    setColWidths(wb, sheet = "Data dictionary", cols = 1:ncol(data_dictionary), widths = "auto")
+    
+    bold_style <- createStyle(textDecoration = c("bold"))
+    addStyle(wb, "Data", style = bold_style, rows = 1, cols = 1:ncol(vpres_corrected))
+    addStyle(wb, "Data dictionary", style = bold_style, rows = 1, cols = 1:ncol(data_dictionary))
+    
+    # Save workbook as excel file
+    saveWorkbook(wb, file = paste0(res_path, 'vp_calc_ANALYZED.xlsx'), overwrite = T)
+  }
 
   return(vpres_corrected)
 }
 
-analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020, data_all, df_abundance)
+analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020, data, df_abundance)
 
 
 

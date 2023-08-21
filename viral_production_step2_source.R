@@ -25,7 +25,7 @@
 packages_to_load<- c("tidyverse", "flowWorkspace", "scales",
                      "readxl", "emmeans", "lme4", "ggsci",
                      "svglite", "tidyr", "data.table",
-                     "colorspace", "cowplot")
+                     "colorspace", "cowplot", 'openxlsx', 'stringr')
 
 # If package not presented, install with BiocManager 
 for(pack in packages_to_load){
@@ -73,7 +73,7 @@ tp <- function(DF){
   # We have added columns to each replicate with its timeframe
   # Change the format => increase number of rows and decrease the number of columns with pivot_longer()
   DF <- DF %>%
-    pivot_longer(cols = colnames, names_to = "Time_Range", values_to = "Time_Time") %>%
+    pivot_longer(cols = all_of(colnames), names_to = "Time_Range", values_to = "Time_Time") %>%
     drop_na() # Drops all the rows which have a NA value
   # When running only this function as DF <- tp(data), an empty dataframe will be returned because of the column "Comments", which consists of NA
   
@@ -83,11 +83,9 @@ tp <- function(DF){
 # Separate replicate dataframe
 df_SR <- function(data, keep_0.22 = F, add_tp = T){
   
-  columns_to_select <- c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-                         'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')
-  
   DF <- data %>%
-    select(all_of(columns_to_select)) %>%
+    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
     gather(7:13, key = 'Population', value = 'Count') %>% # Taking index of columns instead of name, since we select columns in first step => order will always be this one
     mutate(Microbe = if_else(Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>% # Adding an extra column defining if replicate is from bacterial or viral origin
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type','Replicate','Population', as.numeric(Timepoint)) # Reorder the rows by the values of the selected columns
@@ -129,11 +127,9 @@ df_AVG <- function(data, add_tp = T){
   DF <- data[data$Sample_Type != '0.22',]
   
   # Calculating number, mean of replicates and standard error 
-  columns_to_select <- c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-                         'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3')
-  
   DF <- DF %>%
-    select(all_of(columns_to_select)) %>%
+    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
+                    'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
     gather(7:13, key = 'Population', value = 'Count') %>%
     group_by(Location, Station_Number, Depth, Sample_Type, Timepoint, Population) %>%
     summarise(n = n(), Mean = mean(Count), SE = plotrix::std.error(Count)) # plotrix::std.error calculates the standard error of the mean
@@ -150,9 +146,9 @@ df_AVG <- function(data, add_tp = T){
   
   if ('VPC' %in% DF$Sample_Type){
     DF_mean$Diff <- with(DF_mean, VPC - VP)
-    DF_mean <- pivot_longer(DF_mean, cols = c('VP', 'VPC', 'Diff'), names_to = 'Sample_Type', values_to = 'Mean')
+    DF_mean <- pivot_longer(DF_mean, cols = all_of(c('VP', 'VPC', 'Diff')), names_to = 'Sample_Type', values_to = 'Mean')
     DF_se$Diff <- with(DF_se, VPC + VP)
-    DF_se <- pivot_longer(DF_se, cols = c('VP', 'VPC', 'Diff'), names_to = 'Sample_Type', values_to = 'SE')
+    DF_se <- pivot_longer(DF_se, cols = all_of(c('VP', 'VPC', 'Diff')), names_to = 'Sample_Type', values_to = 'SE')
   }
   
   # Merging in one dataframe and adding columns Microbe and Subgroup
@@ -883,6 +879,7 @@ LM_1 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'LM_AP')
   
   return(DF_LM1)
@@ -907,6 +904,7 @@ LM_2 <- function(data, avg = T){
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC')),
               factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+      mutate_at(c('Station_Number'), as.integer) %>%
       mutate(VP_Type = 'LM_SR')
   } else if (avg == T){
     DF_LM2 <- DF_VP %>%
@@ -917,6 +915,7 @@ LM_2 <- function(data, avg = T){
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
               factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+      mutate_at(c('Station_Number'), as.integer) %>%
       mutate(VP_Type = 'LM_SR_AVG')
   }
   
@@ -940,6 +939,7 @@ LM_3 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'LM_AR')
   
   return(DF_LM3)
@@ -960,6 +960,7 @@ LM_4 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'LM_AR_DIFF')
   
   return(DF_LM4)
@@ -980,6 +981,7 @@ LM_5 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'LM_AR_DIFF_LMER')
   
   return(DF_LM5)
@@ -1002,6 +1004,7 @@ VPCL_1 <- function(data, avg = T){
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC')),
               factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+      mutate_at(c('Station_Number'), as.integer) %>%
       mutate(VP_Type = 'VPCL_SR')
   }else if (avg == T){
     DF_VPCL1 <- DF_VP %>%
@@ -1012,6 +1015,7 @@ VPCL_1 <- function(data, avg = T){
       arrange('Location', 'Station_Number', 'Depth',
               factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
               factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+      mutate_at(c('Station_Number'), as.integer) %>%
       mutate(VP_Type = 'VPCL_SR_AVG')
   }
   
@@ -1035,6 +1039,7 @@ VPCL_2 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'VPCL_AR')
   
   return(VPCL2)
@@ -1057,6 +1062,7 @@ VPCL_3 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'VPCL_AR_SE')
   
   return(VPCL3)
@@ -1077,6 +1083,7 @@ VPCL_4 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'VPCL_AR_DIFF')
   
   return(VPCL4)
@@ -1097,6 +1104,7 @@ VPCL_5 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'VPCL_AR_DIFF_SE')
   
   return(VPCL5)
@@ -1117,6 +1125,7 @@ VPCL_6 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'VPCL_AR_DIFF_LMER')
   
   return(VPCL6)
@@ -1137,6 +1146,7 @@ VPCL_7 <- function(data){
     arrange('Location', 'Station_Number', 'Depth',
             factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),
             factor(Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>% 
+    mutate_at(c('Station_Number'), as.integer) %>%
     mutate(VP_Type = 'VPCL_AR_DIFF_LMER_SE')
   
   return(VPCL7)
