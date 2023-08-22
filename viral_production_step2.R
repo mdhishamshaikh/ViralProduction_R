@@ -273,7 +273,7 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   
   for (bs in BS){
     ## 2.
-    col_name <- paste0('%Cells_BS_', bs)
+    col_name <- paste0('P_Cells_BS_', bs)
     vpres_corrected[[col_name]] <- vpres_corrected$abs_VP * (100 / (vpres_corrected$B_0 * bs))
     
     ## 3.
@@ -281,10 +281,10 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
     vpres_corrected[[col_name1]] <- vpres_corrected$c_VP / bs
     
     ## 4.
-    col_name2 <- paste0('%BP_Lysed_BS_', bs)
+    col_name2 <- paste0('P_BP_Lysed_BS_', bs)
     vpres_corrected[[col_name2]] <- vpres_corrected[[col_name1]] / BSP
     
-    col_name3 <- paste0('%B_Loss_BS_', bs)
+    col_name3 <- paste0('P_B_Loss_BS_', bs)
     vpres_corrected[[col_name3]] <- ((vpres_corrected[[col_name1]] * 100) / vpres_corrected$B_OS) * 24
   }
   
@@ -363,25 +363,9 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
       )
     )
     
-    # Create Workbook
-    wb <- createWorkbook()
-    
-    # Add data and dictionary as separate sheets
-    addWorksheet(wb, 'Data')
-    writeData(wb, sheet = 'Data', vpres_corrected)
-    
-    addWorksheet(wb, 'Data dictionary')
-    writeData(wb, sheet = 'Data dictionary', data_dictionary)
-    
-    # Set column width and bold column names
-    setColWidths(wb, sheet = "Data dictionary", cols = 1:ncol(data_dictionary), widths = "auto")
-    
-    bold_style <- createStyle(textDecoration = c("bold"))
-    addStyle(wb, "Data", style = bold_style, rows = 1, cols = 1:ncol(vpres_corrected))
-    addStyle(wb, "Data dictionary", style = bold_style, rows = 1, cols = 1:ncol(data_dictionary))
-    
-    # Save workbook as excel file
-    saveWorkbook(wb, file = paste0(res_path, 'vp_calc_ANALYZED.xlsx'), overwrite = T)
+    # Save as two separate csv.files
+    write.csv(vpres_corrected, file.path(res_path, 'vp_calc_ANALYZED.csv'), row.names = F)
+    write.csv(data_dictionary, file.path(res_path, 'ANALYZED_Legend.csv'), row.names = F)
   }
 
   return(vpres_corrected)

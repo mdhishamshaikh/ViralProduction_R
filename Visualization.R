@@ -284,57 +284,221 @@ collision_rates_plot <- function(data, abundance){
 collision_rates_plot(data, df_abundance)
 
 # 2.3 Comparison of viral production calculation by different methods
-# Compare the different variants of either linear regression and VIPCAL
 compare_variants_vp <- function(data){
   
-  # Transform data
+  ## 1. Linear regression variants
+  # Plot data
   plot_data_LM <- data %>%
-    filter(str_starts(VP_Type, "LM")) 
+    filter(str_starts(VP_Type, "LM"), Population == 'c_Viruses')
   
-  plot_data_VPCL <- data %>%
-    filter(str_starts(VP_Type, "VPCL"))
-  
-  # Create ggplot object
+  # Mean
   n1 <- ggstatsplot::ggbetweenstats(data = plot_data_LM,
                                     x = VP_Type,
-                                    y = VP,
+                                    y = VP, 
                                     type = 'nonparametric',
                                     plot.type = "violin",
-                                    pairswise.display = 'significant',
+                                    violin.args = list(fill = NA),
+                                    boxplot.args = list(width = 0),
+                                    pairswise.display = 's',
                                     pairwise.comparisons = TRUE,
-                                    p.adjust.method = 'holm',
-                                    bf.message = FALSE,
                                     centrality.plotting = FALSE,
-                                    title = 'Kruskal-Wallis Test: Linear Regression variants')
+                                    ggsignif.args = list(textsize = 3),
+                                    title = 'Kruskal-Wallis Test: LM Mean')
   
-  n2 <- ggstatsplot::ggbetweenstats(data = plot_data_VPCL,
+  # SE
+  n2 <- ggstatsplot::ggbetweenstats(data = plot_data_LM,
                                     x = VP_Type,
-                                    y = VP,
+                                    y = VP_SE, 
                                     type = 'nonparametric',
                                     plot.type = "violin",
-                                    pairswise.display = 'significant',
+                                    violin.args = list(fill = NA),
+                                    boxplot.args = list(width = 0),
+                                    pairswise.display = 's',
                                     pairwise.comparisons = TRUE,
-                                    p.adjust.method = 'holm',
-                                    bf.message = FALSE,
                                     centrality.plotting = FALSE,
-                                    title = 'Kruskal-Wallis Test: VIPCAL variants')
+                                    ggsignif.args = list(textsize = 3),
+                                    title = 'Kruskal-Wallis Test: LM SE')
   
-  # Combine plots
+  # Combine and save plot
   n <- ggstatsplot::combine_plots(
-    list(n1,n2),
+    list(n1, n2),
     plotgrid.args = list(nrow = 2),
     annotation.args = list(
-      title = "Comparison of viral production calculations by different methods"))
+      title = "Comparison of viral production calculation by different linear regression variants"
+    )
+  )
   
-  # Save plot as svg file
-  ggsave(paste0('Figures/', unique(data$Location), '_Comparison_Methods.svg'), plot = n, width = 12, height = 15)
+  ggsave(paste0('Figures/', unique(data$Location), '_Comparison_Linear_Methods.svg'), plot = n, width = 8, height = 10)
+  
+  ## 2. VIPCAL variants
+  # Plot data
+  plot_data_VPCL <- data %>%
+    filter(str_starts(VP_Type, "VPCL"), Population == 'c_Viruses')
+  
+  # Mean
+  m1 <- ggstatsplot::ggbetweenstats(data = plot_data_VPCL,
+                                    x = VP_Type,
+                                    y = VP, 
+                                    type = 'nonparametric',
+                                    plot.type = "violin",
+                                    violin.args = list(fill = NA),
+                                    boxplot.args = list(width = 0),
+                                    pairswise.display = 's',
+                                    pairwise.comparisons = TRUE,
+                                    centrality.plotting = FALSE,
+                                    ggsignif.args = list(textsize = 3),
+                                    title = 'Kruskal-Wallis Test: VIPCAL Mean')
+  
+  # SE
+  m2 <- ggstatsplot::ggbetweenstats(data = plot_data_VPCL,
+                                    x = VP_Type,
+                                    y = VP_SE, 
+                                    type = 'nonparametric',
+                                    plot.type = "violin",
+                                    violin.args = list(fill = NA),
+                                    boxplot.args = list(width = 0),
+                                    pairswise.display = 's',
+                                    pairwise.comparisons = TRUE,
+                                    centrality.plotting = FALSE,
+                                    ggsignif.args = list(textsize = 3),
+                                    title = 'Kruskal-Wallis Test: VIPCAL SE')
+  
+  # Combine and save plot
+  m <- ggstatsplot::combine_plots(
+    list(m1, m2),
+    plotgrid.args = list(nrow = 2),
+    annotation.args = list(
+      title = "Comparison of viral production calculation by different VIPCAL variants"
+    )
+  )
+  
+  ggsave(paste0('Figures/', unique(data$Location), '_Comparison_VIPCAL_Methods.svg'), plot = m, width = 10, height = 10)
+  
+  ## 3. VIPCAL/VIPCAL_SE/LM
+  # Plot data
+  plot_data1 <- data %>%
+    filter(VP_Type %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), Population == 'c_Viruses') %>%
+    mutate(VP = VP / 1e6)
+  
+  plot_data2 <- data %>%
+    filter(VP_Type %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE', 'LM_AR_DIFF'), Population == 'c_Viruses') %>%
+    mutate(VP = VP / 1e6)
+  
+  # ggplot object
+  x1 <- ggstatsplot::ggbetweenstats(data = plot_data1,
+                                    x = VP_Type,
+                                    y = VP, 
+                                    type = 'parametric',
+                                    plot.type = "violin",
+                                    violin.args = list(fill = NA),
+                                    pairswise.display = 's',
+                                    pairwise.comparisons = TRUE,
+                                    centrality.plotting = TRUE,
+                                    ggsignif.args = list(textsize = 3),
+                                    title = 'Welch test: VIPCAL vs VIPCAL_SE')
+  
+  x2 <- ggstatsplot::ggbetweenstats(data = plot_data2,
+                                    x = VP_Type,
+                                    y = VP, 
+                                    type = 'parametric',
+                                    plot.type = "violin",
+                                    violin.args = list(fill = NA),
+                                    pairswise.display = 's',
+                                    pairwise.comparisons = TRUE,
+                                    centrality.plotting = TRUE,
+                                    ggsignif.args = list(textsize = 3),
+                                    title = 'Welch test: LM vs VIPCAL vs VIPCAL_SE')
+  
+  # Combine and save plot
+  x <- ggstatsplot::combine_plots(
+    list(x1, x2),
+    plotgrid.args = list(nrow = 2),
+    annotation.args = list(
+      title = "Comparison of LM, VIPCAL and VIPCAL_SE"
+    )
+  )
+  
+  ggsave(paste0('Figures/', unique(data$Location), '_Comparison_LM_VIPCAL_VIPCAL_SE.svg'), plot = x, width = 8, height = 10)
+  
+  ## 4. Overview all methods
+  # Plot data
+  plot_data_all <- data %>%
+    filter(Population == 'c_Viruses')
+  
+  # ggplot object
+  all <- ggplot(data = plot_data_all, aes(x = VP_Type, y = VP, fill = VP_Type)) + 
+    geom_violin() + 
+    geom_point(position = position_jitterdodge(jitter.width = 0.2), size = 1.5, shape = 16, alpha = 0.6) + 
+    geom_hline(yintercept = 0) + 
+    scale_fill_brewer(palette = 'Spectral') + 
+    labs(x = 'VP calculation method',
+         y = 'Viral Production',
+         title = 'Comparison of viral production calculation methods') + 
+    theme_classic() + 
+    theme(axis.title = element_text(face = 'bold'),
+          title = element_text(face = 'bold'),
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+  # Save plot as svg
+  ggsave(paste0('Figures/', unique(data$Location), '_Comparison_ALL.svg'), plot = all, width = 15, height = 10)
 }
 
 compare_variants_vp(vp_calc_NJ2020)
 
+# 2.4 Percentage lytically infected and lysogenic cells over time
+percentage_cells <- function(data){
+  
+  # Select data
+  plot_data <- data %>%
+    filter(Sample_Type != 'VPC', VP_Type == 'VPCL_AR_DIFF', Population == 'c_Viruses') %>%
+    select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', starts_with('P_Cells_')) %>%
+    group_by(Station_Number, Sample_Type) %>%
+    mutate(Timepoint = as.numeric(gsub("[^0-9.]+", "", Time_Range))) %>%
+    pivot_longer(cols = starts_with('P_Cells_'), names_to = 'Burst_Size', values_to = 'P_Cells') %>%
+    mutate(P_Cells = ifelse(P_Cells > 100, 100, P_Cells))
+  
+  # ggplot object
+  n <- ggplot(data = plot_data) + 
+    geom_col(mapping = aes(x = as.factor(Timepoint), y = P_Cells, fill = Sample_Type), position = 'dodge') + 
+    facet_grid(Burst_Size ~ Station_Number, scales = "free_x") + 
+    labs(x = 'Timepoint',
+         y = 'Percentage of cells',
+         title = 'Percentage of lytically infected and lysogenic cells for different burst sizes') + 
+    scale_fill_manual(name = 'Sample_Type',
+                      labels = c('Diff' = "Diff: Percentage lysogenic cells", 'VP' = "VP: Percentage lytically infected cells"),
+                       values = c(Diff = "#669900", VP = "#996633")) +
+    
+    theme_bw() + 
+    theme(strip.text = element_text(face = "bold"),
+          strip.background = element_rect(color = 'black', fill = '#999999'),
+          axis.title = element_text(face = 'bold'),
+          title = element_text(face = 'bold'),
+          legend.position = "bottom") +
+    guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+  
+  # Save plot
+  ggsave(paste0('Figures/', unique(plot_data$Location), '_Percentage_Cells.svg'), plot = n, width = 10, height = 10)
+}
 
+percentage_cells(vp_calc_ANALYZED)
 
+# 2.5 Total nutrient release
+nutrient_release <- function(data){
+  # Select data
+  nutrients_B <- plot_data[,grep("^DO.\\_B_BS_\\d{2}$", colnames(plot_data))][, c(4,5,6)] # Only want the nutrient values for the middle burst size
+  
+  plot_data <- data %>%
+    select('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Type', starts_with('DO')) %>%
+    unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) %>%
+    filter(Population == 'c_Viruses', VP_Type %in% c('LM_AR_DIFF', 'VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
+  
+  for (x_B in nutrients_B){}
+  
+  
+    
+}
 
+nutrient_release(vp_calc_ANALYZED)
 
 
 
