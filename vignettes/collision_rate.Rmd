@@ -1,0 +1,30 @@
+---
+title: "collision rate"
+author: "Hisham M Shaikh"
+date: '2023-07-09'
+output: html_document
+---
+
+We will assess the colision frequency of viruses with bacteria in vira production assay. 
+Compare the differences between VP and VPC treatments.\
+\
+
+The formula I'll use is-\
+\
+
+```{r}
+na<- 100
+nb<- 1000
+ra<- 50
+rb<- 5
+kb<- 1.38e-23
+temp<- 25+273.15
+uab<- 5 #check the actual values of these
+
+
+freq<- na * nb * ((ra + rb)^2) * sqrt((8 * pi * kb * temp) / uab)
+  
+```
+
+Let's calculate the increase in collision frequency as the experiment progresses.\
+\

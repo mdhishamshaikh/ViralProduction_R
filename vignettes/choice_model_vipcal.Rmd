@@ -1,0 +1,180 @@
+---
+title: "Choice of VIPCAL Model"
+author: "Hisham M Shaikh"
+date: '2022-12-21'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**1.0 Setting Up the environment**\
+\
+**1.1 Setting working directory**\
+`setwd("C:/Users/hisham.shaikh/OneDrive - UGent/Projects/FCM_R/ViralProduction_R"`\
+\
+**1.2 Installing Libraries**\
+``` {r}
+library("lme4")
+library("emmeans")
+```
+\
+**2.0 Importing and wrangling data**\
+
+```{r source, echo=T, results='hide'}
+source("C:/Users/hisham.shaikh/OneDrive - UGent/Projects/FCM_R/ViralProduction_R/vp_functions.R", echo=TRUE) #functions written to ease manipulation
+
+```
+
+```{r data input, echo = T, results = 'hide'}
+NJ1<- read.csv("NJ1.csv")
+lmer_data<- df_sr(NJ1)
+
+#only calculating for total virus for now.
+
+lmer_data<- lmer_data[lmer_data$count =="c_Viruses",]
+
+lmer_data$Sample_Type <- as.factor(lmer_data$Sample_Type)
+lmer_data$Timepoint2<- as.factor(lmer_data$Timepoint)
+
+lmer_data[lmer_data$Sample_Type == "VPC",]$Replicate<- replace(lmer_data[lmer_data$Sample_Type == "VPC",]$Replicate, lmer_data[lmer_data$Sample_Type == "VPC",]$Replicate == c("1","2", "3"), c("4", "5", "6"))
+
+lmer_data[order(lmer_data$Replicate),]
+```
+
+
+**3.0 Modeling**\
+Adding all possible models \
+
+```{r models, echo=T, results= 'hide'}
+
+#Linear Models
+
+m1<- lm(data = lmer_data, formula = value~ Sample_Type + Timepoint2 + Replicate)
+summary(m1)  #all three predictors
+m2<- lm(data = lmer_data, formula = value~ Sample_Type + Timepoint2)
+summary(m2) #without replicate
+m3<- lm(data = lmer_data, formula = value~ Sample_Type + Timepoint2 + Replicate + Sample_Type*Timepoint2)
+summary(m3) #with an interaction between sample type and time points
+m4<- lm(data = lmer_data, formula = value~ Sample_Type + Timepoint2 +  Sample_Type*Timepoint2)
+summary(m4) #with an interaction between sample type and time points and without replicates
+
+#Linear Mixed Effect models
+#As we wanted to keep the identity of replicates. We add replicates as the random effect factor
+
+m5<- lmer(data = lmer_data, formula = value~ Sample_Type + Timepoint2 + Sample_Type*Timepoint2 + (1 | Replicate))
+summary(m5) #Both predictors and interaction between them 
+m6<- lmer(data = lmer_data, formula = value~  Sample_Type*Timepoint2 + (1 | Replicate))
+summary(m6) #Only interaction term. We are trying to predict value over a combination of sample type and time points when we keep all points of a replicate together.
+m7<- lmer(data = lmer_data, formula = value~  Sample_Type*Timepoint2 + (1 + value| Replicate))
+summary(m7) #only interaction term, but where replicates vary with value. This model doesn't make sense as what we're basically saying is: we are trying to predict value over a combination of sample type and time points when replicates vary with value itself. This collapses our model.
+m8<- lmer(data = lmer_data, formula = value~  Sample_Type*Timepoint2 + (1 + Sample_Type| Replicate))
+summary(m8) #only interaction term, but where replicates vary with sample type. We are trying to predict value over a combination of sample type and time points when replicates vary with sample_type.
+```
+
+AIC was calculated for each of these models\
+
+```{r}
+AIC.table <- MuMIn::model.sel(m1, m2, m3, m4, m5, m6, m7, m8)
+AIC.table <- AIC.table[, c("df", "logLik", "AICc", "delta")]
+AIC.table
+```
+
+As you can see the best models are m7, m5, m6, and m8 (m7> m5, m6 > m8). All of them are mixed effect models. m5 and m6 are identical in terms of their assessment. Therefore, there is no effect of adding Sample Type and Timepoint as separate predictor variables.\
+\
+m7 is bogus, as we previously established\
+\
+
+Yet, let's assess the fit of these models.\
+
+*Normalized Residuals *
+```{r}
+
+par(mfrow = c(2,2))
+for( model in 5:8){
+ a<- paste0("m", model)
+ 
+hist(resid(get(a)),
+      xlab = "Normalized Residuals",
+     main = paste("LMEM", a , sep = "_")) 
+  
+}
+```
+
+
+*Normalized Residuals vs Predicted Values plots*
+```{r}
+
+par(mfrow = c(2,2))
+for( model in 5:8){
+  a<- paste0("m", model)
+   plot(resid(get(a)) ~ fitted(get(a)), 
+        xlab = "Predicted values", 
+        ylab = "Normalized residuals", 
+        main = paste("LMEM", a , sep = "_"))
+   abline(h = 0, lty = 2)
+  
+}
+
+```
+m5, m6, m7 are quite similar.\
+
+Let's plot the predicted vs observed values to asess the models further \
+
+*Normalized Residuals vs Replicates plots*
+```{r}
+
+par(mfrow = c(2,2))
+for( model in 5:8){
+  a<- paste0("m", model)
+  print(a)
+  boxplot(resid(get(a)) ~ Replicate, 
+          data = lmer_data, 
+          xlab = "Replicate",
+          ylab = "Normalized residuals",
+          main = paste("LMEM", a , sep = "_"))
+ 
+  abline(h = 0, lty = 2)
+  
+}
+```
+
+*Predicted Values *
+```{r}
+
+par(mfrow = c(2,2))
+for( model in 5:8){
+ a<- paste0("m", model)
+ 
+hist(predict(get(a)),
+      xlab = "Predicted Values",
+     main = paste("LMEM", a , sep = "_")) 
+  
+}
+```
+
+*Predicted vs Observed Values plots*
+```{r}
+
+par(mfrow = c(2,2))
+for( model in 5:8){
+  a<- paste0("m", model)
+  plot(predict(get(a)) ~ lmer_data$value, 
+       xlab = "Observed values", 
+       ylab = "Predicted Values", 
+       main = paste("LMEM", a , sep = "_"))
+  abline(a= 0, b = 1)
+  
+}
+
+```
+
+The residuals of m7 are extremely low. We could take either, m5, m6, or m8. As m6 and m5 are identical, we prefer m6 as it is simpler. \
+AIC values suggest m6 is slightly better than m8.\
+
+***Our winner is M6!***
+
+
