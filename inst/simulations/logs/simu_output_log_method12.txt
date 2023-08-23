@@ -1,8 +1,0 @@
-[1] 10
-[1] "10 VP"
-[1] "Number of peaks and valleys identified are the same: 2"
-[1] "10 VPC"
-[1] "Number of peaks and valleys identified are the same: 1"
-[1] "10 Diff"
-[1] "Number of peaks and valleys identified are the same: 1"
-[1] "done"
