@@ -240,7 +240,7 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   }
   if (is_empty(nutrient_content_B)){
     # Article: Fagerbakke, KM & Heldal, Mikal & Norland, S. (1996). Content of Carbon, Nitrogen, Oxygen, Sulfur and Phosphorus in Native Aquatic and Cultured Bacteria. Aquatic Microbial Ecology - AQUAT MICROB ECOL. 10. 15-27. 10.3354/ame010015
-    nutrient_content_B <- list(C = 19e-15, N = 5e-15, V = 0.8e-15) # unit = g (C/N/P) / cell 
+    nutrient_content_B <- list(C = 19e-15, N = 5e-15, P = 0.8e-15) # unit = g (C/N/P) / cell 
   }
   if (is_empty(nutrient_content_V)){
     # Article: Jover, L., Effler, T., Buchan, A. et al. The elemental composition of virus particles: implications for marine biogeochemical cycles. Nat Rev Microbiol 12, 519–528 (2014). https://doi.org/10.1038/nrmicro3289
@@ -261,11 +261,13 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   
   ## 2. Lytic and lysogenic viral production:
   # abs_VP corresponds to the absolute viral production at that point of the experiment, VP takes the time range in account and refers to the mean viral production or viral production rate in that time range
+  # Burst size = the number of new viral particles that are released from an infected bacterial cell
   # Given the burst size, the percentage of cells can be determined (VP_samples = percentage of lytically infected cells; Diff_samples = percentage of lysogenic cells; VPC_samples = both)
-  # A higher burst size, meaning that the bacteriophages will burst, will result in a lower percentage cells
+  # A higher burst size, meaning that the bacteriophages can have more viral particles before they burst => lower percentage infected cells
   
   ## 3. Lysis & Lysogenic rate of bacteria:
   # The rate at which bacterial cells rupture (lytic) or become lysogenized (lysogenic)
+  # Higher burst size means more viral particles before cell rupture = lower lysis rate
   # Need to use the viral production rate of the original sample (c_VP)
   
   ## 4. Percentage of bacterial production lysed and bacterial loss per day:
@@ -294,17 +296,24 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
     mutate(V_TT = c_VP / V_OS)
   
   ## 6. Nutrient release in bacteria and viruses for C, N and P:
+  # For viruses:
+  for (nutrient in 1:length(nutrient_content_V)){
+    col_name <- paste0('DO', names(nutrient_content_V[nutrient]), '_V')
+    vpres_corrected[[col_name]] <- vpres_corrected$VP * nutrient_content_V[[nutrient]]
+  }
+  
+  # For bacteria
   for (bs in BS){
     for (nutrient in 1:length(nutrient_content_B)){
       current_rate_column <- paste0('Rate_BS_', bs)
       col_name <- paste0('DO', names(nutrient_content_B[nutrient]), '_B_BS_', bs)
       vpres_corrected[[col_name]] <- vpres_corrected[[current_rate_column]] * nutrient_content_B[[nutrient]]
+      
+      # Add column with total nutrient release (bacteria + virus)
+      col_name_virus <- paste0('DO', names(nutrient_content_V[nutrient]), '_V')
+      col_name_2 <- paste0('Total_DO', names(nutrient_content_B[nutrient]), '_BS_', bs)
+      vpres_corrected[[col_name_2]] <- vpres_corrected[[col_name]] + vpres_corrected[[col_name_virus]]
     }
-  }
-  
-  for (nutrient in 1:length(nutrient_content_V)){
-    col_name <- paste0('DO', names(nutrient_content_V[nutrient]), '_V')
-    vpres_corrected[[col_name]] <- vpres_corrected[[current_rate_column]] * nutrient_content_V[[nutrient]]
   }
   
   # Write results in csv. If no csv is wanted, set write_csv to F
@@ -316,7 +325,8 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
       Unit = c('/', '/', 'm', 'h', '/', '/', '#VLP (virus-like particles)/mLh', '#VLP/mL', '/', '/', '/',
                '#VLP/mL', '#VLP/mL', '#VLP/mL', '#VLP/mLh', '#VLP/mL', '/', '%', '#VLP/mLh', '%', '%',
                '%', '#VLP/mLh', '%', '%', '%', '#VLP/mLh', '%', '%', '1/h', 'g C/mLh', 'g N/mLh', 'g P/mLh',
-               'g C/mLh', 'g N/mLh', 'g P/mLh', 'g C/mLh', 'g N/mLh', 'g P/mLh', 'g C/mLh', 'g N/mLh', 'g P/mLh'),
+               'g C/mLh', 'g C/mLh', 'g N/mLh', 'g N/mLh', 'g P/mLh', 'g P/mLh', 'g C/mLh', 'g C/mLh', 'g N/mLh',
+               'g N/mLh', 'g P/mLh', 'g P/mLh', 'g C/mLh', 'g C/mLh', 'g N/mLh', 'g N/mLh', 'g P/mLh', 'g P/mLh'),
       Description = c(
         'Location of the experiment',
         'Number of station where experiment is conducted',
@@ -348,18 +358,27 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
         'Percentage of bacterial production lysed: the quantity of bacterial biomass that undergoes lysis',
         'Percentage of bacterial loss per day: the rate at which bacteria are removed due to viral lysis',
         'Viral turnover time: time to replacte the current virus population by new viruses',
-        'Dissolved organic carbon release of bacteria for given burst size',
-        'Dissolved organic nitrogen release of bacteria for given burst size',
-        'Dissolved organic phosphorous release of bacteria for given burst size',
-        'Dissolved organic carbon release of bacteria for given burst size',
-        'Dissolved organic nitrogen release of bacteria for given burst size',
-        'Dissolved organic phosphorous release of bacteria for given burst size',
-        'Dissolved organic carbon release of bacteria for given burst size',
-        'Dissolved organic nitrogen release of bacteria for given burst size',
-        'Dissolved organic phosphorous release of bacteria for given burst size',
         'Dissolved organic carbon release of viruses',
         'Dissolved organic nitrogen release of viruses',
-        'Dissolved organic phosphorous release of viruses'
+        'Dissolved organic phosphorous release of viruses',
+        'Dissolved organic carbon release of bacteria for given burst size',
+        'Total dissolved organic carbon release for given burst size',
+        'Dissolved organic nitrogen release of bacteria for given burst size',
+        'Total dissolved organic nitrogen release for given burst size', 
+        'Dissolved organic phosphorous release of bacteria for given burst size',
+        'Total dissolved organic phosphorous release of bacteria for given burst size',
+        'Dissolved organic carbon release of bacteria for given burst size',
+        'Total dissolved organic carbon release for given burst size',
+        'Dissolved organic nitrogen release of bacteria for given burst size',
+        'Total dissolved organic nitrogen release for given burst size', 
+        'Dissolved organic phosphorous release of bacteria for given burst size',
+        'Total dissolved organic phosphorous release of bacteria for given burst size',
+        'Dissolved organic carbon release of bacteria for given burst size',
+        'Total dissolved organic carbon release for given burst size',
+        'Dissolved organic nitrogen release of bacteria for given burst size',
+        'Total dissolved organic nitrogen release for given burst size', 
+        'Dissolved organic phosphorous release of bacteria for given burst size',
+        'Total dissolved organic phosphorous release of bacteria for given burst size'
       )
     )
     
@@ -371,7 +390,7 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   return(vpres_corrected)
 }
 
-analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020, data, df_abundance)
+analyze_VP_NJ2020 <- analyze_vpres(vp_calc_ALL, data, df_abundance)
 
 
 

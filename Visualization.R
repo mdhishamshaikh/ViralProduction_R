@@ -99,9 +99,6 @@ overview_plot_counts_over_time <- function(data){
       color <- color + 1 # Go to next color
     }
     
-    # Draw and return plot
-    grid::grid.draw(n_gtable)
-    
     # Save plot as svg file
     ggsave(paste0('Figures/', paste0(unique(df_plot_cot_sub$Location), '_Station_', unique(df_plot_cot_sub$Station_Number), '_Depth_', unique(df_plot_cot_sub$Depth)), '_Overview.svg'), plot = n_gtable, width = 10, height = 10)
   }
@@ -443,7 +440,7 @@ compare_variants_vp <- function(data){
   ggsave(paste0('Figures/', unique(data$Location), '_Comparison_ALL.svg'), plot = all, width = 15, height = 10)
 }
 
-compare_variants_vp(vp_calc_NJ2020)
+compare_variants_vp(vp_calc_ALL)
 
 # 2.4 Percentage lytically infected and lysogenic cells over time
 percentage_cells <- function(data){
@@ -451,30 +448,41 @@ percentage_cells <- function(data){
   # Select data
   plot_data <- data %>%
     filter(Sample_Type != 'VPC', VP_Type == 'VPCL_AR_DIFF', Population == 'c_Viruses') %>%
-    select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', starts_with('P_Cells_')) %>%
+    select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', 'abs_VP', starts_with('P_Cells_')) %>%
     group_by(Station_Number, Sample_Type) %>%
     mutate(Timepoint = as.numeric(gsub("[^0-9.]+", "", Time_Range))) %>%
     pivot_longer(cols = starts_with('P_Cells_'), names_to = 'Burst_Size', values_to = 'P_Cells') %>%
-    mutate(P_Cells = ifelse(P_Cells > 100, 100, P_Cells))
+    mutate(P_Cells = ifelse(P_Cells > 100, 100, P_Cells),
+           abs_VP = abs_VP / 1e6)
   
   # ggplot object
   n <- ggplot(data = plot_data) + 
     geom_col(mapping = aes(x = as.factor(Timepoint), y = P_Cells, fill = Sample_Type), position = 'dodge') + 
-    facet_grid(Burst_Size ~ Station_Number, scales = "free_x") + 
-    labs(x = 'Timepoint',
-         y = 'Percentage of cells',
-         title = 'Percentage of lytically infected and lysogenic cells for different burst sizes') + 
-    scale_fill_manual(name = 'Sample_Type',
-                      labels = c('Diff' = "Diff: Percentage lysogenic cells", 'VP' = "VP: Percentage lytically infected cells"),
-                       values = c(Diff = "#669900", VP = "#996633")) +
+    scale_fill_manual(name = 'Percentage cells',
+                      labels = c(Diff = 'Lysogenic cells', VP = 'Lytically infected cells'),
+                      values = c(Diff = "#66CC00", VP = "#CCCC66")) + 
     
+    geom_point(mapping = aes(x = as.factor(Timepoint), y = abs_VP, color = Sample_Type)) + 
+    scale_color_manual(name = 'Absolute Viral Production',
+                       values = c('#000000', '#666666')) +
+    
+    guides(fill = guide_legend(nrow = 2, byrow = TRUE, order = 1),
+           color = guide_legend(nrow = 2, byrow = TRUE, order = 2)) +
+    
+    scale_y_continuous(limits = c(0,100),
+                       sec.axis = sec_axis(~ .* 1,
+                                           name = "Absolute viral production (x10e6 VLP/mL)")) +
+    
+    facet_grid(Burst_Size ~ Station_Number, scales = 'free_x') + 
+    labs(x = 'Timepoint', 
+         y = 'Percentage of cells', 
+         title = 'Percentage of lytically infected and lysogenic cells for different burst sizes') +
     theme_bw() + 
     theme(strip.text = element_text(face = "bold"),
           strip.background = element_rect(color = 'black', fill = '#999999'),
           axis.title = element_text(face = 'bold'),
           title = element_text(face = 'bold'),
-          legend.position = "bottom") +
-    guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+          legend.position = "bottom")
   
   # Save plot
   ggsave(paste0('Figures/', unique(plot_data$Location), '_Percentage_Cells.svg'), plot = n, width = 10, height = 10)
@@ -484,20 +492,35 @@ percentage_cells(vp_calc_ANALYZED)
 
 # 2.5 Total nutrient release
 nutrient_release <- function(data){
+  
   # Select data
-  nutrients_B <- plot_data[,grep("^DO.\\_B_BS_\\d{2}$", colnames(plot_data))][, c(4,5,6)] # Only want the nutrient values for the middle burst size
-  
   plot_data <- data %>%
-    select('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Type', starts_with('DO')) %>%
-    unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) %>%
-    filter(Population == 'c_Viruses', VP_Type %in% c('LM_AR_DIFF', 'VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
+    filter(Population == 'c_Viruses', Sample_Type == 'VP', VP_Type == 'VPCL_AR_DIFF', Time_Range == 'T0_T24') %>%
+    select('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Type', matches('Total_DO')) %>%
+    pivot_longer(cols = matches('Total_DO'), names_to = 'Nutrient_per_BS', values_to = 'Nutrient_release') %>%
+    mutate(Burst_Size = substring(Nutrient_per_BS, nchar(Nutrient_per_BS) - 1),
+           Nutrient = gsub(".*DO(.).*", "\\1", Nutrient_per_BS),
+           Nutrient_release = Nutrient_release * 1e11)
   
-  for (x_B in nutrients_B){}
+  # ggplot object
+  n <- ggplot(data = plot_data) + 
+    geom_col(mapping = aes(x = Nutrient_release, y = Burst_Size, fill = Nutrient), 
+             position = 'dodge', orientation = 'y') + 
+    scale_fill_manual(name = 'Type of nutrient',
+                      values = c('#CC6666', '#339900', '#3399CC'))+
+    scale_x_continuous() + 
+    facet_grid(Station_Number ~ .) + 
+    labs(title = 'Total nutrient release per burst size at the end of the assay (T0_T24)',
+         x = 'Total nutrient release (x10e-11 g nutrient/mLh)',
+         y = 'Burst size') + 
+    theme_bw() +
+    theme(axis.title = element_text(face = 'bold'),
+          title = element_text(face = 'bold'))
   
-  
-    
+  # Save plot
+  ggsave(paste0('Figures/', unique(plot_data$Location), '_Total_Nutrient_Release.svg'), plot = n, width = 10, height = 10)
 }
-
+  
 nutrient_release(vp_calc_ANALYZED)
 
 

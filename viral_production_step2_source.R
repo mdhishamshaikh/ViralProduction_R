@@ -25,7 +25,7 @@
 packages_to_load<- c("tidyverse", "flowWorkspace", "scales",
                      "readxl", "emmeans", "lme4", "ggsci",
                      "svglite", "tidyr", "data.table",
-                     "colorspace", "cowplot", 'openxlsx', 'stringr')
+                     "colorspace", "cowplot", 'stringr')
 
 # If package not presented, install with BiocManager 
 for(pack in packages_to_load){

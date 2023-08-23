@@ -1,11 +1,11 @@
-Week 1:
+Week 1: 01/08 - 09/08
 
 1. Optimize code from step 2: viral production calculation
 	
 	Understanding the code, add documentation/comments and optimize the functions where possible
 	NJ1.csv dataset as start => test on NJ2020.csv which has the whole experiment
 
-Week 2: 
+Week 2: 10/08 - 17/08
 
 1. Bacterial Endpoint:
 
@@ -48,7 +48,7 @@ Analysing of VP_results:
 
 	Burst size = how many viruses will come out bacteria when viral infection. Search in literature for average value in North Sea and take this as mid burst size => 15 below and above for low and high burst size. If nothing is found: 10, 25, 40 as burst size.
 
-Week 3:
+Week 3: 18/08 - 23/08
 
 1. Finalize the optimization of Step 2 + analyzing of step 2
 	
@@ -57,4 +57,6 @@ Some minor bugs need to be fixed + output of analyzing step with legend and unit
 2. Start look at ways to visualize the analyzing results/results between different methods
 
 3. Start on the making of Rpackage => see ppt Salva => make all the current functions Rpackage compatible
+
+Week 4: 24/08 - 
 
