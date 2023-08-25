@@ -2,6 +2,7 @@
 
 export("%>%")
 export(.data)
+export(vp_average_replicate_dataframe)
 export(vp_separate_replicate_dataframe)
 importFrom(magrittr,"%>%")
 importFrom(rlang,.data)

@@ -4,6 +4,6 @@
 \alias{.data}
 \title{dot-data operator}
 \description{
-See \code{rlang::\link[rlang:.data]{.data}} for details.
+See \link[rlang:dot-data]{rlang::.data} for details.
 }
 \keyword{internal}

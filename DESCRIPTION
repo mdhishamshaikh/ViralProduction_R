@@ -1,9 +1,13 @@
 Package: viralprod
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+  person("Hisham", "Shaikh", , "hisham.shaikh@vliz.be", role = c("aut", "cph"),
+           comment = c(ORCID = "YOUR-ORCID-ID")),
+  person("Salvador", "Fernandez-Bejarano", , "salvador.fernandez@vliz.be", role = "cre",
+           comment = c(ORCID = "0000-0003-0535-7677", github = "salvafern")),
+  person("Jonas", "Van den Bremt", , "jonas.vandenbremt@gmail.com", role = "ctb")
+  )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -17,7 +21,11 @@ VignetteBuilder: knitr
 Imports: 
     data.table,
     dplyr,
+    emmeans,
+    graphics,
+    lme4,
     magrittr,
+    plotrix,
     rlang,
     tidyr
 Config/testthat/edition: 3

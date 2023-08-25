@@ -13,9 +13,9 @@ vp_separate_replicate_dataframe(
 \arguments{
 \item{data}{Dataframe with the output of the flow cytometer. Data frame acquired by reading in the data of csv file.}
 
-\item{keep_0.22_samples}{If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples. If \code{TRUE}, the 0.22 samples are taken into account. Default = \code{FALSE}.}
+\item{keep_0.22_samples}{If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples. If \code{TRUE}, the 0.22 samples are taken into account. (Default = \code{FALSE})}
 
-\item{add_timepoints}{If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. Default = \code{TRUE}.}
+\item{add_timepoints}{If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})}
 }
 \value{
 When \code{add_timepoints = FALSE}, a data frame with 9 columns. When \code{add_timepoints = TRUE}, a data frame with 11 columns is returned since the time ranges are added.
@@ -25,7 +25,7 @@ Determining the bacterial and viral counts with the separate replicates taken in
 }
 \examples{
 \dontrun{
-data_NJ2020 <- read.csv('./inst/NJ2020_subset.csv')
+data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 vp_separate_replicate_dataframe(data_NJ2020)
 vp_separate_replicate_dataframe(data_NJ2020, add_timepoints = F)
 }
