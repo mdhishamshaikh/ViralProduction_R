@@ -519,8 +519,8 @@
 <line x1='811.26' y1='352.27' x2='825.08' y2='352.27' style='stroke-width: 3.20; stroke: #333333; stroke-opacity: 0.50; stroke-linecap: butt;' />
 <text x='831.79' y='338.21' style='font-size: 9.00px; font-family: "Arial";' textLength='73.04px' lengthAdjust='spacingAndGlyphs'>Bacterial Endpoint</text>
 <text x='831.79' y='355.49' style='font-size: 9.00px; font-family: "Arial";' textLength='237.25px' lengthAdjust='spacingAndGlyphs'>Difference in collision rates between VP and VPC treatment</text>
-<text x='33.55' y='31.05' style='font-size: 11.00px; font-weight: bold; font-family: "Arial";' textLength='355.71px' lengthAdjust='spacingAndGlyphs'>Difference in collision rates between VP and VPC samples over time</text>
-<text x='33.55' y='42.93' style='font-size: 11.00px; font-weight: bold; font-family: "Arial";' textLength='610.94px' lengthAdjust='spacingAndGlyphs'>Percentage represents decrease of collision rates in T0_sample compared to original seawater sample (WW_sample)</text>
+<text x='33.55' y='31.05' style='font-size: 11.00px; font-family: "Arial";' textLength='332.91px' lengthAdjust='spacingAndGlyphs'>Difference in collision rates between VP and VPC samples over time</text>
+<text x='33.55' y='42.93' style='font-size: 11.00px; font-family: "Arial";' textLength='572.25px' lengthAdjust='spacingAndGlyphs'>Percentage represents decrease of collision rates in T0_sample compared to original seawater sample (WW_sample)</text>
 <text x='33.55' y='14.93' style='font-size: 13.20px; font-weight: bold; font-family: "Arial";' textLength='152.50px' lengthAdjust='spacingAndGlyphs'>NJ2020_Collision_Rates</text>
 </g>
 </svg>

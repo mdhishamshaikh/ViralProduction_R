@@ -202,7 +202,7 @@ vp_calc_NJ2020 <- calc_VP(data, output_dir = 'vp_calc_NJ2020')
 # 1. data: output of Step 1 => viral and bacterial abundances from flow cytometer
 # 2. vpres: output of Step 2 => viral production calculations based on different methods => VP = [VLP per mL per h] (VLP = virus-like particles)
 # 3. abundance: consists of the viral and bacterial abundances of the original sample (seawater, WW_sample)
-analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient_content_B = list(), 
+analyze_vpres <- function(vpres = data.frame(), data = data.frame(), abundance = data.frame(), BS = c(), BSP = NULL, nutrient_content_B = list(), 
                           nutrient_content_V = list(), write_output = T){
   
   ## Setup
@@ -210,6 +210,10 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   if (!file.exists(output_dir)){
     print(paste0('The ', output_dir, ' folder does not exists!'))
     stop('Please run step 2 before proceeding.')
+  }
+  
+  if (any(sapply(list(vpres, data, abundance), function(df) is_empty(df)))){
+    stop('Cant proceed analyzing since one of the input data frames is empty!')
   }
   
   res_path <- paste0('./', output_dir, '/') # output.dir needs to be in current working directory!
@@ -390,7 +394,7 @@ analyze_vpres <- function(vpres, data, abundance, BS = c(), BSP = NULL, nutrient
   return(vpres_corrected)
 }
 
-analyze_VP_NJ2020 <- analyze_vpres(vp_calc_ALL, data, df_abundance)
+analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020, data, df_abundance)
 
 
 

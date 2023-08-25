@@ -9,6 +9,16 @@ if (!file.exists(folder_name)){ # Check if folder not exists already
   dir.create(folder_name)
 }
 
+# Importing data from step 1, step 2 and the analyzing step
+data <- read.csv('NJ2020.csv') %>%
+  rename(Station_Number = Expt_No)
+
+df_abundance <- read.csv('NJ2020_abundance.csv') %>% # Consist of the abundances of all populations in original seawater sample for each experiment
+  rename(Station_Number = Expt_No)
+
+vp_calc_NJ2020 <- read.csv(paste0(output_dir, '/vp_calc_ALL.csv'))
+vp_calc_NJ2020_analyzed <- read.csv(paste0(output_dir, '/vp_calc_ANALYZED.csv'))
+
 ## 2. Visualization
 # 2.1 An overview of the bacterial and viral counts for lytic and lysogenic inductions over time
 # Data consist of the output csv.file of step 1, which is the input file for step 2
@@ -72,14 +82,14 @@ overview_plot_counts_over_time <- function(data){
       
       # Theme
       theme_bw() + 
-      theme(strip.text = element_text(face = "bold"),
-            strip.background = element_rect(color = 'black', fill = 'white'),
+      theme(strip.background = element_rect(color = 'black', fill = 'white'),
             axis.title = element_text(face = 'bold'),
             title = element_text(face = 'bold'),
+            plot.subtitle = element_text(face = 'plain'),
             legend.position = "bottom") +
       
       # Guide
-      guides(color = guide_legend(nrow = 2, byrow = TRUE))
+      guides(color = guide_legend(nrow = 2, byrow = FALSE))
     
     # Determine bacterial endpoint
     bp_cot <- bacterial_endpoint(data_bp, visual = T) - 1 # We want to highlight the timepoint before the one were GT of bacterie is lower then 24
@@ -104,7 +114,6 @@ overview_plot_counts_over_time <- function(data){
   }
 }
 
-#overview_plot_counts_over_time('NJ1.csv')
 overview_plot_counts_over_time(data)
 
 # 2.2 Difference in collision rates between VP and VPC samples over time
@@ -264,6 +273,7 @@ collision_rates_plot <- function(data, abundance){
           panel.border = element_rect(linewidth = 2),
           panel.background = element_rect(fill = NA),
           title = element_text(face = 'bold'),
+          plot.subtitle = element_text(face = 'plain'),
           legend.title = element_text(face = 'bold', size = 10),
           legend.text = element_text(size = 9),
           axis.title = element_text(face = 'bold',size = 10),
@@ -321,9 +331,13 @@ compare_variants_vp <- function(data){
     list(n1, n2),
     plotgrid.args = list(nrow = 2),
     annotation.args = list(
-      title = "Comparison of viral production calculation by different linear regression variants"
+      title = "Comparison of viral production calculation",
+      subtitle = "Population: c_Viruses; Calculation method: all linear regression variants"
     )
-  )
+  ) + 
+    theme(axis.title = element_text(face = 'bold'),
+          plot.title = element_text(face = 'bold'),
+          plot.subtitle = element_text(face = 'plain'))
   
   ggsave(paste0('Figures/', unique(data$Location), '_Comparison_Linear_Methods.svg'), plot = n, width = 8, height = 10)
   
@@ -365,9 +379,13 @@ compare_variants_vp <- function(data){
     list(m1, m2),
     plotgrid.args = list(nrow = 2),
     annotation.args = list(
-      title = "Comparison of viral production calculation by different VIPCAL variants"
+      title = "Comparison of viral production calculation",
+      subtitle = "Population: c_Viruses; Calculation method: all VIPCAL variants"
     )
-  )
+  ) +
+    theme(axis.title = element_text(face = 'bold'),
+          plot.title = element_text(face = 'bold'),
+          plot.subtitle = element_text(face = 'plain'))
   
   ggsave(paste0('Figures/', unique(data$Location), '_Comparison_VIPCAL_Methods.svg'), plot = m, width = 10, height = 10)
   
@@ -411,9 +429,13 @@ compare_variants_vp <- function(data){
     list(x1, x2),
     plotgrid.args = list(nrow = 2),
     annotation.args = list(
-      title = "Comparison of LM, VIPCAL and VIPCAL_SE"
+      title = "Comparison of LM, VIPCAL and VIPCAL_SE",
+      subtitle = "Population: c_Viruses"
     )
-  )
+  ) +
+    theme(axis.title = element_text(face = 'bold'),
+          plot.title = element_text(face = 'bold'),
+          plot.subtitle = element_text(face = 'plain'))
   
   ggsave(paste0('Figures/', unique(data$Location), '_Comparison_LM_VIPCAL_VIPCAL_SE.svg'), plot = x, width = 8, height = 10)
   
@@ -430,72 +452,73 @@ compare_variants_vp <- function(data){
     scale_fill_brewer(palette = 'Spectral') + 
     labs(x = 'VP calculation method',
          y = 'Viral Production',
-         title = 'Comparison of viral production calculation methods') + 
+         title = 'Comparison of viral production calculation methods',
+         subtitle = 'Population: c_Viruses') + 
     theme_classic() + 
     theme(axis.title = element_text(face = 'bold'),
           title = element_text(face = 'bold'),
+          plot.subtitle = element_text(face = 'plain'),
           axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
   
   # Save plot as svg
   ggsave(paste0('Figures/', unique(data$Location), '_Comparison_ALL.svg'), plot = all, width = 15, height = 10)
 }
 
-compare_variants_vp(vp_calc_ALL)
+compare_variants_vp(vp_calc_NJ2020)
 
 # 2.4 Percentage lytically infected and lysogenic cells over time
 percentage_cells <- function(data){
   
   # Select data
   plot_data <- data %>%
-    filter(Sample_Type != 'VPC', VP_Type == 'VPCL_AR_DIFF', Population == 'c_Viruses') %>%
-    select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', 'abs_VP', starts_with('P_Cells_')) %>%
+    filter(Sample_Type != 'VPC', VP_Type == 'VPCL_AR_DIFF_LMER_SE', Population == 'c_Viruses') %>%
+    select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', starts_with('P_Cells_')) %>%
     group_by(Station_Number, Sample_Type) %>%
     mutate(Timepoint = as.numeric(gsub("[^0-9.]+", "", Time_Range))) %>%
     pivot_longer(cols = starts_with('P_Cells_'), names_to = 'Burst_Size', values_to = 'P_Cells') %>%
-    mutate(P_Cells = ifelse(P_Cells > 100, 100, P_Cells),
-           abs_VP = abs_VP / 1e6)
+    mutate(Burst_Size = substring(Burst_Size, nchar(Burst_Size) - 4))
+  
   
   # ggplot object
   n <- ggplot(data = plot_data) + 
-    geom_col(mapping = aes(x = as.factor(Timepoint), y = P_Cells, fill = Sample_Type), position = 'dodge') + 
+    geom_col(mapping = aes(x = Burst_Size, y = P_Cells, fill = Sample_Type), position = 'dodge') + 
+    geom_text(data = plot_data, aes(x = 'BS_25', y = 100),
+              label = paste0('Timepoint of the assay\n(Bacterial Endpoint): T0_T', plot_data$Timepoint),
+              size = 3, color = 'black', show.legend = F) +
     scale_fill_manual(name = 'Percentage cells',
                       labels = c(Diff = 'Lysogenic cells', VP = 'Lytically infected cells'),
                       values = c(Diff = "#66CC00", VP = "#CCCC66")) + 
     
-    geom_point(mapping = aes(x = as.factor(Timepoint), y = abs_VP, color = Sample_Type)) + 
-    scale_color_manual(name = 'Absolute Viral Production',
-                       values = c('#000000', '#666666')) +
+    guides(fill = guide_legend(nrow = 2, byrow = TRUE, order = 1)) +
     
-    guides(fill = guide_legend(nrow = 2, byrow = TRUE, order = 1),
-           color = guide_legend(nrow = 2, byrow = TRUE, order = 2)) +
-    
-    scale_y_continuous(limits = c(0,100),
-                       sec.axis = sec_axis(~ .* 1,
-                                           name = "Absolute viral production (x10e6 VLP/mL)")) +
-    
-    facet_grid(Burst_Size ~ Station_Number, scales = 'free_x') + 
-    labs(x = 'Timepoint', 
+    facet_wrap(~Station_Number, ncol = 3) + 
+    labs(x = 'Burst_Size', 
          y = 'Percentage of cells', 
-         title = 'Percentage of lytically infected and lysogenic cells for different burst sizes') +
+         title = 'Percentage of lytically infected and lysogenic cells for different burst sizes',
+         subtitle = 'Population: c_Viruses; Calculation method: VPCL_AR_DIFF_LMER_SE; Bacterial endpoint taken into account') +
     theme_bw() + 
-    theme(strip.text = element_text(face = "bold"),
-          strip.background = element_rect(color = 'black', fill = '#999999'),
+    theme(strip.background = element_rect(color = 'black', fill = '#999999'),
           axis.title = element_text(face = 'bold'),
           title = element_text(face = 'bold'),
-          legend.position = "bottom")
+          plot.subtitle = element_text(face = 'plain'),
+          legend.position = "right")
   
   # Save plot
-  ggsave(paste0('Figures/', unique(plot_data$Location), '_Percentage_Cells.svg'), plot = n, width = 10, height = 10)
+  ggsave(paste0('Figures/', unique(plot_data$Location), '_Percentage_Cells.svg'), plot = n, width = 15, height = 8)
 }
 
-percentage_cells(vp_calc_ANALYZED)
+# Use the bacterial endpoint csv instead of all the analyzed results
+vp_calc_NJ2020_bp <- read.csv(paste0(output_dir, '/vp_calc_BP.csv'))
+vp_calc_NJ2020_bp_analyzed <- analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020_bp, data, df_abundance, write_output = F)
+
+percentage_cells(vp_calc_NJ2020_bp_analyzed)
 
 # 2.5 Total nutrient release
 nutrient_release <- function(data){
   
   # Select data
   plot_data <- data %>%
-    filter(Population == 'c_Viruses', Sample_Type == 'VP', VP_Type == 'VPCL_AR_DIFF', Time_Range == 'T0_T24') %>%
+    filter(Population == 'c_Viruses', Sample_Type == 'VP', VP_Type == 'VPCL_AR_DIFF_LMER_SE', Time_Range == 'T0_T24') %>%
     select('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Type', matches('Total_DO')) %>%
     pivot_longer(cols = matches('Total_DO'), names_to = 'Nutrient_per_BS', values_to = 'Nutrient_release') %>%
     mutate(Burst_Size = substring(Nutrient_per_BS, nchar(Nutrient_per_BS) - 1),
@@ -510,18 +533,20 @@ nutrient_release <- function(data){
                       values = c('#CC6666', '#339900', '#3399CC'))+
     scale_x_continuous() + 
     facet_grid(Station_Number ~ .) + 
-    labs(title = 'Total nutrient release per burst size at the end of the assay (T0_T24)',
+    labs(title = 'Total nutrient release per burst size',
+         subtitle = 'Population: c_Viruses; Sample_Type: VP; Calculation method: VPCL_AR_DIFF_LMER_SE; Time of assay: T0_T24',
          x = 'Total nutrient release (x10e-11 g nutrient/mLh)',
          y = 'Burst size') + 
     theme_bw() +
     theme(axis.title = element_text(face = 'bold'),
-          title = element_text(face = 'bold'))
+          title = element_text(face = 'bold'),
+          plot.subtitle = element_text(face = 'plain'))
   
   # Save plot
   ggsave(paste0('Figures/', unique(plot_data$Location), '_Total_Nutrient_Release.svg'), plot = n, width = 10, height = 10)
 }
   
-nutrient_release(vp_calc_ANALYZED)
+nutrient_release(vp_calc_NJ2020_analyzed)
 
 
 
