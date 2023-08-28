@@ -1,3 +1,25 @@
+#' Linear Mixed-Effects Model
+#' 
+#' To calculate lysogenic production, a difference curve is used. The average of increments of the difference curve 
+#' represent the lysogenic production. The difference curve can be estimated by subtracting the slope of VP samples,
+#' represent lytic viral production, from the slope of VPC samples, representing lytic + lysogenic viral production.
+#' On the other hand, a \code{LMER model} can be used which will incorporate both fixed- and random effects terms. The
+#' influence of the sample type and timepoint on the viral count will be considered plus the variability between the different replicates (random-effect).
+#' See [lme4::lmer] for more details on the LMER model.
+#' 
+#' @param DF Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe].
+#' 
+#' @return Dataframe with the mean viral count for VP samples, VPC samples and the difference (DIFF samples) for each population at each timepoint.
+#' 
+#' @name LMER_model
+#' @rdname vp_LMER_model
+#' 
+#' @examples \dontrun{
+#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
+#' 
+#' DF_LMER <- LMER_model(DF_SR)
+#' }
 LMER_model <- function(DF){ 
   result_DF <- data.frame() 
   

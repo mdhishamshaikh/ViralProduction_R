@@ -141,7 +141,7 @@ vp_determine_valleys <- function(count_values){
 #' @examples \dontrun{
 #' NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' 
-#' # Adding two values to make sure the first and last element of the count values are not dismissed#' 
+#' # Adding two values to make sure the first and last element of the count values are not dismissed
 #' NJ2020_AVG <- vp_average_replicate_dataframe(NJ2020, add_timepoints = F)
 #' vp_determine_peaks_with_se(c(+10e+10, NJ2020_AVG$Mean, -10e+10),
 #'                            c(0, NJ2020_AVG$SE, 0))
@@ -176,7 +176,7 @@ vp_determine_peaks_with_se <- function(count_values, count_se){
 #' @examples \dontrun{
 #' NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' 
-#' # Adding two values to make sure the first and last element of the count values are not dismissed#' 
+#' # Adding two values to make sure the first and last element of the count values are not dismissed
 #' NJ2020_AVG <- vp_average_replicate_dataframe(NJ2020, add_timepoints = F)
 #' vp_determine_valleys_with_se(c(+10e+10, NJ2020_AVG$Mean, -10e+10),
 #'                            c(0, NJ2020_AVG$SE, 0))
