@@ -1,21 +1,40 @@
-#' Determine viral production by linear regression with no replicate treatment
+#' Calculate viral production with linear regression
 #' 
-#' Viral production rate is calculated by considering all points, no distinguishing between replicates.
-#' Use of linear model to determine the slope between the viral counts on different time points of the assay. See
-#' [stats::lm] for more details on the linear model.  
+#' @description
+#' `Linear Regression` uses the slope between the viral counts to determine the viral production rate. 
+#' Lytic viral production can be derived from the slope of the VP samples. For lysogenic viral production, 
+#' the slope of VP samples needs to be subtracted from the slope of VPC samples. See [stats::lm] for more 
+#' details on the linear model used to determine the slope. 
+#' 
+#' `determine_vp_linear_allpoints` considers all points when calculating the slopes, no distinguishing between replicates.
+#' 
+#' `determine_vp_linear_separate_replicates` uses a separate replicate treatment, distinguishing between replicates. 
+#' 
+#' `determine_vp_linear_average_replicates` uses an average replicate treatment, average over the replicates. 
+#' 
+#' `determine_vp_linear_LMER_model` uses an average replicate treatment, average over the replicates is included in LMER model. 
+#' Difference curve estimation by LMER model, See [viralprod::vp_LMER_model] for more details about LMER model.
 #'
 #' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
+#' @param AVG_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
 #' 
 #' @return Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
 #' 
-#' @name determine_vp_linear_allpoints
-#' @rdname vp_LM_allpoints
+#' @name determine_vp_LM
+#' @rdname vp_LM
 #'
 #' @examples \dontrun{
 #' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
 #' 
-#' viral_production_linear_allpoints <- determine_vp_linear_allpoints(DF_SR)
+#' determine_vp_linear_allpoints(DF_SR)
+#' 
+#' determine_vp_linear_separate_replicates(DF_SR)
+#' 
+#' determine_vp_linear_average_replicates(DF_AVG)
+#' 
+#' determine_vp_linear_LMER_model(DF_SR)
 #' }
 determine_vp_linear_allpoints <- function(SR_dataframe){
   result_list <- list()
@@ -54,25 +73,7 @@ determine_vp_linear_allpoints <- function(SR_dataframe){
 }
 
 
-#' Determine viral production by linear regression with separate replicate treatment 
-#' 
-#' Viral production rate is calculated by using a separate replicate treatment, distinguishing between
-#' replicates. Use of linear model to determine the slope between the viral counts on different time points of the assay. 
-#' See [stats::lm] for more details on the linear model. 
-#'
-#' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population and replicate at given time range of the assay.
-#' 
-#' @name determine_vp_linear_separate_replicates 
-#' @rdname vp_LM_SR
-#'
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_linear_SR <- determine_vp_linear_separate_replicates(DF_SR)
-#' }
+#' @rdname vp_LM
 determine_vp_linear_separate_replicates <- function(SR_dataframe){
   result_list <- list()
   
@@ -113,25 +114,7 @@ determine_vp_linear_separate_replicates <- function(SR_dataframe){
 }
 
 
-#' Determine viral production by linear regression with average replicate treatment
-#' 
-#' Viral production rate is calculated by using average replicate treatment, average over the replicates
-#' is taken. Use of linear model to determine the slope between the viral counts on different time points of the assay. 
-#' See [stats::lm] for more details on the linear model. 
-#'
-#' @param AVG_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population averaged over the replicates at given time range of the assay.
-#' 
-#' @name determine_vp_linear_average_replicates 
-#' @rdname vp_LM_AR
-#'
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_linear_AR <- determine_vp_linear_average_replicates(DF_AVG)
-#' }
+#' @rdname vp_LM
 determine_vp_linear_average_replicates <- function(AVG_dataframe){
   result_list <- list()
   
@@ -169,26 +152,7 @@ determine_vp_linear_average_replicates <- function(AVG_dataframe){
 }
 
 
-#' Determine viral production by linear regression with difference curve estimation by LMER model
-#' 
-#' Viral production rate is calculated by using average replicate treatment, average over the replicates is taken
-#' and the difference curve is estimated by the LMER model instead by subtraction. See [viralprod::LMER_model] for 
-#' more details about LMER model. Use of linear model to determine the slope between the viral counts on 
-#' different time points of the assay. See [stats::lm] for more details on the linear model. 
-#'
-#' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population averaged over the replicates at given time range of the assay. Difference curve estimated by LMER model.
-#' 
-#' @name determine_vp_linear_LMER_model 
-#' @rdname vp_LM__LMER
-#' 
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_linear_LMER <- determine_vp_linear_LMER_model(DF_SR)
-#' }
+#' @rdname vp_LM
 determine_vp_linear_LMER_model <- function(SR_dataframe){
   result_list <- list()
   
@@ -201,7 +165,7 @@ determine_vp_linear_LMER_model <- function(SR_dataframe){
         DF2 <- DF %>%
           dplyr::filter(.data$Time_Range == time)
         
-        DF_with_LMER_model <- LMER_model(DF2)
+        DF_with_LMER_model <- vp_LMER_model(DF2)
         
         for (sample in unique(DF_with_LMER_model$Sample_Type)){
           linear_model <- summary(stats::lm(data = DF_with_LMER_model[DF_with_LMER_model$Sample_Type == sample, ], 
@@ -227,7 +191,3 @@ determine_vp_linear_LMER_model <- function(SR_dataframe){
   
   return(viral_production_linear)
 }
-
-
-
-

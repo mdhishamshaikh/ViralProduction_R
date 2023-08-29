@@ -1,22 +1,49 @@
-#' Determine viral production by VIPCAL with separate replicate treatment
+#' Calculate viral production with VIPCAL
 #' 
-#' Viral production rate is calculated by using a separate replicate treatment, distinguishing between
-#' replicates. VIPCAL determines viral production rate as the average of increments between the viral counts
-#' on different time points of the assay. First, peaks and valleys in the count data are calculated followed by
-#' averaging the increases over time to get the viral production rate.
+#' @description
+#' On the contrary of Linear Regression, `VIPCAL` uses the average of increments to determine 
+#' the viral production rate. After determining peaks and valleys in the count data, averaging the increases over
+#' time will result in the viral production rate. Lytic viral production can be derived as the average
+#' of increments of the VP samples. For lysogenic viral production, the average of increments of the difference
+#' curve needs to be looked at. `VIPCAL-SE` goes one step furhter and takes the standard error into account. With
+#' the determination of peaks and valleys, only true increments are kept. A peak/valley is only defined if
+#' there is no overlap between the standard errors. By doing this, sufficient differences in count values, 
+#' representing possible increments, are preserved.
+#' 
+#' `determine_vp_VIPCAL_separate_replicates` uses a separate replicate treatment, distinguishing between replicates.  
+#' 
+#' `determine_vp_VIPCAL_average_replicates` uses an average replicate treatment, average over the replicates.
+#' 
+#' `determine_vp_VIPCAL_average_replicates_SE` uses VIPCAL-SE and an average replicate treatment, average over the replicates.
+#' 
+#' `determine_vp_VIPCAL_LMER_model` uses an average replicate treatment, average over the replicates is included in LMER model. 
+#' Difference curve estimation by LMER model, See [viralprod::vp_LMER_model] for more details about LMER model.
+#' 
+#' `determine_vp_VIPCAL_LMER_model_SE` Uses VIPCAL-SE and an average replicate treatment, average over the replicates is included in LMER model. 
+#' Difference curve estimation by LMER model, See [viralprod::vp_LMER_model] for more details about LMER model.
 #'
 #' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population and replicate at given time range of the assay.
+#' @param AVG_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
 #' 
-#' @name determine_vp_VIPCAL_separate_replicates 
-#' @rdname vp_VPCL_SR
+#' @return Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
+#' 
+#' @name determine_vp_VIPCAL
+#' @rdname vp_VIPCAL
 #'
 #' @examples \dontrun{
 #' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
 #' 
-#' viral_production_VIPCAL_SR <- determine_vp_VIPCAL_separate_replicates(DF_SR)
+#' determine_vp_VIPCAL_separate_replicates(DF_SR)
+#' 
+#' determine_vp_VIPCAL_average_replicates(DF_AVG)
+#' 
+#' determine_vp_VIPCAL_average_replicates_SE(DF_AVG)
+#' 
+#' determine_vp_VIPCAL_LMER_model(DF_SR)
+#' 
+#' determine_vp_VIPCAL_LMER_model_SE(DF_SR)
 #' }
 determine_vp_VIPCAL_separate_replicates <- function(SR_dataframe){
   result_list <- list()
@@ -75,26 +102,7 @@ determine_vp_VIPCAL_separate_replicates <- function(SR_dataframe){
 }
 
 
-#' Determine viral production by VIPCAL with average replicate treatment
-#' 
-#' Viral production rate is calculated by using average replicate treatment, average over the replicates
-#' is taken. VIPCAL determines viral production rate as the average of increments between the viral counts
-#' on different time points of the assay. First, peaks and valleys in the count data are calculated followed by
-#' averaging the increases over time to get the viral production rate.
-#'
-#' @param AVG_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population averaged over the replicates at given time range of the assay.
-#' 
-#' @name determine_vp_VIPCAL_average_replicates
-#' @rdname vp_VPCL_AR
-#'
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_VIPCAL_AR <- determine_vp_VIPCAL_average_replicates(DF_AVG)
-#' }
+#' @rdname vp_VIPCAL
 determine_vp_VIPCAL_average_replicates <- function(AVG_dataframe){
   result_list <- list()
   
@@ -148,28 +156,7 @@ determine_vp_VIPCAL_average_replicates <- function(AVG_dataframe){
 }
 
 
-#' Determine viral production by VIPCAL-SE with average replicate treatment
-#' 
-#' Viral production rate is calculated by using average replicate treatment, average over the replicates 
-#' is taken. VIPCAL-SE determines viral production rate as the average of increments between the viral counts
-#' on different time points of the assay. VIPCAL-SE works the same as VIPCAL but takes the standard error into
-#' account. When determining peaks and valleys, only true increments are kept. A peak/valley is only defined if
-#' there is no overlap between the standard errors. By doing this, sufficient differences in count values, 
-#' representing possible increments, are preserved.
-#'
-#' @param AVG_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population averaged over the replicates at given time range of the assay. Standard error is taken into account.
-#' 
-#' @name determine_vp_VIPCAL_average_replicates_SE 
-#' @rdname vp_VPCL_AR_SE
-#'
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_VIPCAL_AR_SE <- determine_vp_VIPCAL_average_replicates_SE(DF_AVG)
-#' }
+#' @rdname vp_VIPCAL
 determine_vp_VIPCAL_average_replicates_SE <- function(AVG_dataframe){
   result_list <- list()
   
@@ -231,27 +218,7 @@ determine_vp_VIPCAL_average_replicates_SE <- function(AVG_dataframe){
 }
 
 
-#' Determine viral production by VIPCAL with difference curve estimation by LMER model
-#' 
-#' Viral production rate is calculated by using average replicate treatment, average over the replicates 
-#' is taken and the difference curve is estimated by the LMER model instead by subtraction. See [viralprod::LMER_model] for 
-#' more details about LMER model. VIPCAL determines viral production rate as the average of increments between the viral counts
-#' on different time points of the assay. First, peaks and valleys in the count data are calculated followed by
-#' averaging the increases over time to get the viral production rate.
-#'
-#' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population averaged over the replicates at given time range of the assay. Difference curve estimated by LMER model.
-#' 
-#' @name determine_vp_VIPCAL_LMER_model
-#' @rdname vp_VPCL_LMER
-#'
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_VIPCAL_LMER <- determine_vp_VIPCAL_LMER_model(DF_SR)
-#' }
+#' @rdname vp_VIPCAL
 determine_vp_VIPCAL_LMER_model <- function(SR_dataframe){
   result_list <- list()
   
@@ -264,7 +231,7 @@ determine_vp_VIPCAL_LMER_model <- function(SR_dataframe){
         DF2 <- DF %>%
           dplyr::filter(.data$Time_Range == time)
         
-        DF_with_LMER_model <- LMER_model(DF2)
+        DF_with_LMER_model <- vp_LMER_model(DF2)
         
         for(sample in unique(DF_with_LMER_model$Sample_Type)){
           DF3 <- DF_with_LMER_model %>%
@@ -310,29 +277,7 @@ determine_vp_VIPCAL_LMER_model <- function(SR_dataframe){
 }
 
 
-#' Determine viral production by VIPCAL-SE with difference curve estimation by LMER model
-#' 
-#' VIral production rate is calculated by using average replicate treatment, average over the replicates 
-#' is taken and the difference curve is estimated by the LMER model instead by subtraction. See [viralprod::LMER_model] for 
-#' more details about LMER model. VIPCAL-SE determines viral production rate as the average of increments between the viral counts
-#' on different time points of the assay. VIPCAL-SE works the same as VIPCAL but takes the standard error into
-#' account. When determining peaks and valleys, only true increments are kept. A peak/valley is only defined if
-#' there is no overlap between the standard errors. By doing this, sufficient differences in count values, 
-#' representing possible increments, are preserved.
-#'
-#' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
-#'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population averaged over the replicates at given time range of the assay. Difference curve estimated by LMER model and standard error is taken into account.
-#' 
-#' @name determine_vp_VIPCAL_LMER_model_SE
-#' @rdname vp_VPCL_LMER_SE
-#'
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' 
-#' viral_production_VIPCAL_LMER_SE <- determine_vp_VIPCAL_LMER_model_SE(DF_SR)
-#' }
+#' @rdname vp_VIPCAL
 determine_vp_VIPCAL_LMER_model_SE <- function(SR_dataframe){
   result_list <- list()
   
@@ -345,7 +290,7 @@ determine_vp_VIPCAL_LMER_model_SE <- function(SR_dataframe){
         DF2 <- DF %>%
           dplyr::filter(.data$Time_Range == time)
         
-        DF_with_LMER_model <- LMER_model(DF2)
+        DF_with_LMER_model <- vp_LMER_model(DF2)
         
         for(sample in unique(DF_with_LMER_model$Sample_Type)){
           DF3 <- DF_with_LMER_model %>%

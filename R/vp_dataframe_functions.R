@@ -1,22 +1,31 @@
-#' Separate replicate data frame
+#' Construct viral count data frame
 #' 
-#' Determining the bacterial and viral counts with the separate replicates taken into account.
+#' @description
+#' Determining the bacterial and viral counts.
+#' 
+#' `vp_separate_replicate_dataframe` determines the counts by taking the separate replicates into account.
+#' 
+#' `vp_average_replicate_dataframe` determines the counts by taking the average over the replicates.
 #' 
 #' @param data Dataframe with the output of the flow cytometer (Step 1).
 #' @param keep_0.22_samples If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples and are normally always filtered out. If you want to keep control samples, set to \code{TRUE}. (Default = \code{FALSE})
 #' @param add_timepoints If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})
 #'
-#' @return When \code{add_timepoints = FALSE}, a data frame with 9 columns. When \code{add_timepoints = TRUE}, a data frame with 11 columns is returned since the time ranges are added.
+#' @return Dataframe with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the dataframe. 
 #' 
 #' @export
-#' @name vp_separate_replicate_dataframe
-#' @rdname vp_SR_dataframe
+#' @name vp_dataframes
+#' @rdname vp_dataframes
 #' 
 #' @examples \dontrun{
 #' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' 
 #' vp_separate_replicate_dataframe(data_NJ2020)
 #' vp_separate_replicate_dataframe(data_NJ2020, add_timepoints = F)
+#' vp_separate_replicate_dataframe(data_NJ2020, keep_0.22_samples = T)
+#' 
+#' vp_average_replicate_dataframe(data_NJ2020)
+#' vp_average_replicate_dataframe(data_NJ2020, add_timepoints = F)
 #' }
 vp_separate_replicate_dataframe <- function(data, keep_0.22_samples = FALSE, add_timepoints = TRUE){
   SR_dataframe <- data %>%
@@ -51,25 +60,8 @@ vp_separate_replicate_dataframe <- function(data, keep_0.22_samples = FALSE, add
 }
 
 
-#' Average replicate data frame
-#' 
-#' Determining the bacterial and viral counts by taking the average over the replicates.
-#' 
-#' @param data Dataframe with the output of the flow cytometer (Step 1).
-#' @param add_timepoints If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})
-#'
-#' @return When \code{add_timepoints = FALSE}, a data frame with 11 columns. When \code{add_timepoints = TRUE}, a data frame with 13 columns is returned since the time ranges are added.
-#' 
 #' @export
-#' @name vp_average_replicate_dataframe
-#' @rdname vp_AVG_dataframe
-#' 
-#' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' 
-#' vp_average_replicate_dataframe(data_NJ2020)
-#' vp_average_replicate_dataframe(data_NJ2020, add_timepoints = F)
-#' }
+#' @rdname vp_dataframes
 vp_average_replicate_dataframe <- function(data, add_timepoints = TRUE){
   dataframe_without_controls <- data[data$Sample_Type != '0.22',]
   

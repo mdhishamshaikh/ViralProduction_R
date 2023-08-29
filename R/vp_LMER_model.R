@@ -11,16 +11,16 @@
 #' 
 #' @return Dataframe with the mean viral count for VP samples, VPC samples and the difference (DIFF samples) for each population at each timepoint.
 #' 
-#' @name LMER_model
-#' @rdname vp_LMER_model
+#' @name vp_LMER_model
+#' @rdname vp_LMER
 #' 
 #' @examples \dontrun{
 #' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
 #' 
-#' DF_LMER <- LMER_model(DF_SR)
+#' vp_LMER_model(DF_SR)
 #' }
-LMER_model <- function(DF){ 
+vp_LMER_model <- function(DF){ 
   result_DF <- data.frame() 
   
   # VP and VPC have same replicate reference, needs to be unique for model
