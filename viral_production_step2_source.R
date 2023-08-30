@@ -84,9 +84,8 @@ tp <- function(DF){
 df_SR <- function(data, keep_0.22 = F, add_tp = T){
   
   DF <- data %>%
-    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-             'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
-    gather(7:13, key = 'Population', value = 'Count') %>% # Taking index of columns instead of name, since we select columns in first step => order will always be this one
+    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!present_populations))) %>%
+    pivot_longer(cols = starts_with("c_"), names_to = 'Population', values_to = 'Count') %>% # Taking index of columns instead of name, since we select columns in first step => order will always be this one
     mutate(Microbe = if_else(Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>% # Adding an extra column defining if replicate is from bacterial or viral origin
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type','Replicate','Population', as.numeric(Timepoint)) # Reorder the rows by the values of the selected columns
   
@@ -128,9 +127,8 @@ df_AVG <- function(data, add_tp = T){
   
   # Calculating number, mean of replicates and standard error 
   DF <- DF %>%
-    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-                    'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
-    gather(7:13, key = 'Population', value = 'Count') %>%
+    select(all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!present_populations))) %>%
+    pivot_longer(cols = starts_with("c_"), names_to = 'Population', values_to = 'Count') %>%
     group_by(Location, Station_Number, Depth, Sample_Type, Timepoint, Population) %>%
     summarise(n = n(), Mean = mean(Count), SE = plotrix::std.error(Count)) # plotrix::std.error calculates the standard error of the mean
     
@@ -155,7 +153,6 @@ df_AVG <- function(data, add_tp = T){
   DF <- merge(DF_mean, DF_se, by = c('Location', 'Station_Number', 'Depth',
                                      'Timepoint', 'Population', 'n', 'Sample_Type')) %>%
     mutate(Microbe = if_else(Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>%
-    mutate(Subgroup = if_else(Population %in% c('c_Bacteria', 'c_Viruses'), 'Parent', 'Subgroup')) %>%
     arrange('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Population', as.numeric(Timepoint))
   
   # Option to add timepoints to dataframe, is necessary for all calculating methods so base case = T. For bacterial endpoint for example not wanted
@@ -489,12 +486,7 @@ VIPCAL_sr <- function(DF_SR){ # Takes separate replicate dataframe as input, wit
                 p <- peaks(c(+10e+10, DF2$Count, -10e+10)) # Adding to make sure that first and last element are not dismissed
                 v <- valleys(c(+10e+10, DF2$Count, -10e+10))
                 
-                # Check if number of peaks and valleys correspond
-                if (identical(length(p), length(v))){
-                  print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
-                } else {
-                  print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
-                }
+  
                 
                 # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
                 # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
@@ -554,12 +546,6 @@ VIPCAL_avg <- function(DF_AVG){ # Takes average replicate dataframe as input
               p <- peaks(c(+10e+10, DF2$Mean, -10e+10))
               v <- valleys(c(+10e+10, DF2$Mean, -10e+10))
               
-              # Check if number of peaks and valleys correspond
-              if (identical(length(p), length(v))){
-                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
-              } else {
-                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
-              }
               
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
@@ -620,12 +606,6 @@ VIPCAL_avg_se <- function(DF_AVG){ # Takes average replicate dataframe as input
               v <- valleys_se(c(+10e+10, DF2$Mean, -10e+10),
                               c(0, DF2$SE, 0))
               
-              # Check if number of peaks and valleys correspond
-              if (identical(length(p), length(v))){
-                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
-              } else {
-                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
-              }
               
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
@@ -697,12 +677,6 @@ VIPCAL_avg_lmer <- function(DF_SR){ # Takes separate replicate dataframe as inpu
               p <- peaks(c(+10e+10, DF4$Mean, -10e+10))
               v <- valleys(c(+10e+10, DF4$Mean, -10e+10))
               
-              # Check if number of peaks and valleys correspond
-              if (identical(length(p), length(v))){
-                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
-              } else {
-                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
-              }
               
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks
@@ -769,12 +743,6 @@ VIPCAL_avg_lmer_se <- function(DF_SR){ # Takes separate replicate dataframe as i
               v <- valleys_se(c(+10e+10, DF4$Mean, -10e+10),
                               c(0, DF4$SE, 0))
               
-              # Check if number of peaks and valleys correspond
-              if (identical(length(p), length(v))){
-                print(paste0("Number of peaks and valleys identified are the same: ", length(p)))
-              } else {
-                print("Number of peaks and valleys identified differ, this will lead to erroneous viral production calculations")
-              }
               
               # Calculate viral production: as the slope between the minimum (valley) and maximum (peak) viral abundance
               # Following function holds: {[(Viral_Count(peak1) - Viral_Count(valley1)) / (Time(peak1) - Time(valley1))] + [...] + [...]} / amount of peaks

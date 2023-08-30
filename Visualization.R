@@ -28,6 +28,10 @@ overview_plot_counts_over_time <- function(data){
   data_tag <- data %>%
     unite(all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
   
+  
+  ## !!! FIX subgroup thing => not in dataframe anymore !!!
+  
+  
   # Create dataframe for plot: averaging the sample replicates, calculate the differences by subtraction and add timepoints
   df_plot_cot <- df_AVG(data) %>%
     mutate(Sample_Type = factor(Sample_Type, levels = c('VP', 'VPC', 'Diff')),

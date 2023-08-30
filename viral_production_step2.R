@@ -15,18 +15,29 @@ df_abundance <- read.csv('NJ2020_abundance.csv') %>% # Consist of the abundances
 # Different variables are presented to adjust for the desired output
 calc_VP <- function(data, output_dir = '', method = c(1:12), write_csv = T, SR_calc = T, bp_endpoint = T){
   
-  ## 1. Check if output directory is valid (variable: output_dir)
-  if (output_dir == ''){
-    print('No output directory is given!')
-    stop('Please define output directory before proceeding.')
-    
-  }else if (file.exists(output_dir)){
-    print(paste0('The ', output_dir, ' folder already exists!'))
-    stop('Please define another output directory before proceeding.')
-    
-  }else {
-    .GlobalEnv$output_dir <- output_dir
-    dir.create(output_dir)
+  ## 1. Do some checks
+  # Check if output directory is valid (variable = output_dir) when csv files needs to be written
+  if (write_csv == T){
+    if (output_dir == ''){
+      print('No output directory is given!')
+      stop('Please define output directory before proceeding.')
+      
+    }else if (file.exists(output_dir)){
+      print(paste0('The ', output_dir, ' folder already exists!'))
+      stop('Please define another output directory before proceeding.')
+      
+    }else {
+      .GlobalEnv$output_dir <- output_dir
+      dir.create(output_dir)
+    }
+  }
+  
+  # Check which populations are in the input data and needs to be examined
+  if ('c_Viruses' %in% colnames(data)){
+    .GlobalEnv$present_populations <- colnames(data)[grep("^c_", colnames(data))]
+    print(paste("Following populations will be analyzed:", paste(present_populations, collapse = ", ")))
+  } else {
+    stop('Column c_Viruses, which represents total viral counts, is not presented in input data!')
   }
   
   # Storing all errors and warnings in global environment
@@ -206,10 +217,12 @@ analyze_vpres <- function(vpres = data.frame(), data = data.frame(), abundance =
                           nutrient_content_V = list(), write_output = T){
   
   ## Setup
-  # Check if output folder of step 2 is there (Step 2 needs to be runned)
-  if (!file.exists(output_dir)){
-    print(paste0('The ', output_dir, ' folder does not exists!'))
-    stop('Please run step 2 before proceeding.')
+  # Check if output folder of step 2 is there (Step 2 needs to be runned) if csv file needs to be written
+  if (write_output == T){
+    if (!file.exists(output_dir)){
+      print(paste0('The ', output_dir, ' folder does not exists!'))
+      stop('Please run step 2 before proceeding.')
+    }
   }
   
   if (any(sapply(list(vpres, data, abundance), function(df) is_empty(df)))){
