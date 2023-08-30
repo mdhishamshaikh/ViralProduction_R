@@ -17,12 +17,12 @@ determine_vp_linear_average_replicates(AVG_dataframe)
 determine_vp_linear_LMER_model(SR_dataframe)
 }
 \arguments{
-\item{SR_dataframe}{Dataframe with the viral counts and time ranges, see \link{vp_separate_replicate_dataframe} for more details.}
+\item{SR_dataframe}{Data frame with the viral counts and time ranges, see \link{vp_separate_replicate_dataframe} for more details.}
 
-\item{AVG_dataframe}{Dataframe with the viral counts and time ranges, see \link{vp_average_replicate_dataframe} for more details.}
+\item{AVG_dataframe}{Data frame with the viral counts and time ranges, see \link{vp_average_replicate_dataframe} for more details.}
 }
 \value{
-Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
+Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
 }
 \description{
 \verb{Linear Regression} uses the slope between the viral counts to determine the viral production rate.

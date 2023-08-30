@@ -15,10 +15,10 @@
 #' `determine_vp_linear_LMER_model` uses an average replicate treatment, average over the replicates is included in LMER model. 
 #' Difference curve estimation by LMER model, See [viralprod::vp_LMER_model] for more details about LMER model.
 #'
-#' @param SR_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
-#' @param AVG_dataframe Dataframe with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
+#' @param SR_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
+#' @param AVG_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
 #' 
-#' @return Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
+#' @return Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
 #' 
 #' @name determine_vp_LM
 #' @rdname vp_LM

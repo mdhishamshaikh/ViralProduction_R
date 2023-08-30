@@ -11,7 +11,7 @@
 \usage{
 vp_linear_allpoints(data)
 
-vp_linear_separate_replicates(data, AVG = T)
+vp_linear_separate_replicates(data, AVG = TRUE)
 
 vp_linear_average_replicates(data)
 
@@ -20,15 +20,15 @@ vp_linear_average_replicates_diff(data)
 vp_linear_average_replicates_diff_LMER(data)
 }
 \arguments{
-\item{data}{Dataframe with the output of the flow cytometer (Step 1).}
+\item{data}{Data frame with the output of the flow cytometer.}
 
 \item{AVG}{Interested in the lytic and lysogenic viral production. To study the lysogenic viral production,
 in need of difference samples. If \code{TRUE}, average over replicates after determining viral production with
 separate replicate treatment and lysogenic viral production is calculated. If \code{FALSE}, no averaging over replicates,
-output will consits of only VP and VPC samples with separate replicate treatment. (Default = \code{TRUE})}
+output will consists of only VP and VPC samples with separate replicate treatment. (Default = \code{TRUE})}
 }
 \value{
-Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
+Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
 }
 \description{
 Two main methods are used to determine the viral production rate over time in our assay: \verb{Linear Regression} vs
@@ -40,7 +40,7 @@ step-by-step plan is carried out by each of the variants:
 \item Constructing correct data frame depending on replicate treatment.
 \item Calculate viral production depending on replicate treatment, standard error use and difference curve estimation.
 If no difference curve estimation, calculate lysogenic viral production.
-\item Arrange output dataframe.
+\item Arrange output data frame.
 }
 
 \code{vp_linear_allpoints} considers all points: no replicate treatment, no SE taken into account, no difference curve estimation.

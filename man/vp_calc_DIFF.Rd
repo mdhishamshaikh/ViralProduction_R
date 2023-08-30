@@ -7,18 +7,18 @@
 vp_calculate_difference_samples(DF, VIPCAL = FALSE, SE = FALSE)
 }
 \arguments{
-\item{DF}{Dataframe containing the viral production for VP and VPC samples calculated with linear regression or VIPCAL.}
+\item{DF}{Data frame containing the viral production for VP and VPC samples calculated with linear regression or VIPCAL.}
 
 \item{VIPCAL}{If \code{FALSE}, viral production is calculated with linear regression. If viral production is calculated with VIPCAL, set to \code{TRUE}. (Default = \code{FALSE})}
 
 \item{SE}{If \code{FALSE}, viral production is calculated with VIPCAL without taking the standard error into account. If VIPCAL takes the SE into account, set to \code{TRUE}. (Default = \code{FALSE})}
 }
 \value{
-Dataframe with the viral production added for lysogenic phase. In the column Sample_Type a new sample, \code{Diff} is introduced that represents the lysogenic viral production.
+Data frame with the viral production added for lysogenic phase. In the column Sample_Type a new sample, \code{Diff} is introduced that represents the lysogenic viral production.
 }
 \description{
 Viral production can be divided in two phases: lytic and lysogenic viral production. The VP samples
-cover the lytic viral production, VPC samples include both phases since treatment with the antibiotic \verb{mitomycin C}.
+cover the lytic viral production, VPC samples include both phases since treatment with the antibiotic \code{mitomycin-C}.
 If the bacteriophage is in the lysogenic phase, it integrates with the genome of the bacteria and
 can't be measured. Since mitomycin C inhibits DNA synthesis in the bacteria, bacteriophages go into the lytic
 phase and measurement is possible. Viral production is calculated by different variants of \verb{Linear Regression}

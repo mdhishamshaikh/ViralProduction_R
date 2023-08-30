@@ -1,14 +1,15 @@
 Package: viralprod
-Title: What the Package Does (One Line, Title Case)
+Title: Automated viral production data analyses
 Version: 0.0.0.9000
 Authors@R: c(
-  person("Hisham", "Shaikh", , "hisham.shaikh@vliz.be", role = c("aut", "cph"),
-           comment = c(ORCID = "YOUR-ORCID-ID")),
-  person("Salvador", "Fernandez-Bejarano", , "salvador.fernandez@vliz.be", role = "cre",
+  person("Hisham", "Shaikh", ,"hisham.shaikh@vliz.be", role = c("aut", "cph"),
+           comment = c(ORCID = "YOUR-ORCID-ID", github = "mdhishamshaikh")),
+  person("Salvador", "Fernandez-Bejarano", ,"salvador.fernandez@vliz.be", role = "cre",
            comment = c(ORCID = "0000-0003-0535-7677", github = "salvafern")),
-  person("Jonas", "Van den Bremt", , "jonas.vandenbremt@gmail.com", role = "ctb")
+  person("Jonas", "Van den Bremt", ,"jonas.vandenbremt@gmail.com", role = "ctb",
+           comment = c(github = "jonasvdnbrem"))
   )
-Description: What the package does (one paragraph).
+Description: Analyzing viral production by virus reduction assay.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

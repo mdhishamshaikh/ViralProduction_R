@@ -15,14 +15,14 @@ vp_separate_replicate_dataframe(
 vp_average_replicate_dataframe(data, add_timepoints = TRUE)
 }
 \arguments{
-\item{data}{Dataframe with the output of the flow cytometer (Step 1).}
+\item{data}{Data frame with the output of the flow cytometer (Step 1).}
 
 \item{keep_0.22_samples}{If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples and are normally always filtered out. If you want to keep control samples, set to \code{TRUE}. (Default = \code{FALSE})}
 
 \item{add_timepoints}{If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})}
 }
 \value{
-Dataframe with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the dataframe.
+Data frame with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the data frame.
 }
 \description{
 Determining the bacterial and viral counts.

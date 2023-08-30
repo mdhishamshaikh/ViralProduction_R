@@ -1,11 +1,11 @@
-#' Adding timepoints
+#' Adding time points
 #' 
-#' Given a dataframe that consists of column, 'Timepoint', that represents the different points of measuring the assay.
-#' \code{\link{vp_add_timepoints()}} will add the different time ranges to the dataframe. 
+#' Given a data frame that consists of column, 'Timepoint', that represents the different sub sampling points of the assay.
+#' Adding column with the different time ranges of the assay to the data frame. 
 #'
-#' @param DF Dataframe.
+#' @param DF Data frame.
 #'
-#' @return Same dataframe with time ranges added as new column.
+#' @return Expanded data frame with time ranges added as new column.
 #' 
 #' @name vp_add_timepoints
 #' @rdname vp_add_timepoints
@@ -16,12 +16,12 @@
 #' vp_add_timepoints(x)
 #' 
 #' \dontrun{
-#' NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
 #' 
-#' NJ2020_SR <- vp_separate_replicate_dataframe(NJ2020, add_timepoints = F)
+#' NJ2020_SR <- vp_separate_replicate_dataframe(data_NJ2020, add_timepoints = F)
 #' vp_add_timepoints(NJ2020_SR)
 #' 
-#' NJ2020_AVG <- vp_average_replicate_dataframe(NJ2020, add_timepoints = F)
+#' NJ2020_AVG <- vp_average_replicate_dataframe(data_NJ2020, add_timepoints = F)
 #' vp_add_timepoints(NJ2020_AVG)
 #' }
 vp_add_timepoints <- function(DF){
@@ -63,8 +63,8 @@ vp_add_timepoints <- function(DF){
 #' influence on the results. `VIPCAL-SE` goes one step further and takes the standard error into account when determining peaks
 #' and valleys. Because of that, only TRUE increments (increments without overlapping standard errors) are returned. 
 #'
-#' @param count_values Column with viral count values.
-#' @param count_se Column with standard error on the viral count values.
+#' @param count_values Column of data frame with viral count values.
+#' @param count_se Column of data frame with standard error on the viral count values.
 #'
 #' @return Vector with the indices of the peaks or valleys in the count data.
 #' 
@@ -73,9 +73,9 @@ vp_add_timepoints <- function(DF){
 #' @noRd
 #'
 #' @examples \dontrun{
-#' NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(NJ2020)
-#' DF_AVG <- vp_average_replicate_dataframe(NJ2020)
+#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
 #' 
 #' # Adding two values to make sure the first and last element of the count values are not dismissed
 #' vp_determine_peaks(c(+10e+10, DF_SR$Count, -10e+10))

@@ -10,7 +10,7 @@
 #' 1. Constructing correct data frame depending on replicate treatment.
 #' 2. Calculate viral production depending on replicate treatment, standard error use and difference curve estimation.
 #' If no difference curve estimation, calculate lysogenic viral production.
-#' 3. Arrange output dataframe.
+#' 3. Arrange output data frame.
 #' 
 #' `vp_VIPCAL_separate_replicates`: separate replicate treatment, no SE taken into account, no difference curve estimation.
 #' 
@@ -33,14 +33,13 @@
 #' - LMER model: [viralprod::vp_LMER_model]
 #' - Calculating lyosgenic production: [viralprod::vp_calculate_difference_samples]
 #' 
-#' @param data Dataframe with the output of the flow cytometer (Step 1).
+#' @param data Data frame with the output of the flow cytometer (Step 1).
 #' @param AVG Interested in the lytic and lysogenic viral production. To study the lysogenic viral production, 
 #' in need of difference samples. If \code{TRUE}, average over replicates after determining viral production with
 #' separate replicate treatment and lysogenic viral production is calculated. If \code{FALSE}, no averaging over replicates,
-#' output will consits of only VP and VPC samples with separate replicate treatment. (Default = \code{TRUE})
+#' output will consists of only VP and VPC samples with separate replicate treatment. (Default = \code{TRUE})
 #'
-#' @return Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
-#' @export
+#' @return Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
 #' 
 #' @name vp_methods_VIPCAL
 #' @rdname vp_methods_VIPCAL
@@ -96,7 +95,6 @@ vp_VIPCAL_separate_replicates <- function(data, AVG = T){
 }
 
 
-#' @export
 #' @rdname vp_methods_VIPCAL
 vp_VIPCAL_average_replicates <- function(data){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
@@ -119,7 +117,6 @@ vp_VIPCAL_average_replicates <- function(data){
 }
 
 
-#' @export
 #' @rdname vp_methods_VIPCAL
 vp_VIPCAL_average_replicates_SE <- function(data){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
@@ -142,7 +139,6 @@ vp_VIPCAL_average_replicates_SE <- function(data){
 }
 
 
-#' @export
 #' @rdname vp_methods_VIPCAL
 vp_VIPCAL_average_replicates_diff <- function(data){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
@@ -161,7 +157,6 @@ vp_VIPCAL_average_replicates_diff <- function(data){
 }
 
 
-#' @export
 #' @rdname vp_methods_VIPCAL
 vp_VIPCAL_average_replicates_diff_SE <- function(data){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
@@ -179,7 +174,7 @@ vp_VIPCAL_average_replicates_diff_SE <- function(data){
   return(viral_production_VIPCAL)
 }
 
-#' @export
+
 #' @rdname vp_methods_VIPCAL
 vp_VIPCAL_average_replicates_diff_LMER <- function(data){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
@@ -198,7 +193,6 @@ vp_VIPCAL_average_replicates_diff_LMER <- function(data){
 }
 
 
-#' @export
 #' @rdname vp_methods_VIPCAL
 vp_VIPCAL_average_replicates_diff_LMER_SE <- function(data){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)

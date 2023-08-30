@@ -7,13 +7,12 @@
 #' 
 #' `vp_average_replicate_dataframe` determines the counts by taking the average over the replicates.
 #' 
-#' @param data Dataframe with the output of the flow cytometer (Step 1).
+#' @param data Data frame with the output of the flow cytometer (Step 1).
 #' @param keep_0.22_samples If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples and are normally always filtered out. If you want to keep control samples, set to \code{TRUE}. (Default = \code{FALSE})
 #' @param add_timepoints If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})
 #'
-#' @return Dataframe with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the dataframe. 
+#' @return Data frame with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the data frame. 
 #' 
-#' @export
 #' @name vp_dataframes
 #' @rdname vp_dataframes
 #' 
@@ -60,7 +59,6 @@ vp_separate_replicate_dataframe <- function(data, keep_0.22_samples = FALSE, add
 }
 
 
-#' @export
 #' @rdname vp_dataframes
 vp_average_replicate_dataframe <- function(data, add_timepoints = TRUE){
   dataframe_without_controls <- data[data$Sample_Type != '0.22',]

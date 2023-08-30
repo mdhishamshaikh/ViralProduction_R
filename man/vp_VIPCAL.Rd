@@ -20,20 +20,20 @@ determine_vp_VIPCAL_LMER_model(SR_dataframe)
 determine_vp_VIPCAL_LMER_model_SE(SR_dataframe)
 }
 \arguments{
-\item{SR_dataframe}{Dataframe with the viral counts and time ranges, see \link{vp_separate_replicate_dataframe} for more details.}
+\item{SR_dataframe}{Data frame with the viral counts and time ranges, see \link{vp_separate_replicate_dataframe} for more details.}
 
-\item{AVG_dataframe}{Dataframe with the viral counts and time ranges, see \link{vp_average_replicate_dataframe} for more details.}
+\item{AVG_dataframe}{Data frame with the viral counts and time ranges, see \link{vp_average_replicate_dataframe} for more details.}
 }
 \value{
-Dataframe with the viral production rate and the absolute viral production for each population at given time range of the assay.
+Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
 }
 \description{
 On the contrary of Linear Regression, \code{VIPCAL} uses the average of increments to determine
 the viral production rate. After determining peaks and valleys in the count data, averaging the increases over
 time will result in the viral production rate. Lytic viral production can be derived as the average
 of increments of the VP samples. For lysogenic viral production, the average of increments of the difference
-curve needs to be looked at. \code{VIPCAL-SE} goes one step furhter and takes the standard error into account. With
-the determination of peaks and valleys, only true increments are kept. A peak/valley is only defined if
+curve needs to be looked at. \code{VIPCAL-SE} goes one step further and takes the standard error into account. With
+the determination of peaks and valleys, only true increments are returned. A peak/valley is only defined if
 there is no overlap between the standard errors. By doing this, sufficient differences in count values,
 representing possible increments, are preserved.
 
