@@ -509,7 +509,7 @@ percentage_cells <- function(data){
 
 # Use the bacterial endpoint csv instead of all the analyzed results
 vp_calc_NJ2020_bp <- read.csv(paste0(output_dir, '/vp_calc_BP.csv'))
-vp_calc_NJ2020_bp_analyzed <- analyze_VP_NJ2020 <- analyze_vpres(vp_calc_NJ2020_bp, data, df_abundance, write_output = F)
+vp_calc_NJ2020_bp_analyzed <- analyze_vpres(vp_calc_NJ2020_bp, data, df_abundance, write_output = F)
 
 percentage_cells(vp_calc_NJ2020_bp_analyzed)
 

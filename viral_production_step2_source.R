@@ -1131,7 +1131,7 @@ VPCL_6 <- function(data){
   return(VPCL6)
 }
 
-# 6.12 VPCL-7: VIPCAL with averaged replicate treatment with difference curve estimation by LMER and with SE (VPCL_AR_DIFF_LMER)
+# 6.12 VPCL-7: VIPCAL with averaged replicate treatment with difference curve estimation by LMER and with SE (VPCL_AR_DIFF_LMER_SE)
 VPCL_7 <- function(data){
   
   # Create correct type of dataframe
