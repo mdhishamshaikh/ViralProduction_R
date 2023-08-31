@@ -15,31 +15,36 @@ vp_separate_replicate_dataframe(
 vp_average_replicate_dataframe(data, add_timepoints = TRUE)
 }
 \arguments{
-\item{data}{Data frame with the output of the flow cytometer (Step 1).}
+\item{data}{Data frame with the output of the flow cytometry.}
 
 \item{keep_0.22_samples}{If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples and are normally always filtered out. If you want to keep control samples, set to \code{TRUE}. (Default = \code{FALSE})}
 
 \item{add_timepoints}{If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})}
 }
 \value{
-Data frame with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the data frame.
+Data frame with the count for each population and each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the data frame.
 }
 \description{
-Determining the bacterial and viral counts.
+Given the output data frame of the flow cytometry step, produce the correct data frame for further
+calculations. Based on the replicate treatment, a different data frame will be produced. A separate
+replicate treatment will take each of the replicates into account, as a average replicate treatment
+will average over the replicates to retrieve an average count value.
 
-\code{vp_separate_replicate_dataframe} determines the counts by taking the separate replicates into account.
+\code{vp_separate_replicate_dataframe} creates data frame by taking the separate replicates into account.
 
-\code{vp_average_replicate_dataframe} determines the counts by taking the average over the replicates.
+\code{vp_average_replicate_dataframe} creates data frame by taking the average over the replicates.
 }
 \examples{
 \dontrun{
-data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+data_NJ2020_all <- read.csv(system.file('extdata', 
+'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+vp_check_populations(data_NJ2020_all)
 
-vp_separate_replicate_dataframe(data_NJ2020)
-vp_separate_replicate_dataframe(data_NJ2020, add_timepoints = F)
-vp_separate_replicate_dataframe(data_NJ2020, keep_0.22_samples = T)
+vp_separate_replicate_dataframe(data_NJ2020_all)
+vp_separate_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
+vp_separate_replicate_dataframe(data_NJ2020_all, keep_0.22_samples = T)
 
-vp_average_replicate_dataframe(data_NJ2020)
-vp_average_replicate_dataframe(data_NJ2020, add_timepoints = F)
+vp_average_replicate_dataframe(data_NJ2020_all)
+vp_average_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
 }
 }

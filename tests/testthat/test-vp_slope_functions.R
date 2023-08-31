@@ -18,10 +18,15 @@ expect_output_determine_vp_linear_separate_replicates <- function(x){
 }
 
 # Perform
-test_that("Slope functions work that use separate replicate dataframe", {
-  data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-  DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
+test_that("All slope functions work correctly", {
+  data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+  vp_check_populations(data_NJ2020_all)
+  
+  DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
   expect_df_input_vp_linear(DF_SR)
+  
+  DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all)
+  expect_df_input_vp_linear(DF_AVG)
   
   determine_vp_linear_allpoints(DF_SR) %>% expect_output_determine_vp_linear_average_replicates()
   determine_vp_linear_allpoints(DF_SR) %>% ncol() %>% expect_equal(11)
@@ -29,15 +34,9 @@ test_that("Slope functions work that use separate replicate dataframe", {
   determine_vp_linear_separate_replicates(DF_SR) %>% expect_output_determine_vp_linear_separate_replicates()
   determine_vp_linear_separate_replicates(DF_SR) %>% ncol() %>% expect_equal(12)
   
-  determine_vp_linear_LMER_model(DF_SR) %>% expect_output_determine_vp_linear_average_replicates()
-  determine_vp_linear_LMER_model(DF_SR) %>% ncol() %>% expect_equal(11)
-})
-
-test_that("Slope functions work that use average replicate dataframe", {
-  data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-  DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
-  expect_df_input_vp_linear(DF_AVG)
-  
   determine_vp_linear_average_replicates(DF_AVG) %>% expect_output_determine_vp_linear_average_replicates()
   determine_vp_linear_average_replicates(DF_AVG) %>% ncol() %>% expect_equal(11)
+  
+  determine_vp_linear_LMER_model(DF_SR) %>% expect_output_determine_vp_linear_average_replicates()
+  determine_vp_linear_LMER_model(DF_SR) %>% ncol() %>% expect_equal(11)
 })

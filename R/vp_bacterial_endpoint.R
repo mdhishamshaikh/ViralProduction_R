@@ -1,17 +1,17 @@
 #' Determine bacterial endpoint of assay
 #' 
 #' @description
-#' In VP samples, an increase of collision rates between the bacteriophages (viruses) and bacteria is noticed. 
+#' In the VP samples, an increase of collision rates between the bacteriophages (viruses) and bacteria is noticed. 
 #' This is probably due to the net increase in bacterial growth that is established during the assay. In VPC samples
 #' on the other hand, this phenomenon isn't presented since the treatment with antibiotic `mitomycin-C` inhibits the
-#' growth of the bacteria. This increase in collision rates in VP samples results in a higher expected lytic  viral production.
-#' Ultimately, this can result in a negative lysogenic viral production.  To achieve comparable results, we define the
-#' bacterial endpoint as the moment where the generation time in bacteria is less then 24 hours. Since the duration of
-#' the assay is 24 hours, this will be the mark. The generation time is calculated based of the net increase of the total
-#' bacteria population in the VP samples of the assay. The bacterial endpoint will determine the moment we need to stop the 
-#' assay to prevent having less comparable results. 
+#' growth of the bacteria. This increase in collision rates in solely VP samples results in a higher expected lytic viral production.
+#' Ultimately, this can result in a negative lysogenic viral production. To achieve comparable results between sample types,
+#' we define the bacterial endpoint as the moment where the generation time in bacteria is less then 24 hours, since the duration of
+#' the assay is 24 hours. The generation time is calculated based of the net increase of the total bacteria population in 
+#' the VP samples of the assay. The bacterial endpoint will determine the moment we need to stop the assay to prevent
+#' having less comparable results. 
 #'
-#' @param data Data frame with the output of the flow cytometer.
+#' @param data Data frame with the output of the flow cytometry.
 #' @param visual If \code{FALSE}, a character with the time range to stop the assay is returned. The character value is from the form: T0_TX. If \code{TRUE}, an integer with the index of the time point to stop the assay is returned. (Default = \code{FALSE})
 #' 
 #' @return A character or integer value defining the time range to stop the assay to retrieve comparable results.
@@ -20,9 +20,12 @@
 #' @rdname vp_bacterial_endpoint
 #'
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
+#' 
 #' # Bacterial endpoint is determined per station/experiment
-#' subset_data <- subset(data_NJ2020, data_NJ2020$Station_Number == 2)
+#' subset_data <- subset(data_NJ2020_all, data_NJ2020_all$Station_Number == 2)
 #' 
 #' vp_bacterial_endpoint(subset_data)
 #' vp_bacterial_endpoint(subset_data, visual = T)
@@ -69,6 +72,5 @@ vp_bacterial_endpoint <- function(data, visual = FALSE){
       stop_assay <-  paste0("T", unique_timepoints[1], "_T", unique_timepoints[bacterial_endpoint])
     }
   }
-  
   return(stop_assay)
 }

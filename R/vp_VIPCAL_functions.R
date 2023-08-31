@@ -1,14 +1,13 @@
 #' Calculate viral production with VIPCAL
 #' 
 #' @description
-#' On the contrary of Linear Regression, `VIPCAL` uses the average of increments to determine 
-#' the viral production rate. After determining peaks and valleys in the count data, averaging the increases over
-#' time will result in the viral production rate. Lytic viral production can be derived as the average
-#' of increments of the VP samples. For lysogenic viral production, the average of increments of the difference
-#' curve needs to be looked at. `VIPCAL-SE` goes one step further and takes the standard error into account. With
-#' the determination of peaks and valleys, only true increments are returned. A peak/valley is only defined if
-#' there is no overlap between the standard errors. By doing this, sufficient differences in count values, 
-#' representing possible increments, are preserved.
+#' `VIPCAL` uses the average of increments to determine the viral production rate. After determining peaks and valleys
+#' in the count data, averaging the increases will result in the viral production rate. Again,
+#' lytic viral production can be derived from the VP samples, the average of increments of the difference curve is needed
+#' for lysogenic viral production. `VIPCAL-SE` goes one step further and takes the standard error into account, since this
+#' has a major influence on the results. With the determination of peaks and valleys, only true increments are returned with
+#' VIPCAL-SE. A peak/valley is only defined if there is no overlap between the standard errors. By adding this requirement,
+#' sufficient differences in count values are needed so that there is a true increase in the viral count.
 #' 
 #' `determine_vp_VIPCAL_separate_replicates` uses a separate replicate treatment, distinguishing between replicates.  
 #' 
@@ -25,15 +24,18 @@
 #' @param SR_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
 #' @param AVG_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
 #' 
-#' @return Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
+#' @return Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 #' 
 #' @name determine_vp_VIPCAL
 #' @rdname vp_VIPCAL
 #'
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
+#' 
+#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all)
 #' 
 #' determine_vp_VIPCAL_separate_replicates(DF_SR)
 #' 

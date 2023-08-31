@@ -2,8 +2,8 @@
 #' 
 #' @description
 #' Two main methods are used to determine the viral production rate over time in our assay: `Linear Regression` vs
-#' `VIPCAL`. Different variants of both methods are performed, variance in replicate treatment, use of standard error
-#' or type of estimation of difference curve is presented. Next, the different variants of `VIPCAL`,
+#' `VIPCAL`. Different variants of both methods are performed: variance in replicate treatment, use of standard error
+#' and type of estimation of the difference curve is presented. Next, the different variants of `VIPCAL`,
 #' which uses the average of increments between the viral counts to determine the viral production rate. 
 #' The following general step-by-step plan is carried out by each of the variants:
 #'    
@@ -28,39 +28,41 @@
 #' 
 #' More details about the used functions:
 #' 
-#' - Constructing data frames: [viralprod::vp_dataframes]
+#' - Constructing data frames: [viralprod::vp_dataframes], [viralprod::vp_check_populations] 
 #' - Calculating viral production with VIPCAL: [viralprod::determine_vp_VIPCAL]
 #' - LMER model: [viralprod::vp_LMER_model]
-#' - Calculating lyosgenic production: [viralprod::vp_calculate_difference_samples]
+#' - Calculating lysogenic production: [viralprod::vp_calculate_difference_samples]
 #' 
-#' @param data Data frame with the output of the flow cytometer (Step 1).
-#' @param AVG Interested in the lytic and lysogenic viral production. To study the lysogenic viral production, 
-#' in need of difference samples. If \code{TRUE}, average over replicates after determining viral production with
+#' @param data Data frame with the output of the flow cytometry.
+#' @param AVG One of the methods uses an separate replicate treatment. In the end, interested in the lytic and lysogenic
+#' viral production. For the last one, difference samples are needed. If \code{TRUE}, average over replicates after determining viral production with
 #' separate replicate treatment and lysogenic viral production is calculated. If \code{FALSE}, no averaging over replicates,
 #' output will consists of only VP and VPC samples with separate replicate treatment. (Default = \code{TRUE})
 #'
-#' @return Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
+#' @return Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 #' 
 #' @name vp_methods_VIPCAL
 #' @rdname vp_methods_VIPCAL
 #'
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
 #' 
-#' vp_VIPCAL_separate_replicates(data_NJ2020)
-#' vp_VIPCAL_separate_replicates(data_NJ2020, AVG = F)
+#' vp_VIPCAL_separate_replicates(data_NJ2020_all)
+#' vp_VIPCAL_separate_replicates(data_NJ2020_all, AVG = F)
 #' 
-#' vp_VIPCAL_average_replicates(data_NJ2020)
+#' vp_VIPCAL_average_replicates(data_NJ2020_all)
 #' 
-#' vp_VIPCAL_average_replicates_SE(data_NJ2020)
+#' vp_VIPCAL_average_replicates_SE(data_NJ2020_all)
 #' 
-#' vp_VIPCAL_average_replicates_diff(data_NJ2020)
+#' vp_VIPCAL_average_replicates_diff(data_NJ2020_all)
 #' 
-#' vp_VIPCAL_average_replicates_diff_SE(data_NJ2020)
+#' vp_VIPCAL_average_replicates_diff_SE(data_NJ2020_all)
 #' 
-#' vp_VIPCAL_average_replicates_diff_LMER(data_NJ2020)
+#' vp_VIPCAL_average_replicates_diff_LMER(data_NJ2020_all)
 #' 
-#' vp_VIPCAL_average_replicates_diff_LMER_SE(data_NJ2020)
+#' vp_VIPCAL_average_replicates_diff_LMER_SE(data_NJ2020_all)
 #' }
 vp_VIPCAL_separate_replicates <- function(data, AVG = T){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
@@ -72,7 +74,7 @@ vp_VIPCAL_separate_replicates <- function(data, AVG = T){
       dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
       dplyr::arrange('tag',
                      factor(.data$Sample_Type, levels = c('VP', 'VPC')),
-                     factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                     factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
       dplyr::mutate(VP_method = 'VPCL_SR') %>%
       dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   } else {
@@ -86,7 +88,7 @@ vp_VIPCAL_separate_replicates <- function(data, AVG = T){
       vp_calculate_difference_samples(VIPCAL = T) %>%
       dplyr::arrange('tag',
                      factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                     factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                     factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
       dplyr::mutate(VP_method = 'VPCL_SR_AVG') %>%
       dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   }
@@ -109,7 +111,7 @@ vp_VIPCAL_average_replicates <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
     dplyr::mutate(VP_method = 'VPCL_AR') %>%
     dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   
@@ -131,7 +133,7 @@ vp_VIPCAL_average_replicates_SE <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
     dplyr::mutate(VP_method = 'VPCL_AR_SE') %>%
     dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   
@@ -149,7 +151,7 @@ vp_VIPCAL_average_replicates_diff <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
     dplyr::mutate(VP_method = 'VPCL_AR_DIFF') %>%
     dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   
@@ -167,7 +169,7 @@ vp_VIPCAL_average_replicates_diff_SE <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
     dplyr::mutate(VP_method = 'VPCL_AR_DIFF_SE') %>%
     dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   
@@ -185,7 +187,7 @@ vp_VIPCAL_average_replicates_diff_LMER <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
     dplyr::mutate(VP_method = 'VPCL_AR_DIFF_LMER') %>%
     dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   
@@ -203,7 +205,7 @@ vp_VIPCAL_average_replicates_diff_LMER_SE <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = c('c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
     dplyr::mutate(VP_method = 'VPCL_AR_DIFF_LMER_SE') %>%
     dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
   

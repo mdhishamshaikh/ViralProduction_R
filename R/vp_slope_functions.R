@@ -1,12 +1,12 @@
 #' Calculate viral production with linear regression
 #' 
 #' @description
-#' `Linear Regression` uses the slope between the viral counts to determine the viral production rate. 
-#' Lytic viral production can be derived from the slope of the VP samples. For lysogenic viral production, 
-#' the slope of VP samples needs to be subtracted from the slope of VPC samples. See [stats::lm] for more 
-#' details on the linear model used to determine the slope. 
+#' `Linear Regression` uses the slope between the viral counts to determine the viral production rate.
+#' Lytic viral production can be derived as the slope of the VP samples. For the lysogenic viral production,
+#' subtraction of the VP slope from the VPC slope is performed. A difference curve estimation by subtraction or
+#' LMER model is also an option. See [stats::lm] for more details on the linear model used to determine the slope. 
 #' 
-#' `determine_vp_linear_allpoints` considers all points when calculating the slopes, no distinguishing between replicates.
+#' `determine_vp_linear_allpoints` considers all points, no distinguishing between replicates.
 #' 
 #' `determine_vp_linear_separate_replicates` uses a separate replicate treatment, distinguishing between replicates. 
 #' 
@@ -18,15 +18,18 @@
 #' @param SR_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
 #' @param AVG_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.
 #' 
-#' @return Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
+#' @return Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 #' 
-#' @name determine_vp_LM
+#' @name determine_vp_linear_regression
 #' @rdname vp_LM
 #'
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
+#' 
+#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all)
 #' 
 #' determine_vp_linear_allpoints(DF_SR)
 #' 

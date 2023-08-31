@@ -1,9 +1,61 @@
-#' Adding time points
+#' Check populations to analyze
 #' 
-#' Given a data frame that consists of column, 'Timepoint', that represents the different sub sampling points of the assay.
-#' Adding column with the different time ranges of the assay to the data frame. 
+#' @description
+#' Bacterial and viral counts are retrieved from flow cytometry data by selecting an area on the generated scatter plot,
+#' this process is called `gating`. During the gating process, different populations are defined based on the side scatter
+#' and green fluorescence. Since gating is a manual process, the user is free to determine the amount and which populations
+#' to define. The count values, retrieved from scatter plot, need to be as a column in the output data frame of the flow 
+#' cytometry step as followed: `c_PopulationName`. Given the output data frame of the flow cytometry step, 
+#' the different populations to analyze (determined by the gating process) are defined. 
+#' 
+#' @param data Data frame with the output of the flow cytometry.
 #'
-#' @param DF Data frame.
+#' @return A character vector with the different populations to analyze. An error occurs when the total virus population, `c_Viruses`, is not defined during the gating process. 
+#' 
+#' @name vp_check_populations
+#' @rdname vp_check_populations
+#'
+#' @examples \dontrun{
+#' # Case 1: General, 7 different populations defined during gating 
+#' # (most common populations)
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
+#' 
+#' # Case 2: Less populations defined during gating 
+#' # (only the total viral and bacterial population for example)
+#' data_NJ2020_less <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_less_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_less)
+#' 
+#' # Case 3: More populations defined during gating 
+#' # (more niche populations, like c_V4, for example)
+#' data_NJ2020_more <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_more_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_more)
+#' 
+#' # Case 4: Total virus population is not defined during gating 
+#' # (error expected)
+#' data_NJ2020_without_cViruses <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_without_cViruses.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_without_cViruses)
+#' }
+vp_check_populations <- function(data){
+  if ('c_Viruses' %in% colnames(data)){
+    .GlobalEnv$populations_to_analyze <- colnames(data)[grep("^c_", colnames(data))]
+    print(paste("Following populations will be analyzed:", paste(.GlobalEnv$populations_to_analyze, collapse = ", ")))
+  } else {
+    stop('Column c_Viruses, which represents total viral population, is not presented in input data. Not able to perform viral production calculation!')
+  }
+}
+
+
+#' Adding unique time ranges of the assay
+#' 
+#' Given a data frame that consists of column, 'Timepoint', that represents the different sub sampling points of the assay,
+#' a column with the different tiem ranges of the assay is added to the original data frame. 
+#'
+#' @param DF Data frame with bacterial and viral counts.
 #'
 #' @return Expanded data frame with time ranges added as new column.
 #' 
@@ -16,12 +68,14 @@
 #' vp_add_timepoints(x)
 #' 
 #' \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
 #' 
-#' NJ2020_SR <- vp_separate_replicate_dataframe(data_NJ2020, add_timepoints = F)
+#' NJ2020_SR <- vp_separate_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
 #' vp_add_timepoints(NJ2020_SR)
 #' 
-#' NJ2020_AVG <- vp_average_replicate_dataframe(data_NJ2020, add_timepoints = F)
+#' NJ2020_AVG <- vp_average_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
 #' vp_add_timepoints(NJ2020_AVG)
 #' }
 vp_add_timepoints <- function(DF){
@@ -39,12 +93,12 @@ vp_add_timepoints <- function(DF){
     colvalues[length(colvalues)+1] <- timerange_value
   }
   
-  ncol <- ncol(DF)
+  number_of_columns <- ncol(DF)
   DF[colnames] <- NA
   
   for (i in 1:(length(timepoints)-1)) { 
     conditions <- DF$Timepoint %in% timepoints[1:(i+1)]
-    DF[conditions, (ncol + i)] <- colvalues[i]
+    DF[conditions, (number_of_columns + i)] <- colvalues[i]
   }
   
   DF <- DF %>%
@@ -59,9 +113,9 @@ vp_add_timepoints <- function(DF){
 #' 
 #' @description
 #' `VIPCAL` calculates the viral production based off the average of increments. To get these increments, peaks
-#' and valleys in the viral counts need to be determined. VIPCAL has his own issues, the standard error has a big
-#' influence on the results. `VIPCAL-SE` goes one step further and takes the standard error into account when determining peaks
-#' and valleys. Because of that, only TRUE increments (increments without overlapping standard errors) are returned. 
+#' and valleys in the viral counts need to be determined. VIPCAL has his own issues, namely that the standard error 
+#' has a big influence on the results. `VIPCAL-SE` goes one step further and takes the standard error into account
+#' when determining peaks and valleys. Because of that, only TRUE increments (increments without overlapping standard errors) are returned. 
 #'
 #' @param count_values Column of data frame with viral count values.
 #' @param count_se Column of data frame with standard error on the viral count values.
@@ -73,9 +127,12 @@ vp_add_timepoints <- function(DF){
 #' @noRd
 #'
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
+#' 
+#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all)
 #' 
 #' # Adding two values to make sure the first and last element of the count values are not dismissed
 #' vp_determine_peaks(c(+10e+10, DF_SR$Count, -10e+10))

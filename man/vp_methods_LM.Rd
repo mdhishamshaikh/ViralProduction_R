@@ -20,21 +20,21 @@ vp_linear_average_replicates_diff(data)
 vp_linear_average_replicates_diff_LMER(data)
 }
 \arguments{
-\item{data}{Data frame with the output of the flow cytometer.}
+\item{data}{Data frame with the output of the flow cytometry.}
 
-\item{AVG}{Interested in the lytic and lysogenic viral production. To study the lysogenic viral production,
-in need of difference samples. If \code{TRUE}, average over replicates after determining viral production with
+\item{AVG}{One of the methods uses an separate replicate treatment. In the end, interested in the lytic and lysogenic
+viral production. For the last one, difference samples are needed. If \code{TRUE}, average over replicates after determining viral production with
 separate replicate treatment and lysogenic viral production is calculated. If \code{FALSE}, no averaging over replicates,
 output will consists of only VP and VPC samples with separate replicate treatment. (Default = \code{TRUE})}
 }
 \value{
-Data frame with the viral production rate and the absolute viral production for each population at given time range of the assay.
+Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 }
 \description{
 Two main methods are used to determine the viral production rate over time in our assay: \verb{Linear Regression} vs
-\code{VIPCAL}. Different variants of both methods are performed, variance in replicate treatment, use of standard error
-or type of estimation of difference curve is presented. Next, the different variants of \verb{Linear Regression},
-which uses the slope between the viral counts to determine the viral production rate. The following general
+\code{VIPCAL}. Different variants of both methods are performed: variance in replicate treatment, use of standard error
+and type of estimation of the difference curve is presented. Next, the different variants of \verb{Linear Regression}
+which use the slope between the viral counts to determine the viral production rate. The following general
 step-by-step plan is carried out by each of the variants:
 \enumerate{
 \item Constructing correct data frame depending on replicate treatment.
@@ -43,7 +43,7 @@ If no difference curve estimation, calculate lysogenic viral production.
 \item Arrange output data frame.
 }
 
-\code{vp_linear_allpoints} considers all points: no replicate treatment, no SE taken into account, no difference curve estimation.
+\code{vp_linear_allpoints}: no replicate treatment, no SE taken into account, no difference curve estimation.
 
 \code{vp_linear_separate_replicates}: separate replicate treatment, no SE taken into account, no difference curve estimation.
 
@@ -55,25 +55,27 @@ If no difference curve estimation, calculate lysogenic viral production.
 
 More details about the used functions:
 \itemize{
-\item Constructing data frames: \link{vp_dataframes}
-\item Calculating viral production with linear regression: \link{determine_vp_LM}
+\item Constructing data frames: \link{vp_dataframes}, \link{vp_check_populations}
+\item Calculating viral production with linear regression: \link{determine_vp_linear_regression}
 \item LMER model: \link{vp_LMER_model}
-\item Calculating lyosgenic production: \link{vp_calculate_difference_samples}
+\item Calculating lysogenic production: \link{vp_calculate_difference_samples}
 }
 }
 \examples{
 \dontrun{
-data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+data_NJ2020_all <- read.csv(system.file('extdata', 
+'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+vp_check_populations(data_NJ2020_all)
 
-vp_linear_allpoints(data_NJ2020)
+vp_linear_allpoints(data_NJ2020_all)
 
-vp_linear_separate_replicates(data_NJ2020)
-vp_linear_separate_replicates(data_NJ2020, AVG = F)
+vp_linear_separate_replicates(data_NJ2020_all)
+vp_linear_separate_replicates(data_NJ2020_all, AVG = F)
 
-vp_linear_average_replicates(data_NJ2020)
+vp_linear_average_replicates(data_NJ2020_all)
 
-vp_linear_average_replicates_diff(data_NJ2020)
+vp_linear_average_replicates_diff(data_NJ2020_all)
 
-vp_linear_average_replicates_diff_LMER(data_NJ2020)
+vp_linear_average_replicates_diff_LMER(data_NJ2020_all)
 }
 }

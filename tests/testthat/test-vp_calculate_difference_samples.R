@@ -22,25 +22,27 @@ expect_df_input_vp_calc_diff_VIPCAL_SE <- function(x){
 
 # Perform
 test_that("Difference samples can be calculated for all methods", {
-  data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-  DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-  DF_AVG <- vp_average_replicate_dataframe(data_NJ2020) %>% subset(Sample_Type != 'Diff')
+  data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+  vp_check_populations(data_NJ2020_all)
   
-  vp_linear_allpoints <- determine_vp_linear_allpoints(DF_SR)
-  expect_df_input_vp_calc_diff_linear(vp_linear_allpoints)
+  DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
+  DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all) %>% subset(Sample_Type != 'Diff')
   
-  test_linear <- vp_calculate_difference_samples(vp_linear_allpoints)
+  vp_linear <- determine_vp_linear_allpoints(DF_SR)
+  expect_df_input_vp_calc_diff_linear(vp_linear)
+  
+  test_linear <- vp_calculate_difference_samples(vp_linear)
   expect_true(any(test_linear$Sample_Type == "Diff"))
   
-  vp_VIPCAL_AR <- determine_vp_VIPCAL_average_replicates(DF_AVG)
-  expect_df_input_vp_calc_diff_VIPCAL(vp_VIPCAL_AR)
+  vp_VIPCAL <- determine_vp_VIPCAL_average_replicates(DF_AVG)
+  expect_df_input_vp_calc_diff_VIPCAL(vp_VIPCAL)
   
-  test_VIPCAL <- vp_calculate_difference_samples(vp_VIPCAL_AR, VIPCAL = T)
+  test_VIPCAL <- vp_calculate_difference_samples(vp_VIPCAL, VIPCAL = T)
   expect_true(any(test_VIPCAL$Sample_Type == "Diff"))
   
-  vp_VIPCAL_AR_SE <- determine_vp_VIPCAL_average_replicates_SE(DF_AVG)
-  expect_df_input_vp_calc_diff_VIPCAL_SE(vp_VIPCAL_AR_SE)
+  vp_VIPCAL_SE <- determine_vp_VIPCAL_average_replicates_SE(DF_AVG)
+  expect_df_input_vp_calc_diff_VIPCAL_SE(vp_VIPCAL_SE)
   
-  test_VIPCAL_SE <- vp_calculate_difference_samples(vp_VIPCAL_AR_SE, VIPCAL = T, SE = T)
+  test_VIPCAL_SE <- vp_calculate_difference_samples(vp_VIPCAL_SE, VIPCAL = T, SE = T)
   expect_true(any(test_VIPCAL_SE$Sample_Type == "Diff"))
 })

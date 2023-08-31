@@ -28,5 +28,6 @@ Imports:
     magrittr,
     plotrix,
     rlang,
-    tidyr
+    tidyr,
+    utils
 Config/testthat/edition: 3

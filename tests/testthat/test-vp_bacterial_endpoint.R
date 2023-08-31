@@ -15,8 +15,11 @@ expect_output_bacterial_endpoint_for_visual <- function(x){
 
 # Perform
 test_that("Bacterial endpoint can be determinated", {
-  data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-  subset_data <- subset(data_NJ2020, data_NJ2020$Station_Number == 2) # Bacterial endpoint is determined per station/experiment
+  data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+  vp_check_populations(data_NJ2020_all)
+  
+  # Bacterial endpoint is determined per station/experiment
+  subset_data <- subset(data_NJ2020_all, data_NJ2020_all$Station_Number == 2)
   expect_data_input(subset_data)
   
   vp_bacterial_endpoint(subset_data) %>% expect_output_bacterial_endpoint()

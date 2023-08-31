@@ -1,60 +1,65 @@
 #' Construct viral count data frame
 #' 
 #' @description
-#' Determining the bacterial and viral counts.
+#' Given the output data frame of the flow cytometry step, produce the correct data frame for further
+#' calculations. Based on the replicate treatment, a different data frame will be produced. A separate
+#' replicate treatment will take each of the replicates into account, as a average replicate treatment
+#' will average over the replicates to retrieve an average count value. 
 #' 
-#' `vp_separate_replicate_dataframe` determines the counts by taking the separate replicates into account.
+#' `vp_separate_replicate_dataframe` creates data frame by taking the separate replicates into account.
 #' 
-#' `vp_average_replicate_dataframe` determines the counts by taking the average over the replicates.
+#' `vp_average_replicate_dataframe` creates data frame by taking the average over the replicates.
 #' 
-#' @param data Data frame with the output of the flow cytometer (Step 1).
+#' @param data Data frame with the output of the flow cytometry.
 #' @param keep_0.22_samples If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples and are normally always filtered out. If you want to keep control samples, set to \code{TRUE}. (Default = \code{FALSE})
 #' @param add_timepoints If \code{TRUE}, different time ranges will be added with \code{vp_add_timepoints()}. If \code{FALSE}, no addition of time ranges to data frame. (Default = \code{TRUE})
 #'
-#' @return Data frame with the count for each population for each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the data frame. 
+#' @return Data frame with the count for each population and each sample at the different time points of the assay. If \code{add_timepoints = T}, a column with the time ranges is added to the data frame. 
 #' 
 #' @name vp_dataframes
 #' @rdname vp_dataframes
 #' 
+#' @importFrom rlang !!!
+#' 
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
 #' 
-#' vp_separate_replicate_dataframe(data_NJ2020)
-#' vp_separate_replicate_dataframe(data_NJ2020, add_timepoints = F)
-#' vp_separate_replicate_dataframe(data_NJ2020, keep_0.22_samples = T)
+#' vp_separate_replicate_dataframe(data_NJ2020_all)
+#' vp_separate_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
+#' vp_separate_replicate_dataframe(data_NJ2020_all, keep_0.22_samples = T)
 #' 
-#' vp_average_replicate_dataframe(data_NJ2020)
-#' vp_average_replicate_dataframe(data_NJ2020, add_timepoints = F)
+#' vp_average_replicate_dataframe(data_NJ2020_all)
+#' vp_average_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
 #' }
 vp_separate_replicate_dataframe <- function(data, keep_0.22_samples = FALSE, add_timepoints = TRUE){
   SR_dataframe <- data %>%
-    dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-                                  'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
-    tidyr::gather(7:13, key = 'Population', value = 'Count') %>% 
+    dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!.GlobalEnv$populations_to_analyze))) %>%
+    tidyr::pivot_longer(cols = dplyr::starts_with('c_'), names_to = 'Population', values_to = 'Count') %>% 
     dplyr::mutate(Microbe = dplyr::if_else(.data$Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>%
-    dplyr::arrange('Location', 'Station_Number', 'Depth', 'Sample_Type','Replicate','Population', as.numeric(.data$Timepoint)) %>%
-    tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
+    tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) %>%
+    dplyr::arrange('tag', 'Sample_Type','Replicate','Population', as.numeric(.data$Timepoint))
   
-  if (keep_0.22_samples == FALSE){
+  if (keep_0.22_samples == F){
   SR_dataframe <- SR_dataframe[SR_dataframe$Sample_Type != '0.22',]
   }
   
-  if (add_timepoints == TRUE){
-    df_list <- list()
+  if (add_timepoints == T){
+    result_list <- list()
     
     for(combi_tag in unique(SR_dataframe$tag)){
       SR_dataframe_2 <- SR_dataframe %>%
         dplyr::filter(.data$tag == combi_tag)
       
       SR_dataframe_2 <- vp_add_timepoints(SR_dataframe_2)
-      df_list[[length(df_list)+1]] <- SR_dataframe_2
+      result_list[[length(result_list)+1]] <- SR_dataframe_2
     }
     
-    SR_dataframe_with_timepoints <- data.table::rbindlist(df_list)
+    SR_dataframe_with_timepoints <- data.table::rbindlist(result_list)
   }else {
     SR_dataframe_with_timepoints <- as.data.frame(SR_dataframe)
   }
-  
   return(SR_dataframe_with_timepoints)
 }
 
@@ -64,9 +69,8 @@ vp_average_replicate_dataframe <- function(data, add_timepoints = TRUE){
   dataframe_without_controls <- data[data$Sample_Type != '0.22',]
   
   AVG_dataframe <- dataframe_without_controls %>%
-    dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate',
-                                  'c_Bacteria', 'c_HNA', 'c_LNA', 'c_Viruses', 'c_V1', 'c_V2', 'c_V3'))) %>%
-    tidyr::gather(7:13, key = 'Population', value = 'Count') %>%
+    dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!.GlobalEnv$populations_to_analyze))) %>%
+    tidyr::pivot_longer(cols = dplyr::starts_with('c_'), names_to = 'Population', values_to = 'Count') %>%
     dplyr::group_by(.data$Location, .data$Station_Number, .data$Depth, .data$Sample_Type, .data$Timepoint, .data$Population) %>%
     dplyr::summarise(n = dplyr::n(), Mean = mean(.data$Count), SE = plotrix::std.error(.data$Count))
   
@@ -87,24 +91,22 @@ vp_average_replicate_dataframe <- function(data, add_timepoints = TRUE){
   }
   
   AVG_dataframe_merged <- merge(AVG_dataframe_only_means, AVG_dataframe_only_se, 
-                                by = c('Location', 'Station_Number', 'Depth', 
-                                       'Timepoint', 'Population', 'n', 'Sample_Type')) %>%
+                                by = c('Location', 'Station_Number', 'Depth', 'Timepoint', 'Population', 'n', 'Sample_Type')) %>%
     dplyr::mutate(Microbe = dplyr::if_else(.data$Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>%
-    dplyr::mutate(Subgroup = dplyr::if_else(.data$Population %in% c('c_Bacteria', 'c_Viruses'), 'Parent', 'Subgroup')) %>%
-    dplyr::arrange('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Population', as.numeric(.data$Timepoint)) %>%
-    tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
+    tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) %>%
+    dplyr::arrange('tag', 'Sample_Type','Replicate','Population', as.numeric(.data$Timepoint))
   
   if (add_timepoints == TRUE){
-    df_list <- list()
+    result_list <- list()
     
     for(combi_tag in unique(AVG_dataframe_merged$tag)){
       AVG_dataframe_merged_2 <- AVG_dataframe_merged %>%
         dplyr::filter(.data$tag == combi_tag)
       
       AVG_dataframe_merged_2 <- vp_add_timepoints(AVG_dataframe_merged_2)
-      df_list [[length(df_list)+1]] <- AVG_dataframe_merged_2
+      result_list [[length(result_list)+1]] <- AVG_dataframe_merged_2
     }
-    AVG_dataframe_with_timepoints <- data.table::rbindlist(df_list)
+    AVG_dataframe_with_timepoints <- data.table::rbindlist(result_list)
   }else { 
     AVG_dataframe_with_timepoints <- as.data.frame(AVG_dataframe_merged)
   }

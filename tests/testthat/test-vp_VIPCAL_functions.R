@@ -24,29 +24,28 @@ expect_output_determine_vp_VIPCAL_SE <- function(x){
 }
 
 # Perform
-test_that("VIPCAL works with separate replicate dataframe", {
-  data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-  DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
+test_that("All VIPCAL functions work correctly", {
+  data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+  vp_check_populations(data_NJ2020_all)
+  
+  DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
   expect_df_input_vp_VIPCAL(DF_SR)
+  
+  DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all)
+  expect_df_input_vp_VIPCAL(DF_AVG)
   
   determine_vp_VIPCAL_separate_replicates(DF_SR) %>% expect_output_determine_vp_VIPCAL_separate_replicates()
   determine_vp_VIPCAL_separate_replicates(DF_SR) %>% ncol() %>% expect_equal(10)
-  
-  determine_vp_VIPCAL_LMER_model(DF_SR) %>% expect_output_determine_vp_VIPCAL_average_replicates()
-  determine_vp_VIPCAL_LMER_model(DF_SR) %>% ncol() %>% expect_equal(9)
-  
-  determine_vp_VIPCAL_LMER_model_SE(DF_SR) %>% expect_output_determine_vp_VIPCAL_SE()
-  determine_vp_VIPCAL_LMER_model_SE(DF_SR) %>% ncol() %>% expect_equal(10)
-})
-
-test_that("VIPCAL works with average replicate dataframe", {
-  data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-  DF_AVG <- vp_average_replicate_dataframe(data_NJ2020)
-  expect_df_input_vp_VIPCAL(DF_AVG)
   
   determine_vp_VIPCAL_average_replicates(DF_AVG) %>% expect_output_determine_vp_VIPCAL_average_replicates()
   determine_vp_VIPCAL_average_replicates(DF_AVG) %>% ncol() %>% expect_equal(9)
   
   determine_vp_VIPCAL_average_replicates_SE(DF_AVG) %>% expect_output_determine_vp_VIPCAL_SE()
   determine_vp_VIPCAL_average_replicates_SE(DF_AVG) %>% ncol() %>% expect_equal(10)
+  
+  determine_vp_VIPCAL_LMER_model(DF_SR) %>% expect_output_determine_vp_VIPCAL_average_replicates()
+  determine_vp_VIPCAL_LMER_model(DF_SR) %>% ncol() %>% expect_equal(9)
+  
+  determine_vp_VIPCAL_LMER_model_SE(DF_SR) %>% expect_output_determine_vp_VIPCAL_SE()
+  determine_vp_VIPCAL_LMER_model_SE(DF_SR) %>% ncol() %>% expect_equal(10)
 })

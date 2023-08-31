@@ -1,28 +1,33 @@
 #' Calculate lysogenic viral production
 #' 
 #' @description
-#' Viral production can be divided in two phases: lytic and lysogenic viral production. The VP samples
-#' cover the lytic viral production, VPC samples include both phases since treatment with the antibiotic `mitomycin-C`. 
-#' If the bacteriophage is in the lysogenic phase, it integrates with the genome of the bacteria and 
-#' can't be measured. Since mitomycin C inhibits DNA synthesis in the bacteria, bacteriophages go into the lytic 
-#' phase and measurement is possible. Viral production is calculated by different variants of `Linear Regression`
-#' or `VIPCAL`. Some of these variants have the calculation of the lysogenic viral production included by estimating
-#' a difference curve by subtraction or LMER model. For the other variants, calculate lysogenic viral production 
-#' afterwards.
+#' The viral reduction assay has two types of samples: VP and VPC. In VP samples, count of bacteriophages in lytic phase
+#' can be measured (`lytic viral production`). On the other hand in VPC samples, count of bacteriophages in both lytic and
+#' lysogenic phase can be measured (`lytic + lysogenic viral production`) since treatment with antibiotic `mitomycin-C`.
+#' Bacteriophages in the lysogenic phase integrate with the genome of the bacteria and can't be measured normally. Mitomycin-C
+#' inhibits DNA synthesis in the bacteria, therefore the bacteriophage needs to go into the lytic phase and measurement is 
+#' possible. The details around the different calculation methods of viral production, being it either with linear regression
+#' or VIPCAL, are available on: [viralprod::determine_vp_linear_regression] and [viralprod::determine_vp_VIPCAL]. Some of 
+#' the variants estimate the difference curve by subtraction or LMER model to calculate the lysogenic viral production. 
+#' If there is no estimation of the difference curve, lysogenic viral production is calculated afterwards as the difference 
+#' between the viral production of VPC samples and VP samples.
 #'
 #' @param DF Data frame containing the viral production for VP and VPC samples calculated with linear regression or VIPCAL.
 #' @param VIPCAL If \code{FALSE}, viral production is calculated with linear regression. If viral production is calculated with VIPCAL, set to \code{TRUE}. (Default = \code{FALSE})
-#' @param SE If \code{FALSE}, viral production is calculated with VIPCAL without taking the standard error into account. If VIPCAL takes the SE into account, set to \code{TRUE}. (Default = \code{FALSE})
+#' @param SE If \code{FALSE}, viral production is calculated with VIPCAL without taking the standard error into account. If VIPCAL-SE is used, set to \code{TRUE}. (Default = \code{FALSE})
 #'
-#' @return Data frame with the viral production added for lysogenic phase. In the column Sample_Type a new sample, `Diff` is introduced that represents the lysogenic viral production. 
+#' @return Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay. In the column Sample_Type a new sample, `Diff` is introduced that represents the lysogenic viral production. 
 #' 
 #' @name vp_calculate_difference_samples
 #' @rdname vp_calc_DIFF
 #'
 #' @examples \dontrun{
-#' data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_subset.csv', package = "viralprod"))
-#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020)
-#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020) %>% subset(Sample_Type != 'Diff')
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' vp_check_populations(data_NJ2020_all)
+#' 
+#' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
+#' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all) %>% subset(Sample_Type != 'Diff')
 #' 
 #' vp_linear_allpoints <- determine_vp_linear_allpoints(DF_SR)
 #' vp_VIPCAL_AR <- determine_vp_VIPCAL_average_replicates(DF_AVG)
