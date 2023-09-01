@@ -9,7 +9,7 @@
 \alias{vp_VIPCAL_average_replicates_diff_SE}
 \alias{vp_VIPCAL_average_replicates_diff_LMER}
 \alias{vp_VIPCAL_average_replicates_diff_LMER_SE}
-\title{Viral production calculation by VIPCAL}
+\title{VIPCAL variants for viral production calculation}
 \usage{
 vp_VIPCAL_separate_replicates(data, AVG = T)
 

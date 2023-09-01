@@ -7,7 +7,7 @@
 \alias{vp_linear_average_replicates}
 \alias{vp_linear_average_replicates_diff}
 \alias{vp_linear_average_replicates_diff_LMER}
-\title{Viral production calculation by linear regression}
+\title{Linear regression variants for viral production calculation}
 \usage{
 vp_linear_allpoints(data)
 

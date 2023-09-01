@@ -9,7 +9,7 @@
 #' - Variants of linear regression: [viralprod::vp_methods_linear]
 #' - Variants of VIPCAL: [viralprod::vp_methods_VIPCAL]
 #' 
-#' @return A list with the different variants of linear regression and VIPCAL available to calculate viral production.
+#' @return A list with the different variants of linear regression and VIPCAL available to calculate viral production will be available in the global environment.
 #' 
 #' @name vp_list_of_methods
 #' @rdname vp_list_of_methods

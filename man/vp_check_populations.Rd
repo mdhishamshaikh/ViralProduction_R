@@ -10,7 +10,7 @@ vp_check_populations(data)
 \item{data}{Data frame with the output of the flow cytometry.}
 }
 \value{
-A character vector with the different populations to analyze. An error occurs when the total virus population, \code{c_Viruses}, is not defined during the gating process.
+A character vector with the different populations to analyze will be available in the global environment. An error occurs when the total virus population, \code{c_Viruses}, is not defined during the gating process.
 }
 \description{
 Bacterial and viral counts are retrieved from flow cytometry data by selecting an area on the generated scatter plot,

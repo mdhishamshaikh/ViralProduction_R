@@ -51,13 +51,13 @@ vp_bacterial_endpoint <- function(data, visual = FALSE){
   }
   DF_bacterial_endpoint <- data.frame(t(sapply(bacterial_generation_time, c)))
   colnames(DF_bacterial_endpoint) <- c('Timepoint', 'Population', 'Generation_Time')
-  DF_bacterial_endpoint <- tidyr::pivot_wider(DF_bacterial_endpoint, names_from = 'Population', values_from = 'Generation_Time')
-  colnames(DF_bacterial_endpoint) <- c('Timepoint', 'Total_Bacterial_GT', 'HNA_Bacteria_GT', 'LNA_Bacteria_GT')
-  DF_bacterial_endpoint <- DF_bacterial_endpoint %>%
-    as.data.frame() %>% # Pivot_wider creates tibble
-    dplyr::mutate_at(c('Total_Bacterial_GT', 'HNA_Bacteria_GT', 'LNA_Bacteria_GT'), as.numeric)
   
-  bacterial_endpoint <- intersect(which(DF_bacterial_endpoint$Total_Bacterial_GT > 0), which(DF_bacterial_endpoint$Total_Bacterial_GT < 24))[1]
+  DF_bacterial_endpoint <- DF_bacterial_endpoint %>%
+    tidyr::pivot_wider(names_from = 'Population', values_from = 'Generation_Time')  %>%
+    as.data.frame() %>%
+    dplyr::mutate_at(dplyr::vars(-'Timepoint'), as.numeric)
+  
+  bacterial_endpoint <- intersect(which(DF_bacterial_endpoint$c_Bacteria > 0), which(DF_bacterial_endpoint$c_Bacteria < 24))[1]
   
   if (visual == T){
     if(is.na(bacterial_endpoint)){

@@ -37,7 +37,7 @@ vp_separate_replicate_dataframe <- function(data, keep_0.22_samples = FALSE, add
   SR_dataframe <- data %>%
     dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!.GlobalEnv$populations_to_analyze))) %>%
     tidyr::pivot_longer(cols = dplyr::starts_with('c_'), names_to = 'Population', values_to = 'Count') %>% 
-    dplyr::mutate(Microbe = dplyr::if_else(.data$Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>%
+    dplyr::mutate(Microbe = dplyr::if_else(.data$Population %in% .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)], 'Viruses', 'Bacteria')) %>%
     tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) %>%
     dplyr::arrange('tag', 'Sample_Type','Replicate','Population', as.numeric(.data$Timepoint))
   
@@ -92,7 +92,7 @@ vp_average_replicate_dataframe <- function(data, add_timepoints = TRUE){
   
   AVG_dataframe_merged <- merge(AVG_dataframe_only_means, AVG_dataframe_only_se, 
                                 by = c('Location', 'Station_Number', 'Depth', 'Timepoint', 'Population', 'n', 'Sample_Type')) %>%
-    dplyr::mutate(Microbe = dplyr::if_else(.data$Population %in% c('c_Bacteria', 'c_HNA', 'c_LNA'), 'Bacteria', 'Viruses')) %>%
+    dplyr::mutate(Microbe = dplyr::if_else(.data$Population %in% .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)], 'Viruses', 'Bacteria')) %>%
     tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F) %>%
     dplyr::arrange('tag', 'Sample_Type','Replicate','Population', as.numeric(.data$Timepoint))
   

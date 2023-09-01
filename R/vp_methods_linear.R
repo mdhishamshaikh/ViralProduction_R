@@ -1,4 +1,4 @@
-#' Viral production calculation by linear regression
+#' Linear regression variants for viral production calculation
 #' 
 #' @description
 #' Two main methods are used to determine the viral production rate over time in our assay: `Linear Regression` vs
@@ -66,9 +66,9 @@ vp_linear_allpoints <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
-    dplyr::mutate(VP_method = 'LM_ALLPOINTS') %>%
-    dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
+    dplyr::mutate(VP_Method = 'LM_ALLPOINTS') %>%
+    dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   
   return(viral_production_LM)
 }
@@ -85,9 +85,9 @@ vp_linear_separate_replicates <- function(data, AVG = TRUE){
       dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
       dplyr::arrange('tag',
                      factor(.data$Sample_Type, levels = c('VP', 'VPC')),
-                     factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
-      dplyr::mutate(VP_method = 'LM_SR') %>%
-      dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
+                     factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
+      dplyr::mutate(VP_Method = 'LM_SR') %>%
+      dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   } else {
     viral_production_LM <- determine_viral_production_dataframe %>%
       dplyr::group_by(.data$tag, .data$Location, .data$Station_Number, .data$Depth, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
@@ -96,13 +96,14 @@ vp_linear_separate_replicates <- function(data, AVG = TRUE){
         abs_VP_mean = mean(.data$abs_VP),
         VP_SE = plotrix::std.error(.data$VP),
         VP_R_Squared = mean(.data$VP_R_Squared)) %>%
-      dplyr::rename(VP = .data$VP_mean, abs_VP = .data$abs_VP_mean) %>%
+      dplyr::rename(VP = "VP_mean", abs_VP = "abs_VP_mean") %>%
       vp_calculate_difference_samples() %>%
+      dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
       dplyr::arrange('tag',
                      factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                     factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
-      dplyr::mutate(VP_method = 'LM_SR_AVG') %>%
-      dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
+                     factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
+      dplyr::mutate(VP_Method = 'LM_SR_AVG') %>%
+      dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   }
   
   return(viral_production_LM)
@@ -123,9 +124,9 @@ vp_linear_average_replicates <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
-    dplyr::mutate(VP_method = 'LM_AR') %>%
-    dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
+    dplyr::mutate(VP_Method = 'LM_AR') %>%
+    dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   
   return(viral_production_LM)
 }
@@ -141,9 +142,9 @@ vp_linear_average_replicates_diff <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
-    dplyr::mutate(VP_method = 'LM_AR_DIFF') %>%
-    dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
+    dplyr::mutate(VP_Method = 'LM_AR_DIFF') %>%
+    dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   
   return(viral_production_LM)
 }
@@ -159,9 +160,9 @@ vp_linear_average_replicates_diff_LMER <- function(data){
     dplyr::group_by(.data$tag, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
-                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[which(startsWith(.GlobalEnv$populations_to_analyze, 'c_V'))])) %>%
-    dplyr::mutate(VP_method = 'LM_AR_DIFF_LMER') %>%
-    dplyr::select(.data$tag, .data$Location, .data$Station_Number, .data$Depth, dplyr::everything())
+                   factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
+    dplyr::mutate(VP_Method = 'LM_AR_DIFF_LMER') %>%
+    dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   
   return(viral_production_LM)
 }

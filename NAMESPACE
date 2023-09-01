@@ -2,6 +2,8 @@
 
 export("%>%")
 export(.data)
+export(analyze_viral_production)
+export(calculate_viral_production)
 export(vp_list_of_methods)
 importFrom(magrittr,"%>%")
 importFrom(rlang,"!!!")

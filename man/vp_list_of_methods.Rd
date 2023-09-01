@@ -7,7 +7,7 @@
 vp_list_of_methods()
 }
 \value{
-A list with the different variants of linear regression and VIPCAL available to calculate viral production.
+A list with the different variants of linear regression and VIPCAL available to calculate viral production will be available in the global environment.
 }
 \description{
 A list of all the different variants of linear regression and VIPCAL available to calculate the viral
