@@ -4,7 +4,7 @@
 \alias{vp_check_populations}
 \title{Check populations to analyze}
 \usage{
-vp_check_populations(data)
+vp_check_populations(data = data.frame())
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}

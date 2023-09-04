@@ -11,19 +11,19 @@
 \alias{vp_VIPCAL_average_replicates_diff_LMER_SE}
 \title{VIPCAL variants for viral production calculation}
 \usage{
-vp_VIPCAL_separate_replicates(data, AVG = T)
+vp_VIPCAL_separate_replicates(data = data.frame(), AVG = T)
 
-vp_VIPCAL_average_replicates(data)
+vp_VIPCAL_average_replicates(data = data.frame())
 
-vp_VIPCAL_average_replicates_SE(data)
+vp_VIPCAL_average_replicates_SE(data = data.frame())
 
-vp_VIPCAL_average_replicates_diff(data)
+vp_VIPCAL_average_replicates_diff(data = data.frame())
 
-vp_VIPCAL_average_replicates_diff_SE(data)
+vp_VIPCAL_average_replicates_diff_SE(data = data.frame())
 
-vp_VIPCAL_average_replicates_diff_LMER(data)
+vp_VIPCAL_average_replicates_diff_LMER(data = data.frame())
 
-vp_VIPCAL_average_replicates_diff_LMER_SE(data)
+vp_VIPCAL_average_replicates_diff_LMER_SE(data = data.frame())
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}

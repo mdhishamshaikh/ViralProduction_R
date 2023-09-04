@@ -7,12 +7,12 @@
 \title{Construct viral count data frame}
 \usage{
 vp_separate_replicate_dataframe(
-  data,
+  data = data.frame(),
   keep_0.22_samples = FALSE,
   add_timepoints = TRUE
 )
 
-vp_average_replicate_dataframe(data, add_timepoints = TRUE)
+vp_average_replicate_dataframe(data = data.frame(), add_timepoints = TRUE)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}

@@ -64,7 +64,7 @@
 #' 
 #' vp_VIPCAL_average_replicates_diff_LMER_SE(data_NJ2020_all)
 #' }
-vp_VIPCAL_separate_replicates <- function(data, AVG = T){
+vp_VIPCAL_separate_replicates <- function(data = data.frame(), AVG = T){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_VIPCAL_separate_replicates(separate_replicate_dataframe_with_timepoints)
@@ -76,7 +76,7 @@ vp_VIPCAL_separate_replicates <- function(data, AVG = T){
                      factor(.data$Sample_Type, levels = c('VP', 'VPC')),
                      factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
       dplyr::mutate(VP_Method = 'VPCL_SR') %>%
-      dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
+      dplyr::select('tag', 'Location', 'Station_Number', 'Depth', 'Replicate', dplyr::everything())
   } else {
     viral_production_VIPCAL <- determine_viral_production_dataframe %>%
       dplyr::group_by(.data$tag, .data$Location, .data$Station_Number, .data$Depth, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
@@ -98,7 +98,7 @@ vp_VIPCAL_separate_replicates <- function(data, AVG = T){
 
 
 #' @rdname vp_methods_VIPCAL
-vp_VIPCAL_average_replicates <- function(data){
+vp_VIPCAL_average_replicates <- function(data = data.frame()){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   average_replicate_dataframe_no_diff_curve <- average_replicate_dataframe_with_timepoints %>%
@@ -120,7 +120,7 @@ vp_VIPCAL_average_replicates <- function(data){
 
 
 #' @rdname vp_methods_VIPCAL
-vp_VIPCAL_average_replicates_SE <- function(data){
+vp_VIPCAL_average_replicates_SE <- function(data = data.frame()){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   average_replicate_dataframe_no_diff_curve <- average_replicate_dataframe_with_timepoints %>%
@@ -142,7 +142,7 @@ vp_VIPCAL_average_replicates_SE <- function(data){
 
 
 #' @rdname vp_methods_VIPCAL
-vp_VIPCAL_average_replicates_diff <- function(data){
+vp_VIPCAL_average_replicates_diff <- function(data = data.frame()){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_VIPCAL_average_replicates(average_replicate_dataframe_with_timepoints)
@@ -160,7 +160,7 @@ vp_VIPCAL_average_replicates_diff <- function(data){
 
 
 #' @rdname vp_methods_VIPCAL
-vp_VIPCAL_average_replicates_diff_SE <- function(data){
+vp_VIPCAL_average_replicates_diff_SE <- function(data = data.frame()){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_VIPCAL_average_replicates_SE(average_replicate_dataframe_with_timepoints)
@@ -178,7 +178,7 @@ vp_VIPCAL_average_replicates_diff_SE <- function(data){
 
 
 #' @rdname vp_methods_VIPCAL
-vp_VIPCAL_average_replicates_diff_LMER <- function(data){
+vp_VIPCAL_average_replicates_diff_LMER <- function(data = data.frame()){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_VIPCAL_LMER_model(separate_replicate_dataframe_with_timepoints)
@@ -196,7 +196,7 @@ vp_VIPCAL_average_replicates_diff_LMER <- function(data){
 
 
 #' @rdname vp_methods_VIPCAL
-vp_VIPCAL_average_replicates_diff_LMER_SE <- function(data){
+vp_VIPCAL_average_replicates_diff_LMER_SE <- function(data = data.frame()){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_VIPCAL_LMER_model_SE(separate_replicate_dataframe_with_timepoints)

@@ -9,15 +9,15 @@
 \alias{vp_linear_average_replicates_diff_LMER}
 \title{Linear regression variants for viral production calculation}
 \usage{
-vp_linear_allpoints(data)
+vp_linear_allpoints(data = data.frame())
 
-vp_linear_separate_replicates(data, AVG = TRUE)
+vp_linear_separate_replicates(data = data.frame(), AVG = TRUE)
 
-vp_linear_average_replicates(data)
+vp_linear_average_replicates(data = data.frame())
 
-vp_linear_average_replicates_diff(data)
+vp_linear_average_replicates_diff(data = data.frame())
 
-vp_linear_average_replicates_diff_LMER(data)
+vp_linear_average_replicates_diff_LMER(data = data.frame())
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}

@@ -4,7 +4,7 @@
 \alias{vp_bacterial_endpoint}
 \title{Determine bacterial endpoint of assay}
 \usage{
-vp_bacterial_endpoint(data, visual = FALSE)
+vp_bacterial_endpoint(data = data.frame(), visual = FALSE)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}

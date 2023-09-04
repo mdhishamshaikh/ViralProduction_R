@@ -1,7 +1,7 @@
 #' Wrapper function that calculates viral production
 #' 
 #' @description
-#' Wrapper function that does everything at once. Given the output of the flow cytometry step, viral production
+#' Wrapper function that performs viral production calculation at once. Given the output of the flow cytometry step, viral production
 #' is calculated for all the methods of linear regression and VIPCAL. The output data frames are written as csv files,
 #' four different csv files are saved:
 #' 
@@ -45,7 +45,7 @@
 #' 
 #' calculate_viral_production(data_NJ2020_all, write_csv = F, methods = c(2,3,8,12))
 #' }
-calculate_viral_production <- function(data,
+calculate_viral_production <- function(data = data.frame(),
                                        methods = c(1:12),
                                        SR_calc = TRUE,
                                        BP_endpoint = TRUE,

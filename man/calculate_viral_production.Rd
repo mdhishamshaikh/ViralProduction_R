@@ -5,7 +5,7 @@
 \title{Wrapper function that calculates viral production}
 \usage{
 calculate_viral_production(
-  data,
+  data = data.frame(),
   methods = c(1:12),
   SR_calc = TRUE,
   BP_endpoint = TRUE,
@@ -33,7 +33,7 @@ If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 Depending on setting of parameters, different data frames with the viral production calculation will be available in the global environment.
 }
 \description{
-Wrapper function that does everything at once. Given the output of the flow cytometry step, viral production
+Wrapper function that performs viral production calculation at once. Given the output of the flow cytometry step, viral production
 is calculated for all the methods of linear regression and VIPCAL. The output data frames are written as csv files,
 four different csv files are saved:
 \enumerate{

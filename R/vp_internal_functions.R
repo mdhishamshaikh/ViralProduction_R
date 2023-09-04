@@ -40,7 +40,7 @@
 #' 'NJ2020_Station_2_and_6_without_cViruses.csv', package = "viralprod"))
 #' vp_check_populations(data_NJ2020_without_cViruses)
 #' }
-vp_check_populations <- function(data){
+vp_check_populations <- function(data = data.frame()){
   if ('c_Viruses' %in% colnames(data)){
     .GlobalEnv$populations_to_analyze <- colnames(data)[grep("^c_", colnames(data))]
     print(paste("Following populations will be analyzed:", paste(.GlobalEnv$populations_to_analyze, collapse = ", ")))

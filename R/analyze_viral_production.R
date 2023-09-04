@@ -1,27 +1,57 @@
-#' Title
+#' Analyze viral production results
 #' 
 #' @description
-#' test
+#' Luef et al. (2009) created an online tool, `Viral Production Calculator`, that assesses and analyses viral production.
+#' Next to calculating viral production and proportion of lysogenic bacteria in the sample, other parameters for estimating
+#' virus-induced mortality are determined including lysis rate of bacteria, viral turnover time, organic carbon release and others.
 #' 
+#' Based on the original data and the output of [viralprod::calculate_viral_production], the same parameters are
+#' calculated and added to the previous output. Another data frame with the description and units of each of the variables
+#' is also generated. 
+#' 
+#' Reference to paper:
+#' 
+#' Luef, B., Luef, F., and Peduzzi, P. (2009). Online program ‘VIPCAL’ for calculating lytic viral production
+#' and lysogenic cells based on a viral reduction approach. Environmental microbiology reports, 1(1):78–85.
+#' doi:10.1111/j.1758-2229.2008.00008.x.
 #'
-#' @param vp_results test
-#' @param data test
-#' @param original_abundances test
-#' @param burst_sizes test
-#' @param bacterial_secondary_production test
-#' @param nutrient_content_bacteria test
-#' @param nutrient_content_viruses test
-#' @param write_csv test
+#' @param vp_results Data frame with the viral production calculation results. 
+#' @param data Data frame with the output of the flow cytometry.
+#' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample. 
+#' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
+#' @param bacterial_secondary_production Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction. 
+#' @param nutrient_content_bacteria List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.
+#' @param nutrient_content_viruses List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).
+#' @param write_csv If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
+#' If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})
 #'
-#' @return test
+#' @return Data frame with the analyzed viral production results, different parameters for estimating virus-induced mortality are calculated. A second data frame with some more information about the variables will also be available in the global environment. 
 #' @export
 #' 
 #' @name analyze_viral_production
 #' @rdname analyze_viral_production
 #'
 #' @examples \dontrun{
-#' test
+#' # Setup
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
 #' 
+#' original_abundances_NJ2020 <- read.csv(system.file('extdata',
+#' 'NJ2020_original_abundances.csv', package = "viralprod"))
+#' 
+#' calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+#' 
+#' # Perform
+#' analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
+#' original_abundances_2020) # Output files
+#' 
+#' analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
+#' original_abundances_2020, write_csv = F)
+#' 
+#' analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_2020,
+#' burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
+#' nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
+#' nutrient_content_virus = list(C = 5, N = 3, P = 1)) # Set parameters, no default values
 #' }
 analyze_viral_production <- function(vp_results = data.frame(),
                                      data = data.frame(),
@@ -63,35 +93,39 @@ analyze_viral_production <- function(vp_results = data.frame(),
     dplyr::select(dplyr::all_of(c('Station_Number', 'Total_Bacteria', 'Total_Viruses')))
   
   .GlobalEnv$analyzed_vp_results_df <- vp_results %>%
-    dplyr::left_join(dplyr::select(B_T0_df, .data$Station_Number, .data$Mean), by = c('Station_Number')) %>%
+    dplyr::left_join(dplyr::select(B_T0_df, 'Station_Number', 'Mean'), by = c('Station_Number')) %>%
     dplyr::rename(B_0 = "Mean") %>%
-    dplyr::left_join(dplyr::select(original_abundances_df, .data$Station_Number, .data$Total_Bacteria, .data$Total_Viruses), by = c('Station_Number')) %>%
+    dplyr::left_join(dplyr::select(original_abundances_df, 'Station_Number', 'Total_Bacteria', 'Total_Viruses'), by = c('Station_Number')) %>%
     dplyr::rename(B_OS = "Total_Bacteria",
                   V_OS = "Total_Viruses")
   
-  # Default values for burst size, bacterial secondary production and nutrient values if none are given as input
-  if (rlang::is_empty(burst_sizes)){
+  # If no input for hyperparameters is given, default values are used
+  if (rlang::is_empty(burst_sizes) | !rlang::is_bare_numeric(burst_sizes)){
     burst_sizes <- c(10,25,40)
+    print('Default values used for burst size!')
   }
   
-  if (rlang::is_null(bacterial_secondary_production)){
+  if (!rlang::is_bare_numeric(bacterial_secondary_production)){
     bacterial_secondary_production <- 0.0027e6
+    print('Default value used for bacterial secondary production!')
   }
   
-  if (rlang::is_empty(nutrient_content_bacteria)){
+  if (rlang::is_empty(nutrient_content_bacteria) | !all(sapply(nutrient_content_bacteria, rlang::is_bare_numeric))){
     # Article: Fagerbakke, KM & Heldal, Mikal & Norland, S. (1996). 
     # Content of Carbon, Nitrogen, Oxygen, Sulfur and Phosphorus in Native Aquatic and Cultured Bacteria. 
     # Aquatic Microbial Ecology - AQUAT MICROB ECOL. 10. 15-27. 10.3354/ame010015
     nutrient_content_bacteria <- list(C = 19e-15, N = 5e-15, P = 0.8e-15)
+    print('Default values used for nutrient content of bacteria!')
   }
   
-  if (rlang::is_empty(nutrient_content_viruses)){
+  if (rlang::is_empty(nutrient_content_viruses) | !all(sapply(nutrient_content_viruses, rlang::is_bare_numeric))){
     # Article: Jover, L., Effler, T., Buchan, A. et al. The elemental composition of virus particles: 
     # implications for marine biogeochemical cycles. Nat Rev Microbiol 12, 519–528 (2014). 10.1038/nrmicro3289
     C_V <- (1664612 / 6.022e23) * 12.01
     N_V <- (563058 / 6.022e23) * 14.01
     P_V <- (92428 / 6.022e23) * 30.97
     nutrient_content_viruses <- list(C = C_V, N = N_V, P = P_V) 
+    print('Default values used for nutrient condent of viruses!')
   }
   
   ## 3. Analyze viral production results

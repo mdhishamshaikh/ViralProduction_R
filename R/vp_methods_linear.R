@@ -56,7 +56,7 @@
 #' 
 #' vp_linear_average_replicates_diff_LMER(data_NJ2020_all)
 #' }
-vp_linear_allpoints <- function(data){
+vp_linear_allpoints <- function(data = data.frame()){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_allpoints(separate_replicate_dataframe_with_timepoints) %>%
@@ -75,7 +75,7 @@ vp_linear_allpoints <- function(data){
 
 
 #' @rdname vp_methods_LM
-vp_linear_separate_replicates <- function(data, AVG = TRUE){
+vp_linear_separate_replicates <- function(data = data.frame(), AVG = TRUE){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_separate_replicates(separate_replicate_dataframe_with_timepoints)
@@ -87,7 +87,7 @@ vp_linear_separate_replicates <- function(data, AVG = TRUE){
                      factor(.data$Sample_Type, levels = c('VP', 'VPC')),
                      factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
       dplyr::mutate(VP_Method = 'LM_SR') %>%
-      dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
+      dplyr::select('tag', 'Location', 'Station_Number', 'Depth', 'Replicate', dplyr::everything())
   } else {
     viral_production_LM <- determine_viral_production_dataframe %>%
       dplyr::group_by(.data$tag, .data$Location, .data$Station_Number, .data$Depth, .data$Time_Range, .data$Population, .data$Sample_Type) %>%
@@ -111,7 +111,7 @@ vp_linear_separate_replicates <- function(data, AVG = TRUE){
 
 
 #' @rdname vp_methods_LM
-vp_linear_average_replicates <- function(data){
+vp_linear_average_replicates <- function(data = data.frame()){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   average_replicate_dataframe_no_diff_curve <- average_replicate_dataframe_with_timepoints %>%
@@ -133,7 +133,7 @@ vp_linear_average_replicates <- function(data){
   
 
 #' @rdname vp_methods_LM
-vp_linear_average_replicates_diff <- function(data){
+vp_linear_average_replicates_diff <- function(data = data.frame()){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_average_replicates(average_replicate_dataframe_with_timepoints)
@@ -151,7 +151,7 @@ vp_linear_average_replicates_diff <- function(data){
 
 
 #' @rdname vp_methods_LM
-vp_linear_average_replicates_diff_LMER <- function(data){
+vp_linear_average_replicates_diff_LMER <- function(data = data.frame()){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_LMER_model(separate_replicate_dataframe_with_timepoints)

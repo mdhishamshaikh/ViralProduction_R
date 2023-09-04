@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyze_viral_production.R
 \name{analyze_viral_production}
 \alias{analyze_viral_production}
-\title{Title}
+\title{Analyze viral production results}
 \usage{
 analyze_viral_production(
   vp_results = data.frame(),
@@ -16,31 +16,62 @@ analyze_viral_production(
 )
 }
 \arguments{
-\item{vp_results}{test}
+\item{vp_results}{Data frame with the viral production calculation results.}
 
-\item{data}{test}
+\item{data}{Data frame with the output of the flow cytometry.}
 
-\item{original_abundances}{test}
+\item{original_abundances}{Data frame with the abundances of bacterial and virus population in the original sample.}
 
-\item{burst_sizes}{test}
+\item{burst_sizes}{Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell.}
 
-\item{bacterial_secondary_production}{test}
+\item{bacterial_secondary_production}{Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction.}
 
-\item{nutrient_content_bacteria}{test}
+\item{nutrient_content_bacteria}{List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.}
 
-\item{nutrient_content_viruses}{test}
+\item{nutrient_content_viruses}{List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).}
 
-\item{write_csv}{test}
+\item{write_csv}{If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
+If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 }
 \value{
-test
+Data frame with the analyzed viral production results, different parameters for estimating virus-induced mortality are calculated. A second data frame with some more information about the variables will also be available in the global environment.
 }
 \description{
-test
+Luef et al. (2009) created an online tool, \verb{Viral Production Calculator}, that assesses and analyses viral production.
+Next to calculating viral production and proportion of lysogenic bacteria in the sample, other parameters for estimating
+virus-induced mortality are determined including lysis rate of bacteria, viral turnover time, organic carbon release and others.
+
+Based on the original data and the output of \link{calculate_viral_production}, the same parameters are
+calculated and added to the previous output. Another data frame with the description and units of each of the variables
+is also generated.
+
+Reference to paper:
+
+Luef, B., Luef, F., and Peduzzi, P. (2009). Online program ‘VIPCAL’ for calculating lytic viral production
+and lysogenic cells based on a viral reduction approach. Environmental microbiology reports, 1(1):78–85.
+doi:10.1111/j.1758-2229.2008.00008.x.
 }
 \examples{
 \dontrun{
-test
+# Setup
+data_NJ2020_all <- read.csv(system.file('extdata', 
+'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
 
+original_abundances_NJ2020 <- read.csv(system.file('extdata',
+'NJ2020_original_abundances.csv', package = "viralprod"))
+
+calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+
+# Perform
+analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
+original_abundances_2020) # Output files
+
+analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
+original_abundances_2020, write_csv = F)
+
+analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_2020,
+burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
+nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
+nutrient_content_virus = list(C = 5, N = 3, P = 1)) # Set parameters, no default values
 }
 }

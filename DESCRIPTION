@@ -20,14 +20,21 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports: 
+    colorspace,
     data.table,
     dplyr,
     emmeans,
+    ggnewscale,
+    ggplot2,
+    ggstatsplot,
     graphics,
+    grid,
     lme4,
     magrittr,
     plotrix,
     rlang,
+    scales,
+    stringr,
     tidyr,
     utils
 Config/testthat/edition: 3

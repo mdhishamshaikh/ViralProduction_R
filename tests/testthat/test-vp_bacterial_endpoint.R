@@ -10,7 +10,7 @@ expect_output_bacterial_endpoint <- function(x){
 }
 
 expect_output_bacterial_endpoint_for_visual <- function(x){
-  expect_type(x, 'integer')
+  expect_type(x, 'double')
 }
 
 # Perform

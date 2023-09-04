@@ -30,7 +30,7 @@
 #' vp_bacterial_endpoint(subset_data)
 #' vp_bacterial_endpoint(subset_data, visual = T)
 #' }
-vp_bacterial_endpoint <- function(data, visual = FALSE){
+vp_bacterial_endpoint <- function(data = data.frame(), visual = FALSE){
   DF_bacterial_and_VP_samples_only <- data %>%
     vp_average_replicate_dataframe(add_timepoints = F) %>%
     dplyr::filter(.data$Sample_Type == 'VP', .data$Microbe == 'Bacteria')
@@ -61,9 +61,9 @@ vp_bacterial_endpoint <- function(data, visual = FALSE){
   
   if (visual == T){
     if(is.na(bacterial_endpoint)){
-      stop_assay <- length(unique_timepoints)
+      stop_assay <- length(unique_timepoints) - 1
     } else {
-      stop_assay <- bacterial_endpoint
+      stop_assay <- bacterial_endpoint - 1
     }
   } else {
     if (is.na(bacterial_endpoint)){
