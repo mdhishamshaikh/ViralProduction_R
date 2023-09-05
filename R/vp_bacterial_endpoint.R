@@ -3,13 +3,12 @@
 #' @description
 #' In the VP samples, an increase of collision rates between the bacteriophages (viruses) and bacteria is noticed. 
 #' This is probably due to the net increase in bacterial growth that is established during the assay. In VPC samples
-#' on the other hand, this phenomenon isn't presented since the treatment with antibiotic `mitomycin-C` inhibits the
-#' growth of the bacteria. This increase in collision rates in solely VP samples results in a higher expected lytic viral production.
-#' Ultimately, this can result in a negative lysogenic viral production. To achieve comparable results between sample types,
+#' on the other hand, this phenomenon isn't presented since treatment with antibiotic `mitomycin-C` inhibits the
+#' growth of bacteria. This increase in collision rates in solely VP samples results in a higher expected lytic viral production.
+#' Ultimately, this can result in a negative lysogenic viral production. To achieve comparable results between the different sample types,
 #' we define the bacterial endpoint as the moment where the generation time in bacteria is less then 24 hours, since the duration of
 #' the assay is 24 hours. The generation time is calculated based of the net increase of the total bacteria population in 
-#' the VP samples of the assay. The bacterial endpoint will determine the moment we need to stop the assay to prevent
-#' having less comparable results. 
+#' the VP samples of the assay. The bacterial endpoint will determine the moment when to stop the assay to assure less biased results.
 #'
 #' @param data Data frame with the output of the flow cytometry.
 #' @param visual If \code{FALSE}, a character with the time range to stop the assay is returned. The character value is from the form: T0_TX. If \code{TRUE}, an integer with the index of the time point to stop the assay is returned. (Default = \code{FALSE})
@@ -30,7 +29,8 @@
 #' vp_bacterial_endpoint(subset_data)
 #' vp_bacterial_endpoint(subset_data, visual = T)
 #' }
-vp_bacterial_endpoint <- function(data = data.frame(), visual = FALSE){
+vp_bacterial_endpoint <- function(data,
+                                  visual = FALSE){
   DF_bacterial_and_VP_samples_only <- data %>%
     vp_average_replicate_dataframe(add_timepoints = F) %>%
     dplyr::filter(.data$Sample_Type == 'VP', .data$Microbe == 'Bacteria')
@@ -57,19 +57,19 @@ vp_bacterial_endpoint <- function(data = data.frame(), visual = FALSE){
     as.data.frame() %>%
     dplyr::mutate_at(dplyr::vars(-'Timepoint'), as.numeric)
   
-  bacterial_endpoint <- intersect(which(DF_bacterial_endpoint$c_Bacteria > 0), which(DF_bacterial_endpoint$c_Bacteria < 24))[1]
+  bacterial_endpoint_index <- intersect(which(DF_bacterial_endpoint$c_Bacteria > 0), which(DF_bacterial_endpoint$c_Bacteria < 24))[1]
   
   if (visual == T){
-    if(is.na(bacterial_endpoint)){
+    if(is.na(bacterial_endpoint_index)){
       stop_assay <- length(unique_timepoints) - 1
     } else {
-      stop_assay <- bacterial_endpoint - 1
+      stop_assay <- bacterial_endpoint_index - 1
     }
   } else {
-    if (is.na(bacterial_endpoint)){
+    if (is.na(bacterial_endpoint_index)){
       stop_assay <- paste0("T", unique_timepoints[1], "_T", unique_timepoints[length(unique_timepoints)])
     } else {
-      stop_assay <-  paste0("T", unique_timepoints[1], "_T", unique_timepoints[bacterial_endpoint])
+      stop_assay <-  paste0("T", unique_timepoints[1], "_T", unique_timepoints[bacterial_endpoint_index])
     }
   }
   return(stop_assay)

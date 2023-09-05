@@ -1,4 +1,4 @@
-#' Analyze viral production results
+#' Analyze viral production data
 #' 
 #' @description
 #' Luef et al. (2009) created an online tool, `Viral Production Calculator`, that assesses and analyses viral production.
@@ -6,7 +6,7 @@
 #' virus-induced mortality are determined including lysis rate of bacteria, viral turnover time, organic carbon release and others.
 #' 
 #' Based on the original data and the output of [viralprod::calculate_viral_production], the same parameters are
-#' calculated and added to the previous output. Another data frame with the description and units of each of the variables
+#' calculated and added to the already existing data frame. Another data frame with the description and units of each of the variables
 #' is also generated. 
 #' 
 #' Reference to paper:
@@ -15,7 +15,7 @@
 #' and lysogenic cells based on a viral reduction approach. Environmental microbiology reports, 1(1):78–85.
 #' doi:10.1111/j.1758-2229.2008.00008.x.
 #'
-#' @param vp_results Data frame with the viral production calculation results. 
+#' @param vp_results Data frame with the viral production calculation results, available in global environment after running \code{calculate_viral_production}.
 #' @param data Data frame with the output of the flow cytometry.
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample. 
 #' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
@@ -24,6 +24,7 @@
 #' @param nutrient_content_viruses List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).
 #' @param write_csv If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
 #' If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})
+#' @param output_dir String that refers to the location of folder to save the data frames as csv files.
 #'
 #' @return Data frame with the analyzed viral production results, different parameters for estimating virus-induced mortality are calculated. A second data frame with some more information about the variables will also be available in the global environment. 
 #' @export
@@ -39,19 +40,23 @@
 #' original_abundances_NJ2020 <- read.csv(system.file('extdata',
 #' 'NJ2020_original_abundances.csv', package = "viralprod"))
 #' 
-#' calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+#' calculate_viral_production(data_NJ2020_all, write_csv = F)
 #' 
 #' # Perform
-#' analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
-#' original_abundances_2020) # Output files
+#' # Write output files
+#' analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
+#' original_abundances_NJ2020, output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
+#' “/NJ2020_vp_results”))
 #' 
-#' analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
-#' original_abundances_2020, write_csv = F)
+#' # No output files
+#' analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
+#' original_abundances_NJ2020, write_csv = F)
 #' 
-#' analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_2020,
+#' # Set own parameter values
+#' analyze_viral_production(vp_results_output_df, data_NJ2020_all, original_abundances_2020,
 #' burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
 #' nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
-#' nutrient_content_virus = list(C = 5, N = 3, P = 1)) # Set parameters, no default values
+#' nutrient_content_virus = list(C = 5, N = 3, P = 1)) 
 #' }
 analyze_viral_production <- function(vp_results = data.frame(),
                                      data = data.frame(),
@@ -60,20 +65,32 @@ analyze_viral_production <- function(vp_results = data.frame(),
                                      bacterial_secondary_production = NULL,
                                      nutrient_content_bacteria = list(),
                                      nutrient_content_viruses = list(),
-                                     write_csv = TRUE){
+                                     write_csv = TRUE,
+                                     output_dir = ''){
   ## 1. Checks
-  # Check for valid output directory if csv file needs to be written
-  # Output directory of calculation viral production is saved in global environment, save analyze csv file in same folder
+  # Check for valid output directory if csv files needs to be written
   if (write_csv == T){
-    if(!exists("output_dir", where = globalenv(), inherits = FALSE)){
-      stop('There exists no output_dir value in the global environment, please define output folder to save analyzing results!')
+    if(output_dir == ''){
+      stop('No output directory is given, please define output directory before proceeding!')
       
-    } else if(!file.exists(.GlobalEnv$output_dir)){
-      warning('The output folder does not exists, results will be saved in given folder!')
-      analyze_vp_results_path <- paste0(.GlobalEnv$output_dir, '/')
+    } else if(!file.exists(output_dir)){
+      # Give the user an option if he wants to continue and store analyzing results in separate folder
+      user_choice <- utils::menu(
+        c("Continue and store analyzing results in folder by your choice",
+          "Stop and define same output directory of calculation results"),
+        title = message("Warning: The output folder does not exists!"),
+        graphics = FALSE)
       
+      if (user_choice == 1){
+        message('Continuing with the given output directory, analyzing results will be stored in separate folder!')
+        dir.create(output_dir)
+        analyze_vp_results_path <- paste0(output_dir, '/')
+        
+      } else {
+        stop('Process stopped, please define another output directory!')
+      }
     } else {
-      analyzed_vp_results_path <- paste0(.GlobalEnv$output_dir, '/')
+      analyze_vp_results_path <- paste0(output_dir, '/')
     }
   }
   
@@ -99,15 +116,15 @@ analyze_viral_production <- function(vp_results = data.frame(),
     dplyr::rename(B_OS = "Total_Bacteria",
                   V_OS = "Total_Viruses")
   
-  # If no input for hyperparameters is given, default values are used
+  # If no input for hyper parameters is given, default values are used
   if (rlang::is_empty(burst_sizes) | !rlang::is_bare_numeric(burst_sizes)){
     burst_sizes <- c(10,25,40)
-    print('Default values used for burst size!')
+    message('Default values used for burst size!')
   }
   
   if (!rlang::is_bare_numeric(bacterial_secondary_production)){
     bacterial_secondary_production <- 0.0027e6
-    print('Default value used for bacterial secondary production!')
+    message('Default value used for bacterial secondary production!')
   }
   
   if (rlang::is_empty(nutrient_content_bacteria) | !all(sapply(nutrient_content_bacteria, rlang::is_bare_numeric))){
@@ -115,7 +132,7 @@ analyze_viral_production <- function(vp_results = data.frame(),
     # Content of Carbon, Nitrogen, Oxygen, Sulfur and Phosphorus in Native Aquatic and Cultured Bacteria. 
     # Aquatic Microbial Ecology - AQUAT MICROB ECOL. 10. 15-27. 10.3354/ame010015
     nutrient_content_bacteria <- list(C = 19e-15, N = 5e-15, P = 0.8e-15)
-    print('Default values used for nutrient content of bacteria!')
+    message('Default values used for nutrient content of bacteria!')
   }
   
   if (rlang::is_empty(nutrient_content_viruses) | !all(sapply(nutrient_content_viruses, rlang::is_bare_numeric))){
@@ -125,7 +142,7 @@ analyze_viral_production <- function(vp_results = data.frame(),
     N_V <- (563058 / 6.022e23) * 14.01
     P_V <- (92428 / 6.022e23) * 30.97
     nutrient_content_viruses <- list(C = C_V, N = N_V, P = P_V) 
-    print('Default values used for nutrient condent of viruses!')
+    message('Default values used for nutrient condent of viruses!')
   }
   
   ## 3. Analyze viral production results

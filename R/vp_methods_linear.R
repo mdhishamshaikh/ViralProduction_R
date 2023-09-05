@@ -1,10 +1,10 @@
 #' Linear regression variants for viral production calculation
 #' 
 #' @description
-#' Two main methods are used to determine the viral production rate over time in our assay: `Linear Regression` vs
+#' Two main methods are used to determine the viral production rate in the viral reduction assay: `Linear Regression` vs
 #' `VIPCAL`. Different variants of both methods are performed: variance in replicate treatment, use of standard error
 #' and type of estimation of the difference curve is presented. Next, the different variants of `Linear Regression`
-#' which use the slope between the viral counts to determine the viral production rate. The following general 
+#' which uses the slope between the viral counts to determine the viral production rate. The following general 
 #' step-by-step plan is carried out by each of the variants:
 #'    
 #' 1. Constructing correct data frame depending on replicate treatment.
@@ -56,7 +56,7 @@
 #' 
 #' vp_linear_average_replicates_diff_LMER(data_NJ2020_all)
 #' }
-vp_linear_allpoints <- function(data = data.frame()){
+vp_linear_allpoints <- function(data){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_allpoints(separate_replicate_dataframe_with_timepoints) %>%
@@ -75,7 +75,8 @@ vp_linear_allpoints <- function(data = data.frame()){
 
 
 #' @rdname vp_methods_LM
-vp_linear_separate_replicates <- function(data = data.frame(), AVG = TRUE){
+vp_linear_separate_replicates <- function(data,
+                                          AVG = TRUE){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_separate_replicates(separate_replicate_dataframe_with_timepoints)
@@ -105,13 +106,12 @@ vp_linear_separate_replicates <- function(data = data.frame(), AVG = TRUE){
       dplyr::mutate(VP_Method = 'LM_SR_AVG') %>%
       dplyr::select('tag', 'Location', 'Station_Number', 'Depth', dplyr::everything())
   }
-  
   return(viral_production_LM)
 }
 
 
 #' @rdname vp_methods_LM
-vp_linear_average_replicates <- function(data = data.frame()){
+vp_linear_average_replicates <- function(data){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   average_replicate_dataframe_no_diff_curve <- average_replicate_dataframe_with_timepoints %>%
@@ -133,7 +133,7 @@ vp_linear_average_replicates <- function(data = data.frame()){
   
 
 #' @rdname vp_methods_LM
-vp_linear_average_replicates_diff <- function(data = data.frame()){
+vp_linear_average_replicates_diff <- function(data){
   average_replicate_dataframe_with_timepoints <- vp_average_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_average_replicates(average_replicate_dataframe_with_timepoints)
@@ -151,7 +151,7 @@ vp_linear_average_replicates_diff <- function(data = data.frame()){
 
 
 #' @rdname vp_methods_LM
-vp_linear_average_replicates_diff_LMER <- function(data = data.frame()){
+vp_linear_average_replicates_diff_LMER <- function(data){
   separate_replicate_dataframe_with_timepoints <- vp_separate_replicate_dataframe(data)
   
   determine_viral_production_dataframe <- determine_vp_linear_LMER_model(separate_replicate_dataframe_with_timepoints)

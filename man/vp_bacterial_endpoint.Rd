@@ -4,7 +4,7 @@
 \alias{vp_bacterial_endpoint}
 \title{Determine bacterial endpoint of assay}
 \usage{
-vp_bacterial_endpoint(data = data.frame(), visual = FALSE)
+vp_bacterial_endpoint(data, visual = FALSE)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}
@@ -17,13 +17,12 @@ A character or integer value defining the time range to stop the assay to retrie
 \description{
 In the VP samples, an increase of collision rates between the bacteriophages (viruses) and bacteria is noticed.
 This is probably due to the net increase in bacterial growth that is established during the assay. In VPC samples
-on the other hand, this phenomenon isn't presented since the treatment with antibiotic \code{mitomycin-C} inhibits the
-growth of the bacteria. This increase in collision rates in solely VP samples results in a higher expected lytic viral production.
-Ultimately, this can result in a negative lysogenic viral production. To achieve comparable results between sample types,
+on the other hand, this phenomenon isn't presented since treatment with antibiotic \code{mitomycin-C} inhibits the
+growth of bacteria. This increase in collision rates in solely VP samples results in a higher expected lytic viral production.
+Ultimately, this can result in a negative lysogenic viral production. To achieve comparable results between the different sample types,
 we define the bacterial endpoint as the moment where the generation time in bacteria is less then 24 hours, since the duration of
 the assay is 24 hours. The generation time is calculated based of the net increase of the total bacteria population in
-the VP samples of the assay. The bacterial endpoint will determine the moment we need to stop the assay to prevent
-having less comparable results.
+the VP samples of the assay. The bacterial endpoint will determine the moment when to stop the assay to assure less biased results.
 }
 \examples{
 \dontrun{

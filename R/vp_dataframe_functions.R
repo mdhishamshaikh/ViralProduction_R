@@ -1,9 +1,9 @@
-#' Construct viral count data frame
+#' Construct viral count data frame for viral production calculation
 #' 
 #' @description
 #' Given the output data frame of the flow cytometry step, produce the correct data frame for further
 #' calculations. Based on the replicate treatment, a different data frame will be produced. A separate
-#' replicate treatment will take each of the replicates into account, as a average replicate treatment
+#' replicate treatment will take each of the replicates into account, where an average replicate treatment
 #' will average over the replicates to retrieve an average count value. 
 #' 
 #' `vp_separate_replicate_dataframe` creates data frame by taking the separate replicates into account.
@@ -33,7 +33,9 @@
 #' vp_average_replicate_dataframe(data_NJ2020_all)
 #' vp_average_replicate_dataframe(data_NJ2020_all, add_timepoints = F)
 #' }
-vp_separate_replicate_dataframe <- function(data = data.frame(), keep_0.22_samples = FALSE, add_timepoints = TRUE){
+vp_separate_replicate_dataframe <- function(data, 
+                                            keep_0.22_samples = FALSE, 
+                                            add_timepoints = TRUE){
   SR_dataframe <- data %>%
     dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!.GlobalEnv$populations_to_analyze))) %>%
     tidyr::pivot_longer(cols = dplyr::starts_with('c_'), names_to = 'Population', values_to = 'Count') %>% 
@@ -65,7 +67,8 @@ vp_separate_replicate_dataframe <- function(data = data.frame(), keep_0.22_sampl
 
 
 #' @rdname vp_dataframes
-vp_average_replicate_dataframe <- function(data = data.frame(), add_timepoints = TRUE){
+vp_average_replicate_dataframe <- function(data,
+                                           add_timepoints = TRUE){
   dataframe_without_controls <- data[data$Sample_Type != '0.22',]
   
   AVG_dataframe <- dataframe_without_controls %>%
@@ -104,7 +107,7 @@ vp_average_replicate_dataframe <- function(data = data.frame(), add_timepoints =
         dplyr::filter(.data$tag == combi_tag)
       
       AVG_dataframe_merged_2 <- vp_add_timepoints(AVG_dataframe_merged_2)
-      result_list [[length(result_list)+1]] <- AVG_dataframe_merged_2
+      result_list[[length(result_list)+1]] <- AVG_dataframe_merged_2
     }
     AVG_dataframe_with_timepoints <- data.table::rbindlist(result_list)
   }else { 

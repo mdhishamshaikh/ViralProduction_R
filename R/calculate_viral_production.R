@@ -1,23 +1,23 @@
-#' Wrapper function that calculates viral production
+#' Wrapper function to calculate viral production
 #' 
 #' @description
-#' Wrapper function that performs viral production calculation at once. Given the output of the flow cytometry step, viral production
-#' is calculated for all the methods of linear regression and VIPCAL. The output data frames are written as csv files,
-#' four different csv files are saved:
+#' Wrapper function that performs viral production calculation. Given the output of the flow cytometry step, viral production
+#' is calculated for all methods of linear regression and VIPCAL. Based on the parameters, different data frames will be available
+#' in the global environment and can be written as csv files.
 #' 
-#' 1. `vp_results_ALL.csv`: contains the results of all the samples for each time range.
-#' 2. `vp_results_T24.csv`: contains the results of all the samples for the end of the assay (T0_T24).
-#' 3. `vp_results_SR.csv`: contains the results of the separate replicate treatment of all the samples for each time range.
-#' 4. `vp_results_BP.csv`: contains the results of all the samples but takes the bacterial endpoint into account, bacterial endpoint decides time range of the results.
+#' 1. `vp_results_ALL.csv`: contains the viral production results for all samples.
+#' 2. `vp_results_T24.csv`: contains the viral production results for all samples at the end of the assay (T0_T24).
+#' 3. `vp_results_SR.csv`: contains the viral production results for all samples of the separate replicate treatment, VP and VPC samples only.
+#' 4. `vp_results_BP.csv`: contains the viral production results for all samples with the bacterial endpoint into account. Results for that time range will be stored in data frame.
 #' 
-#' More details about each of the methods used:
+#' More details about the calculation methods:
 #' 
 #' - Linear regression variants: [viralprod::vp_methods_linear]
 #' - VIPCAL variants: [viralprod::vp_methods_VIPCAL]
 #'
 #' @param data Data frame with the output of the flow cytometry.
-#' @param methods Integer vector with the indexes of `list_of_methods`. Indexes determine which methods will be used for viral production calculation. 
-#' @param SR_calc If \code{TRUE}, separate replicate treatment results will be performed and saved as an separate data frame. 
+#' @param methods Integer vector with the indexes of `list_of_methods`. Indexes determine which methods will be performed within the viral production calculation. 
+#' @param SR_calc If \code{TRUE}, separate replicate treatment results will be stored and saved as an separate data frame. 
 #' Set to \code{FALSE}, if separate replicate treatment results are not wanted. (Default = \code{TRUE})
 #' @param BP_endpoint If \code{TRUE}, the bacterial endpoint will be taken into account and only those results will be saved in a new
 #' data frame. If not wanted, set to \code{FALSE}. (Default = \code{TRUE})
@@ -32,17 +32,23 @@
 #' @rdname calculate_viral_production
 #'
 #' @examples \dontrun{
+#' # Setup
 #' data_NJ2020_all <- read.csv(system.file('extdata', 
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
 #' 
+#' # Perform
+#' # Write output files
 #' calculate_viral_production(data_NJ2020_all, 
 #' output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
-#' “/vp_results_NJ2020”))
+#' “/NJ2020_vp_results”))
 #' 
+#' # No output files
 #' calculate_viral_production(data_NJ2020_all, write_csv = F)
 #' 
+#' # No bacterial endpoint and separate replicate treatment results
 #' calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
 #' 
+#' # Subselection of the methods
 #' calculate_viral_production(data_NJ2020_all, write_csv = F, methods = c(2,3,8,12))
 #' }
 calculate_viral_production <- function(data = data.frame(),
@@ -58,12 +64,29 @@ calculate_viral_production <- function(data = data.frame(),
       stop('No output directory is given, please define output directory before proceeding!')
       
     } else if (file.exists(output_dir)){
-      stop('The output folder already exists, please define another output directory before proceeding!')
+      # Give the user an option if he wants to continue and possible overwrite results or not
+      user_choice <- utils::menu(
+        c("Continue and possibly overwrite existing results",
+          "Stop and define another output directory"),
+        title = message("Warning: The output folder already exists!"),
+        graphics = FALSE)
       
+      if (user_choice == 1){
+        message('Continuing with the existing output directory, existing results will possibly be overwritten!')
+        vp_results_path <- paste0(output_dir, '/')
+        
+      } else {
+        stop('Process stopped, please define another output directory!')
+      }
     } else{
-      .GlobalEnv$output_dir <- output_dir
       dir.create(output_dir)
+      vp_results_path <- paste0(output_dir, '/')
     }
+  }
+  
+  # Check if data frame isn't empty
+  if (rlang::is_empty(data)){
+    stop('Not able to proceed since input data frames is empty!')
   }
   
   ## 2. Setup
@@ -76,16 +99,15 @@ calculate_viral_production <- function(data = data.frame(),
   vp_check_populations(data)
   
   ## 3. Calculate viral production
-  vp_results_path <- paste0(output_dir, '/')
   .GlobalEnv$vp_results_output_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
                                                 Depth = integer(), Time_Range = character(), Population = character(), 
-                                                Sample_Type = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
-                                                VP_R_Squared = numeric(), VP_Method = character())
+                                                Sample_Type = character(), VP = numeric(), abs_VP = numeric(), 
+                                                VP_SE = numeric(), VP_R_Squared = numeric(), VP_Method = character())
   
   for (method in methods){
     tryCatch(
       expr = {
-        print(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method]))
+        message(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method]))
         vp_results <- .GlobalEnv$list_of_methods[[method]](data)
         
         .GlobalEnv$vp_results_output_df <- dplyr::full_join(.GlobalEnv$vp_results_output_df, vp_results)
@@ -104,7 +126,7 @@ calculate_viral_production <- function(data = data.frame(),
       },
       
       finally = {
-        print(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
+        message(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
       }
     )
   }
@@ -135,7 +157,7 @@ calculate_viral_production <- function(data = data.frame(),
     for (method in methods_SR){
       tryCatch(
         expr = {
-          print(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method], ', only separate replicate results'))
+          message(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method], ', only separate replicate results'))
           vp_results <- .GlobalEnv$list_of_methods[[method]](data, AVG = F)
           
           .GlobalEnv$vp_results_output_SR_df <- dplyr::full_join(.GlobalEnv$vp_results_output_SR_df, vp_results)
@@ -154,7 +176,7 @@ calculate_viral_production <- function(data = data.frame(),
         },
         
         finally = {
-          print(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
+          message(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
         }
       )
     }

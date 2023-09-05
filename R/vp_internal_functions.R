@@ -3,10 +3,10 @@
 #' @description
 #' Bacterial and viral counts are retrieved from flow cytometry data by selecting an area on the generated scatter plot,
 #' this process is called `gating`. During the gating process, different populations are defined based on the side scatter
-#' and green fluorescence. Since gating is a manual process, the user is free to determine the amount and which populations
-#' to define. The count values, retrieved from scatter plot, need to be as a column in the output data frame of the flow 
+#' and green fluorescence. Since gating is a manual process, the user is free to determine which populations to define. 
+#' The count values, retrieved from the scatter plot, need to be as a column in the output data frame of the flow 
 #' cytometry step as followed: `c_PopulationName`. Given the output data frame of the flow cytometry step, 
-#' the different populations to analyze (determined by the gating process) are defined. 
+#' the different populations to analyze, determined by the gating process, are defined. 
 #' 
 #' @param data Data frame with the output of the flow cytometry.
 #'
@@ -40,22 +40,22 @@
 #' 'NJ2020_Station_2_and_6_without_cViruses.csv', package = "viralprod"))
 #' vp_check_populations(data_NJ2020_without_cViruses)
 #' }
-vp_check_populations <- function(data = data.frame()){
+vp_check_populations <- function(data){
   if ('c_Viruses' %in% colnames(data)){
     .GlobalEnv$populations_to_analyze <- colnames(data)[grep("^c_", colnames(data))]
-    print(paste("Following populations will be analyzed:", paste(.GlobalEnv$populations_to_analyze, collapse = ", ")))
+    message(paste("Following populations will be analyzed:", paste(.GlobalEnv$populations_to_analyze, collapse = ", ")))
   } else {
-    stop('Column c_Viruses, which represents total viral population, is not presented in input data. Not able to perform viral production calculation!')
+    stop('Total virus population, column c_Viruses, is not gated in output data fram of flow cytometry. Not able to perform viral production calculation!')
   }
 }
 
 
 #' Adding unique time ranges of the assay
 #' 
-#' Given a data frame that consists of column, 'Timepoint', that represents the different sub sampling points of the assay,
-#' a column with the different tiem ranges of the assay is added to the original data frame. 
+#' Given a data frame that consists of column, 'Timepoint', that represents the different sampling points of the assay,
+#' a column with the different time ranges of the assay is added to the original data frame. 
 #'
-#' @param DF Data frame with bacterial and viral counts.
+#' @param DF Data frame with the count for each population and each sample at the different time points of the assay.
 #'
 #' @return Expanded data frame with time ranges added as new column.
 #' 
@@ -103,7 +103,7 @@ vp_add_timepoints <- function(DF){
   
   DF <- DF %>%
     tidyr::pivot_longer(cols = dplyr::all_of(colnames), names_to = "Time_Range", values_to = "Time_Time") %>%
-    tidyr::drop_na() # Drops all the rows which have a NA value
+    tidyr::drop_na()
   
   return(DF)
 }
@@ -112,7 +112,7 @@ vp_add_timepoints <- function(DF){
 #' Determine peaks and valleys
 #' 
 #' @description
-#' `VIPCAL` calculates the viral production based off the average of increments. To get these increments, peaks
+#' `VIPCAL` calculates the viral production based on the average of increments. To get these increments, peaks
 #' and valleys in the viral counts need to be determined. VIPCAL has his own issues, namely that the standard error 
 #' has a big influence on the results. `VIPCAL-SE` goes one step further and takes the standard error into account
 #' when determining peaks and valleys. Because of that, only TRUE increments (increments without overlapping standard errors) are returned. 
@@ -173,7 +173,8 @@ vp_determine_valleys <- function(count_values){
 
 #' @rdname vp_peaks_and_valleys
 #' @noRd
-vp_determine_peaks_with_se <- function(count_values, count_se){
+vp_determine_peaks_with_se <- function(count_values, 
+                                       count_se){
   result_list <- c()
   
   for (index in 1:(length(count_values)-1)){
@@ -186,7 +187,8 @@ vp_determine_peaks_with_se <- function(count_values, count_se){
 
 #' @rdname vp_peaks_and_valleys
 #' @noRd
-vp_determine_valleys_with_se <- function(count_values, count_se){
+vp_determine_valleys_with_se <- function(count_values, 
+                                         count_se){
   result_list <- c()
   
   for (index in 1:(length(count_values)-1)){

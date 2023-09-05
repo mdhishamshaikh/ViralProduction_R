@@ -7,20 +7,21 @@
 vp_LMER_model(DF)
 }
 \arguments{
-\item{DF}{Data frame with the viral counts and time ranges, see \link{vp_separate_replicate_dataframe}.}
+\item{DF}{Data frame with the viral counts and time ranges, see \link{vp_separate_replicate_dataframe} for more details.}
 }
 \value{
 Data frame with the mean viral count for VP samples, VPC samples and the difference (DIFF samples) for each population at the different time points of the assay.
 }
 \description{
-The viral reduction assay has two types of samples: VP and VPC. In VP samples, count of bacteriophages in lytic phase
-can be measured (\verb{lytic viral production}). On the other hand in VPC samples, count of bacteriophages in both lytic and
+The viral reduction assay has two types of samples: VP and VPC. In VP samples, count of bacteriophages in the lytic phase
+can be measured (\verb{lytic viral production}). On the other hand in VPC samples, count of bacteriophages in both the lytic and
 lysogenic phase can be measured (\verb{lytic + lysogenic viral production}) since treatment with antibiotic \code{mitomycin-C}
 forces lysogenic bacteriophages to go into the lytic phase. To retrieve the lysogenic viral production, a difference
-curve is used. The difference curve can be estimated by subtracting the VP samples from the VPC samples, difference
-curve estimation by subtraction. But also, a \code{LMER model} can be used which will incorparate both fixed- and random
-effect terms. The influence of the sample type and time point on the viral count will be considered plus the variability
-between the different replicates (random-effect), difference curve estimation by LMER model.
+curve is used. The difference curve can be estimated by subtracting the VP samples count from the VPC samples count, \verb{difference curve estimation by subtraction}.
+But also, a \code{LMER model} can be used which will incorporate both fixed- and random effect terms. The influence
+of the sample type and time point on the viral count will be considered plus the variability between the different replicates (random-effect),
+\verb{difference curve estimation by LMER model}.
+
 See \link[lme4:lmer]{lme4::lmer} for more details on the LMER model.
 }
 \examples{

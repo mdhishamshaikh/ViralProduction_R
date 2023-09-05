@@ -4,15 +4,15 @@
 \alias{vp_dataframes}
 \alias{vp_separate_replicate_dataframe}
 \alias{vp_average_replicate_dataframe}
-\title{Construct viral count data frame}
+\title{Construct viral count data frame for viral production calculation}
 \usage{
 vp_separate_replicate_dataframe(
-  data = data.frame(),
+  data,
   keep_0.22_samples = FALSE,
   add_timepoints = TRUE
 )
 
-vp_average_replicate_dataframe(data = data.frame(), add_timepoints = TRUE)
+vp_average_replicate_dataframe(data, add_timepoints = TRUE)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}
@@ -27,7 +27,7 @@ Data frame with the count for each population and each sample at the different t
 \description{
 Given the output data frame of the flow cytometry step, produce the correct data frame for further
 calculations. Based on the replicate treatment, a different data frame will be produced. A separate
-replicate treatment will take each of the replicates into account, as a average replicate treatment
+replicate treatment will take each of the replicates into account, where an average replicate treatment
 will average over the replicates to retrieve an average count value.
 
 \code{vp_separate_replicate_dataframe} creates data frame by taking the separate replicates into account.

@@ -11,19 +11,19 @@
 \alias{vp_VIPCAL_average_replicates_diff_LMER_SE}
 \title{VIPCAL variants for viral production calculation}
 \usage{
-vp_VIPCAL_separate_replicates(data = data.frame(), AVG = T)
+vp_VIPCAL_separate_replicates(data, AVG = T)
 
-vp_VIPCAL_average_replicates(data = data.frame())
+vp_VIPCAL_average_replicates(data)
 
-vp_VIPCAL_average_replicates_SE(data = data.frame())
+vp_VIPCAL_average_replicates_SE(data)
 
-vp_VIPCAL_average_replicates_diff(data = data.frame())
+vp_VIPCAL_average_replicates_diff(data)
 
-vp_VIPCAL_average_replicates_diff_SE(data = data.frame())
+vp_VIPCAL_average_replicates_diff_SE(data)
 
-vp_VIPCAL_average_replicates_diff_LMER(data = data.frame())
+vp_VIPCAL_average_replicates_diff_LMER(data)
 
-vp_VIPCAL_average_replicates_diff_LMER_SE(data = data.frame())
+vp_VIPCAL_average_replicates_diff_LMER_SE(data)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}
@@ -37,9 +37,9 @@ output will consists of only VP and VPC samples with separate replicate treatmen
 Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 }
 \description{
-Two main methods are used to determine the viral production rate over time in our assay: \verb{Linear Regression} vs
+Two main methods are used to determine the viral production rate in the viral reduction assay: \verb{Linear Regression} vs
 \code{VIPCAL}. Different variants of both methods are performed: variance in replicate treatment, use of standard error
-and type of estimation of the difference curve is presented. Next, the different variants of \code{VIPCAL},
+and type of estimation of the difference curve is presented. Next, the different variants of \code{VIPCAL}
 which uses the average of increments between the viral counts to determine the viral production rate.
 The following general step-by-step plan is carried out by each of the variants:
 \enumerate{

@@ -9,15 +9,15 @@
 \alias{vp_linear_average_replicates_diff_LMER}
 \title{Linear regression variants for viral production calculation}
 \usage{
-vp_linear_allpoints(data = data.frame())
+vp_linear_allpoints(data)
 
-vp_linear_separate_replicates(data = data.frame(), AVG = TRUE)
+vp_linear_separate_replicates(data, AVG = TRUE)
 
-vp_linear_average_replicates(data = data.frame())
+vp_linear_average_replicates(data)
 
-vp_linear_average_replicates_diff(data = data.frame())
+vp_linear_average_replicates_diff(data)
 
-vp_linear_average_replicates_diff_LMER(data = data.frame())
+vp_linear_average_replicates_diff_LMER(data)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}
@@ -31,10 +31,10 @@ output will consists of only VP and VPC samples with separate replicate treatmen
 Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 }
 \description{
-Two main methods are used to determine the viral production rate over time in our assay: \verb{Linear Regression} vs
+Two main methods are used to determine the viral production rate in the viral reduction assay: \verb{Linear Regression} vs
 \code{VIPCAL}. Different variants of both methods are performed: variance in replicate treatment, use of standard error
 and type of estimation of the difference curve is presented. Next, the different variants of \verb{Linear Regression}
-which use the slope between the viral counts to determine the viral production rate. The following general
+which uses the slope between the viral counts to determine the viral production rate. The following general
 step-by-step plan is carried out by each of the variants:
 \enumerate{
 \item Constructing correct data frame depending on replicate treatment.

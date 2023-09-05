@@ -1,4 +1,70 @@
-plot_overview_counts_over_time <- function(data = data.frame(), save_figure = TRUE){
+#' Visualizations of viral production data
+#' 
+#' @description
+#' A major step in data analyses is `Data Visualization`. Some suggestions to visualize the flow cytometry, viral
+#' production or analyzed viral production data are given. 
+#' 
+#' `plot_overview_counts_over_time`: plots the bacterial and viral counts, retrieved from the flow cytometry, in
+#' function of the different time ranges of the assay. The bacterial endpoint is also highlighted in pink. 
+#' 
+#' `plot_collision_rates`: plots the difference in collision rates over time between VP and VPC samples. The
+#' collision rate is defined as the frequency of physical encounter between a bacteriophage and a bacterial cell in the sample.
+#' 
+#' `plot_comparison_methods`: compares the different methods to calculate viral production. The calculated viral
+#' production is compared between the linear regression variants and the VIPCAL variants, also an overview of
+#' all the methods is made. Next to that, a plot that compares linear regression with VIPCAL and VIPCAL-SE is also produced.
+#'
+#' `plot_percentage_cells`: plots the percentage of lytically infected and lysogenic cells in function of the 
+#' different burst sizes. Important to note, that this is the percentage of cells at the bacterial endpoint of the assay,
+#' so the point where ideally the assay is stopped to retrieve less biased results between samples. 
+#' 
+#' `plot_nutrient_release`: plots the nutrient release for organic carbon, nitrogen and phosphor in function of the burst
+#' size at the end of the assay (T0_T24).
+#'
+#' @param data Data frame with the output of the flow cytometry.
+#' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample. 
+#' @param vp_results Data frame with the viral production calculation results, available in global environment 
+#' after running \code{calculate_viral_production}.
+#' @param analyzed_vp_results_bacterial_endpoint Data frame with the analyzed viral production results, available in global environment 
+#' after running \code{analyze_viral_production}. Important is that the analyzing step is ran on the \code{vp_results_ouput_BP_df}
+#' data frame from \code{calculate_viral_production} instead of the \code{vp_results_ouput_BP_df} so that the bacterial
+#' endpoint is taken into account. 
+#' @param analyzed_vp_results_T0_T24 Data frame with the analyzed viral production results, available in global environment 
+#' after running \code{analyze_viral_production}. Important is that the analyzing step is ran on the \code{vp_results_ouput_T24_df}
+#' data frame from \code{calculate_viral_production} instead of the \code{vp_results_ouput_BP_df} so that the nutrient release
+#' at the end of the assay is calculated. 
+#' 
+#' @return Plot objects will be stored in variable `plot_list` in the global environment.
+#' 
+#' @name vp_visuals
+#' @rdname vp_visuals
+#'
+#' @examples \dontrun{
+#' # Setup
+#' data_NJ2020_all <- read.csv(system.file('extdata', 
+#' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' 
+#' original_abundances_NJ2020 <- read.csv(system.file('extdata',
+#' 'NJ2020_original_abundances.csv', package = "viralprod"))
+#' 
+#' calculate_viral_production(data_NJ2020_all, write_csv = F)
+#' 
+#' .GlobalEnv$plot_list <- list()
+#' 
+#' # Visuals
+#' plot_overview_counts_over_time(data_NJ2020_all)
+#' plot_collision_rates(data_NJ2020_all, original_abundances_NJ2020)
+#' plot_comparison_methods(vp_results_output_df) 
+#' 
+#' analyze_viral_production(vp_results_output_BP_df, data_NJ2020_all, 
+#' original_abundances_NJ2020, write_csv = F)
+#' plot_percentage_cells(analyzed_vp_results_df)
+#' 
+#' analyze_viral_production(vp_results_output_T24_df, data_NJ2020_all, 
+#' original_abundances_NJ2020, write_csv = F)
+#' plot_nutrient_release(analyzed_vp_results_df)
+#' }
+plot_overview_counts_over_time <- function(data){
   ## 1. Setup
   plot_dataframe <- data %>%
     vp_average_replicate_dataframe() %>%
@@ -68,15 +134,16 @@ plot_overview_counts_over_time <- function(data = data.frame(), save_figure = TR
       color <- color + 1 
     }
     
-    if (save_figure == T){
-      ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_dataframe_counts$Location), '_Station_', unique(plot_dataframe_counts$Station_Number), '_Depth_', unique(plot_dataframe_counts$Depth), '_Overview.pdf')), plot = n_gtable, width = 10, height = 10)
-    } else {
-      grid::grid.draw(n_gtable)
-    }
+    plot_name <- paste0(unique(plot_dataframe_counts$Location), '_Station_', 
+                        unique(plot_dataframe_counts$Station_Number), '_Depth_', 
+                        unique(plot_dataframe_counts$Depth), '_Overview')
+    .GlobalEnv$plot_list[[plot_name]] <- n_gtable
   }
 }
 
 
+# Helper function of plot_collision_rates for adding second color scale.
+#' @noRd
 draw_key_cust <- function(data, params, size){
   if (data$colour == "#996633") {
     ggplot2::draw_key_vpath(data, params, size)
@@ -86,12 +153,14 @@ draw_key_cust <- function(data, params, size){
 }
 
 
-plot_collision_rates <- function(data = data.frame(), original_abundances = data.frame(), save_figure = TRUE){
+#' @rdname vp_visuals
+plot_collision_rates <- function(data, 
+                                 original_abundances){
   ## 1. Setup
   # Get correct data frame
   plot_dataframe <- data %>%
-    dplyr::select(dplyr::all_of(c("Location", "Station_Number", "Depth", "Sample_Type", "Timepoint", "Replicate",
-                                  "c_Bacteria", "c_Viruses")))
+    dplyr::select(dplyr::all_of(c("Location", "Station_Number", "Depth", "Sample_Type", 
+                                  "Timepoint", "Replicate", "c_Bacteria", "c_Viruses")))
   
   original_abundances_DF <- original_abundances %>%
     dplyr::rename(c_Bacteria = 'Total_Bacteria',
@@ -127,8 +196,9 @@ plot_collision_rates <- function(data = data.frame(), original_abundances = data
       }
     }
   }
-  collision_rate_dataframe <- data.frame(t(sapply(collision_rate_results, c)))
+  collision_rate_dataframe <- data.table::data.table(t(data.table::as.data.table(collision_rate_results)))
   colnames(collision_rate_dataframe) <- c("tag", "Sample_Type", "Replicate", "Timepoint", "Collision_Rate")
+  
   collision_rate_dataframe <- collision_rate_dataframe %>%
     dplyr::mutate_at(c('Collision_Rate', 'Timepoint'), as.numeric) %>%
     dplyr::group_by(.data$tag, .data$Sample_Type, .data$Timepoint) %>%
@@ -178,7 +248,7 @@ plot_collision_rates <- function(data = data.frame(), original_abundances = data
     
     unique_timepoints <- unique(DF$Timepoint)
     
-    bacterial_endpoint_index <- vp_bacterial_endpoint(DF, visual = T) + 1
+    bacterial_endpoint_index <- vp_bacterial_endpoint(DF, visual = T) + 1 # +1 since we aren't looking at Time_Ranges but at unique Timepoints
     bacterial_endpoint_timepoint <- unique_timepoints[bacterial_endpoint_index]
     bp_results[[length(bp_results)+1]] <- bacterial_endpoint_timepoint
   }
@@ -211,7 +281,8 @@ plot_collision_rates <- function(data = data.frame(), original_abundances = data
                         ggplot2::aes(xintercept = .data$Bacterial_Endpoint, color = "lineBP"), 
                         linewidth = 1.5, alpha = 0.5, key_glyph = 'cust') +
     
-    ggplot2::scale_color_manual(labels = c(lineCR = "Difference in collision rates between VP and VPC treatment", lineBP = "Bacterial Endpoint"),
+    ggplot2::scale_color_manual(labels = c(lineCR = "Difference in collision rates between VP and VPC treatment", 
+                                           lineBP = "Bacterial Endpoint"),
                                 values = c(lineCR = "#333333", lineBP = "#996633")) +
     
     ggplot2::guides(color = ggplot2::guide_legend(title = '', order = 2)) +
@@ -235,15 +306,13 @@ plot_collision_rates <- function(data = data.frame(), original_abundances = data
                   x = 'Sampling Timepoints\n (in hours)',
                   y = 'Mean Relative Collision Rate') 
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(collision_rates_plot_df$Location), '_Collision_Rates.pdf')), plot = n, width = 15, height = 8)
-  } else {
-    print(n)
-  }
+  plot_name <- paste0(unique(collision_rates_plot_df$Location), '_Collision_Rates')
+  .GlobalEnv$plot_list[[plot_name]] <- n
 }
 
 
-plot_comparison_methods <- function(vp_results = data.frame(), save_figure = TRUE){
+#' @rdname vp_visuals
+plot_comparison_methods <- function(vp_results){
   ## 1. Setup
   plot_data_linear <- vp_results %>%
     dplyr::filter(stringr::str_starts(.data$VP_Method, 'LM'), .data$Population == 'c_Viruses')
@@ -252,10 +321,12 @@ plot_comparison_methods <- function(vp_results = data.frame(), save_figure = TRU
     dplyr::filter(stringr::str_starts(.data$VP_Method, "VPCL"), .data$Population == 'c_Viruses')
   
   plot_data_LM_vs_VPCL <- vp_results %>%
-    dplyr::filter(.data$VP_Method %in% c('LM_AR_DIFF','VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), .data$Population == 'c_Viruses')
+    dplyr::filter(.data$VP_Method %in% c('LM_AR_DIFF','VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), 
+                  .data$Population == 'c_Viruses')
   
   plot_data_VPCL_vs_VPCL_SE <- vp_results %>%
-    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), .data$Population == 'c_Viruses')
+    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), 
+                  .data$Population == 'c_Viruses')
   
   plot_data_all_methods <- vp_results %>%
     dplyr::filter(.data$Population == 'c_Viruses')
@@ -298,11 +369,8 @@ plot_comparison_methods <- function(vp_results = data.frame(), save_figure = TRU
                    plot.title = ggplot2::element_text(face = 'bold'),
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_data_linear$Location), '_Comparison_Linear_Methods.pdf')), plot = n_linear, width = 8, height = 10)
-  } else {
-    print(n_linear)
-  }
+  plot_name <- paste0(unique(plot_data_linear$Location), '_Comparison_Linear_Methods')
+  .GlobalEnv$plot_list[[plot_name]] <- n_linear
   
   # VIPCAL methods
   n_VIPCAL_mean <- ggstatsplot::ggbetweenstats(data = plot_data_VIPCAL,
@@ -341,11 +409,8 @@ plot_comparison_methods <- function(vp_results = data.frame(), save_figure = TRU
                    plot.title = ggplot2::element_text(face = 'bold'),
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_data_VIPCAL$Location), '_Comparison_VIPCAL_Methods.pdf')), plot = n_VIPCAL, width = 10, height = 10)
-  } else {
-    print(n_VIPCAL)
-  }
+  plot_name <- paste0(unique(plot_data_VIPCAL$Location), '_Comparison_VIPCAL_Methods')
+  .GlobalEnv$plot_list[[plot_name]] <- n_VIPCAL
   
   # LM vs VIPCAL vs VIPCAL_SE
   n_LM_vs_VIPCAL <- ggstatsplot::ggbetweenstats(data = plot_data_LM_vs_VPCL,
@@ -382,11 +447,8 @@ plot_comparison_methods <- function(vp_results = data.frame(), save_figure = TRU
                    plot.title = ggplot2::element_text(face = 'bold'),
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_data_LM_vs_VPCL$Location), '_Comparison_LM_VIPCAL_VIPCAL_SE.pdf')), plot = n_compared, width = 8, height = 10)
-  } else {
-    print(n_compared)
-  }
+  plot_name <- paste0(unique(plot_data_LM_vs_VPCL$Location), '_Comparison_LM_VIPCAL_VIPCAL_SE')
+  .GlobalEnv$plot_list[[plot_name]] <- n_compared
   
   # All methods
   n_all <- ggplot2::ggplot(data = plot_data_all_methods, 
@@ -407,21 +469,21 @@ plot_comparison_methods <- function(vp_results = data.frame(), save_figure = TRU
     ggplot2::theme(axis.title = ggplot2::element_text(face = 'bold'),
                    title = ggplot2::element_text(face = 'bold'),
                    plot.subtitle = ggplot2::element_text(face = 'plain'),
-                   axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))
+                   axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1))
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_data_all_methods$Location), '_Comparison_ALL.pdf')), plot = n_all, width = 15, height = 10)
-  } else {
-    print(n_all)
-  }
+  plot_name <- paste0(unique(plot_data_all_methods$Location), '_Comparison_ALL')
+  .GlobalEnv$plot_list[[plot_name]] <- n_all
 }
 
 
-plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint = data.frame(), save_figure = TRUE){
+#' @rdname vp_visuals
+plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
   ## 1. Setup
   plot_data <- analyzed_vp_results_bacterial_endpoint %>%
-    dplyr::filter(.data$Sample_Type != 'VPC', .data$VP_Method == 'VPCL_AR_DIFF_LMER_SE', .data$Population == 'c_Viruses') %>%
-    dplyr::select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', tidyr::starts_with('P_Cells_')) %>%
+    dplyr::filter(.data$Sample_Type != 'VPC', .data$VP_Method == 'VPCL_AR_DIFF_LMER_SE', 
+                  .data$Population == 'c_Viruses') %>%
+    dplyr::select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', 
+                  tidyr::starts_with('P_Cells_')) %>%
     dplyr::group_by(.data$Station_Number, .data$Sample_Type) %>%
     dplyr::mutate(Timepoint = as.numeric(gsub("[^0-9.]+", "", .data$Time_Range))) %>%
     tidyr::pivot_longer(cols = tidyr::starts_with('P_Cells_'), 
@@ -438,8 +500,8 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint = data.
                        size = 3, color = 'black', show.legend = F) +
     
     ggplot2::scale_fill_manual(name = 'Percentage cells',
-                               labels = c('Lysogenic cells', 'Lytically infected cells'),
-                               values = c("#66CC00", "#CCCC66")) + 
+                               labels = c(Diff = 'Lysogenic cells', VP = 'Lytically infected cells'),
+                               values = c(Diff = "#66CC00", VP = "#CCCC66")) + 
     
     ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2, byrow = TRUE, order = 1)) +
     
@@ -457,19 +519,17 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint = data.
                    plot.subtitle = ggplot2::element_text(face = 'plain'),
                    legend.position = "right")
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_data$Location), '_Percentage_Cells.pdf')), plot = n, width = 15, height = 8)
-  } else {
-    print(n)
-  }
+  plot_name <- paste0(unique(plot_data$Location), '_Percentage_Cells')
+  .GlobalEnv$plot_list[[plot_name]] <- n
 }
 
 
-plot_nutrient_release <- function(analyzed_vp_results = data.frame(), save_figure = TRUE){
+#' @rdname vp_visuals
+plot_nutrient_release <- function(analyzed_vp_results_T0_T24){
   ## 1. Setup
-  plot_data <- analyzed_vp_results %>%
+  plot_data <- analyzed_vp_results_T0_T24 %>%
     dplyr::filter(.data$Population == 'c_Viruses', .data$Sample_Type == 'VP', 
-                  .data$VP_Method == 'VPCL_AR_DIFF_LMER_SE', .data$Time_Range == 'T0_T24') %>%
+                  .data$VP_Method == 'VPCL_AR_DIFF_LMER_SE') %>%
     dplyr::select('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Method', tidyr::matches('Total_DO')) %>%
     tidyr::pivot_longer(cols = tidyr::matches('Total_DO'), 
                         names_to = 'Nutrient_per_BS', 
@@ -498,10 +558,6 @@ plot_nutrient_release <- function(analyzed_vp_results = data.frame(), save_figur
                    title = ggplot2::element_text(face = 'bold'),
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
-  if (save_figure == T){
-    ggplot2::ggsave(paste0(.GlobalEnv$visuals_path, '/', paste0(unique(plot_data$Location), '_Total_Nutrient_Release.pdf')), plot = n, width = 10, height = 10)
-  } else {
-    print(n)
-  }
+  plot_name <- paste0(unique(plot_data$Location), '_Total_Nutrient_Release')
+  .GlobalEnv$plot_list[[plot_name]] <- n
 }
-

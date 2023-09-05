@@ -4,7 +4,7 @@
 \alias{vp_check_populations}
 \title{Check populations to analyze}
 \usage{
-vp_check_populations(data = data.frame())
+vp_check_populations(data)
 }
 \arguments{
 \item{data}{Data frame with the output of the flow cytometry.}
@@ -15,10 +15,10 @@ A character vector with the different populations to analyze will be available i
 \description{
 Bacterial and viral counts are retrieved from flow cytometry data by selecting an area on the generated scatter plot,
 this process is called \code{gating}. During the gating process, different populations are defined based on the side scatter
-and green fluorescence. Since gating is a manual process, the user is free to determine the amount and which populations
-to define. The count values, retrieved from scatter plot, need to be as a column in the output data frame of the flow
+and green fluorescence. Since gating is a manual process, the user is free to determine which populations to define.
+The count values, retrieved from the scatter plot, need to be as a column in the output data frame of the flow
 cytometry step as followed: \code{c_PopulationName}. Given the output data frame of the flow cytometry step,
-the different populations to analyze (determined by the gating process) are defined.
+the different populations to analyze, determined by the gating process, are defined.
 }
 \examples{
 \dontrun{

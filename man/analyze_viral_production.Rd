@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyze_viral_production.R
 \name{analyze_viral_production}
 \alias{analyze_viral_production}
-\title{Analyze viral production results}
+\title{Analyze viral production data}
 \usage{
 analyze_viral_production(
   vp_results = data.frame(),
@@ -12,11 +12,12 @@ analyze_viral_production(
   bacterial_secondary_production = NULL,
   nutrient_content_bacteria = list(),
   nutrient_content_viruses = list(),
-  write_csv = TRUE
+  write_csv = TRUE,
+  output_dir = ""
 )
 }
 \arguments{
-\item{vp_results}{Data frame with the viral production calculation results.}
+\item{vp_results}{Data frame with the viral production calculation results, available in global environment after running \code{calculate_viral_production}.}
 
 \item{data}{Data frame with the output of the flow cytometry.}
 
@@ -32,6 +33,8 @@ analyze_viral_production(
 
 \item{write_csv}{If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
 If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
+
+\item{output_dir}{String that refers to the location of folder to save the data frames as csv files.}
 }
 \value{
 Data frame with the analyzed viral production results, different parameters for estimating virus-induced mortality are calculated. A second data frame with some more information about the variables will also be available in the global environment.
@@ -42,7 +45,7 @@ Next to calculating viral production and proportion of lysogenic bacteria in the
 virus-induced mortality are determined including lysis rate of bacteria, viral turnover time, organic carbon release and others.
 
 Based on the original data and the output of \link{calculate_viral_production}, the same parameters are
-calculated and added to the previous output. Another data frame with the description and units of each of the variables
+calculated and added to the already existing data frame. Another data frame with the description and units of each of the variables
 is also generated.
 
 Reference to paper:
@@ -60,18 +63,22 @@ data_NJ2020_all <- read.csv(system.file('extdata',
 original_abundances_NJ2020 <- read.csv(system.file('extdata',
 'NJ2020_original_abundances.csv', package = "viralprod"))
 
-calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+calculate_viral_production(data_NJ2020_all, write_csv = F)
 
 # Perform
-analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
-original_abundances_2020) # Output files
+# Write output files
+analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
+original_abundances_NJ2020, output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
+“/NJ2020_vp_results”))
 
-analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, 
-original_abundances_2020, write_csv = F)
+# No output files
+analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
+original_abundances_NJ2020, write_csv = F)
 
-analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_2020,
+# Set own parameter values
+analyze_viral_production(vp_results_output_df, data_NJ2020_all, original_abundances_2020,
 burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
 nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
-nutrient_content_virus = list(C = 5, N = 3, P = 1)) # Set parameters, no default values
+nutrient_content_virus = list(C = 5, N = 3, P = 1)) 
 }
 }

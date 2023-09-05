@@ -3,17 +3,22 @@
 #' @description
 #' `Linear Regression` uses the slope between the viral counts to determine the viral production rate.
 #' Lytic viral production can be derived as the slope of the VP samples. For the lysogenic viral production,
-#' subtraction of the VP slope from the VPC slope is performed. A difference curve estimation by subtraction or
-#' LMER model is also an option. See [stats::lm] for more details on the linear model used to determine the slope. 
+#' subtraction of the VP slope from the VPC slope is needed. A difference curve estimation by subtraction or
+#' LMER model is also an option to determine the lysogenic viral production rate. 
+#' 
+#' See [stats::lm] for more details on the linear model used to determine the slope. 
 #' 
 #' `determine_vp_linear_allpoints` considers all points, no distinguishing between replicates.
 #' 
 #' `determine_vp_linear_separate_replicates` uses a separate replicate treatment, distinguishing between replicates. 
 #' 
-#' `determine_vp_linear_average_replicates` uses an average replicate treatment, average over the replicates. 
+#' `determine_vp_linear_average_replicates` uses an average replicate treatment, average over the replicates.
+#' Difference curve estimation by subtraction. 
 #' 
 #' `determine_vp_linear_LMER_model` uses an average replicate treatment, average over the replicates is included in LMER model. 
-#' Difference curve estimation by LMER model, See [viralprod::vp_LMER_model] for more details about LMER model.
+#' Difference curve estimation by LMER model.
+#' 
+#' See [viralprod::vp_LMER_model] for more details about the LMER model.
 #'
 #' @param SR_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_separate_replicate_dataframe] for more details.
 #' @param AVG_dataframe Data frame with the viral counts and time ranges, see [viralprod::vp_average_replicate_dataframe] for more details.

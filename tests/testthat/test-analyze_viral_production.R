@@ -38,16 +38,22 @@ expect_output_analyzed_vp_dictionary <- function(x){
 
 # Perform
 test_that("Viral production can be analyzed", {
-  data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+  data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', 
+                                          package = "viralprod"))
   expect_data_input(data_NJ2020_all)
   
-  NJ2020_original_abundances <- read.csv(system.file('extdata','NJ2020_original_abundances.csv', package = "viralprod"))
-  expect_original_abundances_input(NJ2020_original_abundances)
+  original_abundances_NJ2020 <- read.csv(system.file('extdata','NJ2020_original_abundances.csv', 
+                                                     package = "viralprod"))
+  expect_original_abundances_input(original_abundances_NJ2020)
   
   calculate_viral_production(data_NJ2020_all, SR_calc = F, BP_endpoint = F, write_csv = F)
   expect_input_vp_results(.GlobalEnv$vp_results_output_df)
   
-  analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, NJ2020_original_abundances, write_csv = F)
+  analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_NJ2020, 
+                           write_csv = F)
   expect_output_analyzed_vp(.GlobalEnv$analyzed_vp_results_df)
   expect_output_analyzed_vp_dictionary(.GlobalEnv$analyzed_vp_results_dictionary)
+  
+  analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_NJ2020,
+                           write_csv = T, output_dir = '') %>% expect_error()
 })
