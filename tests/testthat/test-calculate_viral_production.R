@@ -25,26 +25,26 @@ test_that("Wrapper function viral production calculation works", {
                                           package = "viralprod"))
   expect_data_input(data_NJ2020_all)
   
-  calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+  calculate_viral_production(data_NJ2020_all, write_output = F, SR_calc = F, BP_endpoint = F)
   expect_output_vp_results(.GlobalEnv$vp_results_output_df)
   
   data_NJ2020_less <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_less_populations.csv', 
                                            package = "viralprod"))
   expect_data_input(data_NJ2020_less)
   
-  calculate_viral_production(data_NJ2020_less, write_csv = F)
+  calculate_viral_production(data_NJ2020_less, write_output = F)
   expect_output_vp_results(.GlobalEnv$vp_results_output_df)
   expect_output_vp_results(.GlobalEnv$vp_results_output_T24_df)
   expect_output_vp_results_SR(.GlobalEnv$vp_results_output_SR_df)
   expect_output_vp_results(.GlobalEnv$vp_results_output_BP_df)
   
-  calculate_viral_production(data_NJ2020_less, write_csv = T, output_dir = '') %>% expect_error()
+  calculate_viral_production(data_NJ2020_less, write_output = T, output_dir = '') %>% expect_error()
   
   data_NJ2020_more <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_more_populations.csv', 
                                            package = "viralprod"))
   expect_data_input(data_NJ2020_more)
   
-  calculate_viral_production(data_NJ2020_more, write_csv = F, SR_calc = F, BP_endpoint = F, methods = c(2,6,12))
+  calculate_viral_production(data_NJ2020_more, write_output = F, SR_calc = F, BP_endpoint = F, methods = c(2,6,12))
   expect_output_vp_results(.GlobalEnv$vp_results_output_df)
   
   data_NJ2020_without_cViruses <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_without_cViruses.csv', 

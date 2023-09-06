@@ -21,7 +21,7 @@
 #' Set to \code{FALSE}, if separate replicate treatment results are not wanted. (Default = \code{TRUE})
 #' @param BP_endpoint If \code{TRUE}, the bacterial endpoint will be taken into account and only those results will be saved in a new
 #' data frame. If not wanted, set to \code{FALSE}. (Default = \code{TRUE})
-#' @param write_csv If \code{TRUE}, the output data frames will be saved as csv files in a folder specified by `output_dir`.
+#' @param write_output If \code{TRUE}, the output data frames will be saved as csv files in a folder specified by `output_dir`.
 #' If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})
 #' @param output_dir String that refers to the location of folder to save the data frames as csv files.
 #'
@@ -43,23 +43,23 @@
 #' “/NJ2020_vp_results”))
 #' 
 #' # No output files
-#' calculate_viral_production(data_NJ2020_all, write_csv = F)
+#' calculate_viral_production(data_NJ2020_all, write_output = F)
 #' 
 #' # No bacterial endpoint and separate replicate treatment results
-#' calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+#' calculate_viral_production(data_NJ2020_all, write_output = F, SR_calc = F, BP_endpoint = F)
 #' 
-#' # Subselection of the methods
-#' calculate_viral_production(data_NJ2020_all, write_csv = F, methods = c(2,3,8,12))
+#' # Sub selection of the methods
+#' calculate_viral_production(data_NJ2020_all, write_output = F, methods = c(2,3,8,12))
 #' }
 calculate_viral_production <- function(data = data.frame(),
                                        methods = c(1:12),
                                        SR_calc = TRUE,
                                        BP_endpoint = TRUE,
-                                       write_csv = TRUE,
+                                       write_output = TRUE,
                                        output_dir = ''){
   ## 1. Checks
   # Check for valid output directory if csv files needs to be written
-  if (write_csv == T){
+  if (write_output == T){
     if (output_dir == ''){
       stop('No output directory is given, please define output directory before proceeding!')
       
@@ -140,7 +140,7 @@ calculate_viral_production <- function(data = data.frame(),
   .GlobalEnv$vp_results_output_T24_df <- .GlobalEnv$vp_results_output_df %>%
     dplyr::filter(.data$Time_Range == 'T0_T24')
   
-  if (write_csv == T){
+  if (write_output == T){
     utils::write.csv(.GlobalEnv$vp_results_output_df, file.path(vp_results_path, 'vp_results_ALL.csv'), row.names = F)
     utils::write.csv(.GlobalEnv$vp_results_output_T24_df, file.path(vp_results_path, 'vp_results_24.csv'), row.names = F)
   }
@@ -187,7 +187,7 @@ calculate_viral_production <- function(data = data.frame(),
                      factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
       dplyr::select(-'tag')
     
-    if (write_csv == T){
+    if (write_output == T){
       utils::write.csv(.GlobalEnv$vp_results_output_SR_df, file.path(vp_results_path, 'vp_results_SR.csv'), row.names = F)
     }
   }
@@ -225,7 +225,7 @@ calculate_viral_production <- function(data = data.frame(),
                      factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
       dplyr::select(-'tag')
     
-    if (write_csv == T){
+    if (write_output == T){
       utils::write.csv(.GlobalEnv$vp_results_output_BP_df, file.path(vp_results_path, 'vp_results_BP.csv'), row.names = F)
     }
   }

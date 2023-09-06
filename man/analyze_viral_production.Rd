@@ -12,7 +12,7 @@ analyze_viral_production(
   bacterial_secondary_production = NULL,
   nutrient_content_bacteria = list(),
   nutrient_content_viruses = list(),
-  write_csv = TRUE,
+  write_output = TRUE,
   output_dir = ""
 )
 }
@@ -31,7 +31,7 @@ analyze_viral_production(
 
 \item{nutrient_content_viruses}{List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).}
 
-\item{write_csv}{If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
+\item{write_output}{If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
 If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 
 \item{output_dir}{String that refers to the location of folder to save the data frames as csv files.}
@@ -63,7 +63,7 @@ data_NJ2020_all <- read.csv(system.file('extdata',
 original_abundances_NJ2020 <- read.csv(system.file('extdata',
 'NJ2020_original_abundances.csv', package = "viralprod"))
 
-calculate_viral_production(data_NJ2020_all, write_csv = F)
+calculate_viral_production(data_NJ2020_all, write_output = F)
 
 # Perform
 # Write output files
@@ -73,7 +73,7 @@ original_abundances_NJ2020, output_dir = paste0(system.file(“extdata”, packa
 
 # No output files
 analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
-original_abundances_NJ2020, write_csv = F)
+original_abundances_NJ2020, write_output = F)
 
 # Set own parameter values
 analyze_viral_production(vp_results_output_df, data_NJ2020_all, original_abundances_2020,

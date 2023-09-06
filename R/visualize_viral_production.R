@@ -13,7 +13,11 @@
 #' 
 #' @param data Data frame with the output of the flow cytometry.
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample.
-#' @param write_csv If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
+#' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
+#' @param bacterial_secondary_production Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction. 
+#' @param nutrient_content_bacteria List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.
+#' @param nutrient_content_viruses List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).
+#' @param write_output If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
 #' If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})
 #' @param output_dir String that refers to the location of folder to save the data frames as csv files. 
 #' 
@@ -38,15 +42,25 @@
 #' “/NJ2020_vp_results”))
 #' 
 #' # No output files
-#' visualize_viral_production(data_NJ2020_all, original_abundances_NJ2020, write_csv = F)
+#' visualize_viral_production(data_NJ2020_all, original_abundances_NJ2020, write_output = F)
+#' 
+#' # Set own parameter values for analyzing viral production data
+#' visualize_viral_production(data_NJ2020_all, original_abundances_NJ2020,
+#' burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
+#' nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
+#' nutrient_content_virus = list(C = 5, N = 3, P = 1), write_output = F)
 #' }
 visualize_viral_production <- function(data = data.frame(),
                                        original_abundances = data.frame(),
-                                       write_csv = TRUE,
+                                       burst_sizes = c(),
+                                       bacterial_secondary_production = NULL,
+                                       nutrient_content_bacteria = list(),
+                                       nutrient_content_viruses = list(),
+                                       write_output = TRUE,
                                        output_dir = ''){
   ## 1. Checks
   # Check for valid output directory if PDFs needs to be written
-  if (write_csv == T){
+  if (write_output == T){
     if(output_dir == ''){
       stop('No output directory is given, please define output directory before proceeding!')
       
@@ -61,13 +75,14 @@ visualize_viral_production <- function(data = data.frame(),
       if (user_choice == 1){
         message('Continuing with the given output directory, analyzing results will be stored in separate folder!')
         dir.create(output_dir)
-        visualize_vp_results_path <- paste0(output_dir, '/Figures/')
+        visualize_vp_results_path <- paste0(output_dir, '/')
         
       } else {
         stop('Process stopped, please define another output directory!')
       }
     } else {
       visualize_vp_results_path <- paste0(output_dir, '/Figures/')
+      dir.create(visualize_vp_results_path)
     }
   }
   
@@ -81,16 +96,29 @@ visualize_viral_production <- function(data = data.frame(),
   
   plot_overview_counts_over_time(data)
   plot_collision_rates(data, original_abundances)
-  
-  calculate_viral_production(data, write_csv = F)
   plot_comparison_methods(.GlobalEnv$vp_results_output_df)
   
-  analyze_viral_production(.GlobalEnv$vp_results_output_BP_df, data, original_abundances, write_csv = F)
+  analyze_viral_production(.GlobalEnv$vp_results_output_BP_df, data, original_abundances, 
+                           burst_sizes, bacterial_secondary_production, 
+                           nutrient_content_bacteria, nutrient_content_bacteria, 
+                           write_output = F)
   plot_percentage_cells(.GlobalEnv$analyzed_vp_results_df)
   
-  analyze_viral_production(.GlobalEnv$vp_results_output_T24_df, data, original_abundances, write_csv = F)
+  analyze_viral_production(.GlobalEnv$vp_results_output_T24_df, data, original_abundances, 
+                           burst_sizes, bacterial_secondary_production, 
+                           nutrient_content_bacteria, nutrient_content_bacteria, 
+                           write_output = F)
   plot_nutrient_release(.GlobalEnv$analyzed_vp_results_df)
   
   ## 3. Save figures as PDFs
-  
+  if(write_output == T){
+    for (plot in 1:length(.GlobalEnv$plot_list)){
+      plot_name <- names(.GlobalEnv$plot_list)[plot]
+      file_path <- paste0(visualize_vp_results_path, paste0(plot_name, '.pdf'))
+      ggplot2::ggsave(filename = file_path, 
+                      plot = .GlobalEnv$plot_list[[plot]]$plot_object, 
+                      width = .GlobalEnv$plot_list[[plot]]$width, 
+                      height = .GlobalEnv$plot_list[[plot]]$height)
+    }
+  }
 }

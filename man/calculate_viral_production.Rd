@@ -9,7 +9,7 @@ calculate_viral_production(
   methods = c(1:12),
   SR_calc = TRUE,
   BP_endpoint = TRUE,
-  write_csv = TRUE,
+  write_output = TRUE,
   output_dir = ""
 )
 }
@@ -24,7 +24,7 @@ Set to \code{FALSE}, if separate replicate treatment results are not wanted. (De
 \item{BP_endpoint}{If \code{TRUE}, the bacterial endpoint will be taken into account and only those results will be saved in a new
 data frame. If not wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 
-\item{write_csv}{If \code{TRUE}, the output data frames will be saved as csv files in a folder specified by \code{output_dir}.
+\item{write_output}{If \code{TRUE}, the output data frames will be saved as csv files in a folder specified by \code{output_dir}.
 If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 
 \item{output_dir}{String that refers to the location of folder to save the data frames as csv files.}
@@ -62,12 +62,12 @@ output_dir = paste0(system.file(“extdata”, package = “viralprod”),
 “/NJ2020_vp_results”))
 
 # No output files
-calculate_viral_production(data_NJ2020_all, write_csv = F)
+calculate_viral_production(data_NJ2020_all, write_output = F)
 
 # No bacterial endpoint and separate replicate treatment results
-calculate_viral_production(data_NJ2020_all, write_csv = F, SR_calc = F, BP_endpoint = F)
+calculate_viral_production(data_NJ2020_all, write_output = F, SR_calc = F, BP_endpoint = F)
 
-# Subselection of the methods
-calculate_viral_production(data_NJ2020_all, write_csv = F, methods = c(2,3,8,12))
+# Sub selection of the methods
+calculate_viral_production(data_NJ2020_all, write_output = F, methods = c(2,3,8,12))
 }
 }

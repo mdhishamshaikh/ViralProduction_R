@@ -46,14 +46,14 @@ test_that("Viral production can be analyzed", {
                                                      package = "viralprod"))
   expect_original_abundances_input(original_abundances_NJ2020)
   
-  calculate_viral_production(data_NJ2020_all, SR_calc = F, BP_endpoint = F, write_csv = F)
+  calculate_viral_production(data_NJ2020_all, SR_calc = F, BP_endpoint = F, write_output = F)
   expect_input_vp_results(.GlobalEnv$vp_results_output_df)
   
   analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_NJ2020, 
-                           write_csv = F)
+                           write_output = F)
   expect_output_analyzed_vp(.GlobalEnv$analyzed_vp_results_df)
   expect_output_analyzed_vp_dictionary(.GlobalEnv$analyzed_vp_results_dictionary)
   
   analyze_viral_production(.GlobalEnv$vp_results_output_df, data_NJ2020_all, original_abundances_NJ2020,
-                           write_csv = T, output_dir = '') %>% expect_error()
+                           write_output = T, output_dir = '') %>% expect_error()
 })

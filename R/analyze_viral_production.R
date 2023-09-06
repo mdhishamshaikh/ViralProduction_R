@@ -22,7 +22,7 @@
 #' @param bacterial_secondary_production Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction. 
 #' @param nutrient_content_bacteria List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.
 #' @param nutrient_content_viruses List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).
-#' @param write_csv If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
+#' @param write_output If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
 #' If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})
 #' @param output_dir String that refers to the location of folder to save the data frames as csv files.
 #'
@@ -40,7 +40,7 @@
 #' original_abundances_NJ2020 <- read.csv(system.file('extdata',
 #' 'NJ2020_original_abundances.csv', package = "viralprod"))
 #' 
-#' calculate_viral_production(data_NJ2020_all, write_csv = F)
+#' calculate_viral_production(data_NJ2020_all, write_output = F)
 #' 
 #' # Perform
 #' # Write output files
@@ -50,7 +50,7 @@
 #' 
 #' # No output files
 #' analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
-#' original_abundances_NJ2020, write_csv = F)
+#' original_abundances_NJ2020, write_output = F)
 #' 
 #' # Set own parameter values
 #' analyze_viral_production(vp_results_output_df, data_NJ2020_all, original_abundances_2020,
@@ -65,11 +65,11 @@ analyze_viral_production <- function(vp_results = data.frame(),
                                      bacterial_secondary_production = NULL,
                                      nutrient_content_bacteria = list(),
                                      nutrient_content_viruses = list(),
-                                     write_csv = TRUE,
+                                     write_output = TRUE,
                                      output_dir = ''){
   ## 1. Checks
   # Check for valid output directory if csv files needs to be written
-  if (write_csv == T){
+  if (write_output == T){
     if(output_dir == ''){
       stop('No output directory is given, please define output directory before proceeding!')
       
@@ -255,7 +255,7 @@ analyze_viral_production <- function(vp_results = data.frame(),
     )
   )
   
-  if (write_csv == T){
+  if (write_output == T){
     utils::write.csv(.GlobalEnv$analyzed_vp_results_df, file.path(analyze_vp_results_path, 'vp_results_ANALYZED.csv'), row.names = F)
     utils::write.csv(.GlobalEnv$analyzed_vp_results_dictionary, file.path(analyze_vp_results_path, 'ANALYZED_Legend.csv'), row.names = F)
   }

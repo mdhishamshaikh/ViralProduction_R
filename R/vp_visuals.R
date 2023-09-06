@@ -90,9 +90,9 @@ plot_overview_counts_over_time <- function(data){
       ggplot2::geom_point(size = 1.5) + 
       ggplot2::geom_line() + 
       ggplot2::geom_smooth(linewidth = 1.0, method = 'lm', se = F) + 
-      ggplot2::geom_hline(yintercept = 0, color = '#000000', size = 0.3, linetype = 'dashed') + 
+      ggplot2::geom_hline(yintercept = 0, color = '#000000', linewidth = 0.3, linetype = 'dashed') + 
       ggplot2::geom_errorbar(ggplot2::aes(ymin = .data$Mean - .data$SE, ymax = .data$Mean + .data$SE), 
-                             width = 0.5, size = 0.5) + 
+                             width = 0.5, linewidth = 0.5) + 
       
       ggplot2::facet_grid(.data$Plot_Group + .data$Sample_Type ~ .data$Time_Time) + 
       
@@ -100,11 +100,10 @@ plot_overview_counts_over_time <- function(data){
       ggplot2::scale_x_continuous(breaks = unique(plot_dataframe_counts$Timepoint)) + 
       ggplot2::scale_shape_manual(name = 'Populations', 
                                   labels = unique(plot_dataframe_counts$Population),
-                                  values = c(16,17,16,17,15,16,17)) +
+                                  values = rep(c(15,16,17),4)) +
       ggplot2::scale_color_manual(name = 'Populations',
                                   labels = unique(plot_dataframe_counts$Population),
-                                  values = c("#FF0000", "#0000FF", "#0099CC", "#666666", 
-                                             "#666633", "#669900", "#FF0066")) + 
+                                  values = RColorBrewer::brewer.pal(n = 12, name = 'Paired')) + 
       
       ggplot2::labs(title = paste0(plot_dataframe_counts$tag, " - Overview"),
                     subtitle = 'Bacterial and Viral counts for Lytic and Lysogenic inductions',
@@ -137,18 +136,9 @@ plot_overview_counts_over_time <- function(data){
     plot_name <- paste0(unique(plot_dataframe_counts$Location), '_Station_', 
                         unique(plot_dataframe_counts$Station_Number), '_Depth_', 
                         unique(plot_dataframe_counts$Depth), '_Overview')
-    .GlobalEnv$plot_list[[plot_name]] <- n_gtable
-  }
-}
-
-
-# Helper function of plot_collision_rates for adding second color scale.
-#' @noRd
-draw_key_cust <- function(data, params, size){
-  if (data$colour == "#996633") {
-    ggplot2::draw_key_vpath(data, params, size)
-  } else {
-    ggplot2::draw_key_path(data, params, size)
+    .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_gtable, 
+                                              width = 12,
+                                              height = 10)
   }
 }
 
@@ -276,16 +266,15 @@ plot_collision_rates <- function(data,
     ggnewscale::new_scale_color() +
     ggplot2::geom_line(data = collision_rates_plot_df_diff, 
                        ggplot2::aes(x = .data$Timepoint, y = .data$CR_Diff, color = "lineCR"), 
-                       size = 1, alpha = 0.5, key_glyph = 'cust') +
+                       linewidth = 1, alpha = 0.5) +
     ggplot2::geom_vline(data = bacterial_endpoint_dataframe, 
                         ggplot2::aes(xintercept = .data$Bacterial_Endpoint, color = "lineBP"), 
-                        linewidth = 1.5, alpha = 0.5, key_glyph = 'cust') +
+                        linewidth = 1.5, alpha = 0.5) +
     
     ggplot2::scale_color_manual(labels = c(lineCR = "Difference in collision rates between VP and VPC treatment", 
                                            lineBP = "Bacterial Endpoint"),
-                                values = c(lineCR = "#333333", lineBP = "#996633")) +
-    
-    ggplot2::guides(color = ggplot2::guide_legend(title = '', order = 2)) +
+                                values = c(lineCR = "#333333", lineBP = "#996633"),
+                                guide = ggplot2::guide_legend(title = '', order = 2)) +
     
     ggplot2::facet_grid(~ .data$Station_Number) + 
     
@@ -307,7 +296,9 @@ plot_collision_rates <- function(data,
                   y = 'Mean Relative Collision Rate') 
   
   plot_name <- paste0(unique(collision_rates_plot_df$Location), '_Collision_Rates')
-  .GlobalEnv$plot_list[[plot_name]] <- n
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n, 
+                                            width = 15,
+                                            height = 8)
 }
 
 
@@ -370,7 +361,9 @@ plot_comparison_methods <- function(vp_results){
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
   plot_name <- paste0(unique(plot_data_linear$Location), '_Comparison_Linear_Methods')
-  .GlobalEnv$plot_list[[plot_name]] <- n_linear
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_linear, 
+                                            width = 8,
+                                            height = 10)
   
   # VIPCAL methods
   n_VIPCAL_mean <- ggstatsplot::ggbetweenstats(data = plot_data_VIPCAL,
@@ -410,7 +403,9 @@ plot_comparison_methods <- function(vp_results){
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
   plot_name <- paste0(unique(plot_data_VIPCAL$Location), '_Comparison_VIPCAL_Methods')
-  .GlobalEnv$plot_list[[plot_name]] <- n_VIPCAL
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_VIPCAL, 
+                                            width = 10,
+                                            height = 10)
   
   # LM vs VIPCAL vs VIPCAL_SE
   n_LM_vs_VIPCAL <- ggstatsplot::ggbetweenstats(data = plot_data_LM_vs_VPCL,
@@ -448,7 +443,9 @@ plot_comparison_methods <- function(vp_results){
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
   plot_name <- paste0(unique(plot_data_LM_vs_VPCL$Location), '_Comparison_LM_VIPCAL_VIPCAL_SE')
-  .GlobalEnv$plot_list[[plot_name]] <- n_compared
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_compared, 
+                                            width = 8,
+                                            height = 10)
   
   # All methods
   n_all <- ggplot2::ggplot(data = plot_data_all_methods, 
@@ -458,7 +455,7 @@ plot_comparison_methods <- function(vp_results){
                         size = 1.5, shape = 16, alpha = 0.6) + 
     ggplot2::geom_hline(yintercept = 0) + 
     
-    ggplot2::scale_fill_brewer(palette = 'Spectral') + 
+    ggplot2::scale_fill_brewer(palette = 'Paired') + 
     
     ggplot2::labs(x = 'VP calculation method',
                   y = 'Viral Production',
@@ -472,7 +469,9 @@ plot_comparison_methods <- function(vp_results){
                    axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1))
   
   plot_name <- paste0(unique(plot_data_all_methods$Location), '_Comparison_ALL')
-  .GlobalEnv$plot_list[[plot_name]] <- n_all
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_all, 
+                                            width = 15,
+                                            height = 10)
 }
 
 
@@ -489,16 +488,18 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
     tidyr::pivot_longer(cols = tidyr::starts_with('P_Cells_'), 
                         names_to = 'Burst_Size', 
                         values_to = 'P_Cells') %>%
-    dplyr::mutate(Burst_Size = substring(.data$Burst_Size, nchar(.data$Burst_Size) - 4))
+    dplyr::mutate(Burst_Size = gsub("[^0-9]+", "", .data$Burst_Size),
+                  Burst_Size = factor(.data$Burst_Size, levels = unique(.data$Burst_Size)))
   
   ## 2. Make plot
   n <- ggplot2::ggplot(data = plot_data) + 
     ggplot2::geom_col(mapping = ggplot2::aes(x = .data$Burst_Size, y = .data$P_Cells, fill = .data$Sample_Type), 
                       position = 'dodge') + 
-    ggplot2::geom_text(data = plot_data, ggplot2::aes(x = 'BS_25', y = 100),
+    ggplot2::geom_text(data = plot_data, ggplot2::aes(x = unique(.data$Burst_Size)[2], y = max(.data$P_Cells)),
                        label = paste0('Timepoint of the assay\n(Bacterial Endpoint): T0_T', plot_data$Timepoint),
                        size = 3, color = 'black', show.legend = F) +
     
+    ggplot2::scale_x_discrete(labels = unique(plot_data$Burst_Size)) +
     ggplot2::scale_fill_manual(name = 'Percentage cells',
                                labels = c(Diff = 'Lysogenic cells', VP = 'Lytically infected cells'),
                                values = c(Diff = "#66CC00", VP = "#CCCC66")) + 
@@ -520,7 +521,9 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
                    legend.position = "right")
   
   plot_name <- paste0(unique(plot_data$Location), '_Percentage_Cells')
-  .GlobalEnv$plot_list[[plot_name]] <- n
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n, 
+                                            width = 15,
+                                            height = 8)
 }
 
 
@@ -534,8 +537,9 @@ plot_nutrient_release <- function(analyzed_vp_results_T0_T24){
     tidyr::pivot_longer(cols = tidyr::matches('Total_DO'), 
                         names_to = 'Nutrient_per_BS', 
                         values_to = 'Nutrient_release') %>%
-    dplyr::mutate(Burst_Size = substring(.data$Nutrient_per_BS, nchar(.data$Nutrient_per_BS) - 1),
-           Nutrient = gsub(".*DO(.).*", "\\1", .data$Nutrient_per_BS))
+    dplyr::mutate(Burst_Size = gsub("[^0-9]+", "", .data$Nutrient_per_BS),
+                  Burst_Size = factor(.data$Burst_Size, levels = unique(.data$Burst_Size)),
+                  Nutrient = gsub(".*DO(.).*", "\\1", .data$Nutrient_per_BS))
   
   ## 2. Make plot
   n <- ggplot2::ggplot(data = plot_data) + 
@@ -544,7 +548,8 @@ plot_nutrient_release <- function(analyzed_vp_results_T0_T24){
     
     ggplot2::scale_fill_manual(name = 'Type of nutrient',
                                values = c('#CC6666', '#339900', '#3399CC')) +
-    ggplot2::scale_x_continuous() + 
+    ggplot2::scale_y_discrete(labels = unique(plot_data$Burst_Size)) +
+    ggplot2::scale_x_continuous() +
     
     ggplot2::facet_grid(.data$Station_Number ~ .) + 
     
@@ -559,5 +564,7 @@ plot_nutrient_release <- function(analyzed_vp_results_T0_T24){
                    plot.subtitle = ggplot2::element_text(face = 'plain'))
   
   plot_name <- paste0(unique(plot_data$Location), '_Total_Nutrient_Release')
-  .GlobalEnv$plot_list[[plot_name]] <- n
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n, 
+                                            width = 10,
+                                            height = 10)
 }
