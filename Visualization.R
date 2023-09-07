@@ -579,21 +579,36 @@ test1 <- function(vp_results){
   return(n)
 }
 
+# ROGME VIPCAL vs VIPCAL-SE
 test2 <- function(vp_results){
   plot_DF <- vp_results %>%
     filter(VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
     select(-all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared'))) 
   
-  n <- ggplot(data = plot_DF, aes(x = VP, y = VP_Method)) + 
-    geom_point(position = 'jitter') +
+  deciles <- plot_DF %>%
+    group_by(VP_Method) %>%
+    reframe(decile = quantile(VP, probs = seq(0, 1, by = 0.1))) %>%
+    ungroup()
+  
+  n <- ggplot(data = plot_DF, aes(x = VP, y = VP_Method, fill = VP_Method)) + 
+    geom_point(position = position_jitterdodge(dodge.width = 0.2), color = 'darkolivegreen3',
+               shape = 16, show.legend = F) + 
     
-    ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE ROGME distribution') + 
+    geom_segment(data = deciles,
+                 aes(x = decile, xend = decile, 
+                     y = as.numeric(factor(VP_Method)) - 0.2, 
+                     yend = as.numeric(factor(VP_Method)) + 0.2),
+                 color = "black") + 
+    
+    
+    ggplot2::labs(title = 'Robust Graphical Methods for VIPCAL vs VIPCAL-SE') + 
     
     ggplot2::theme_bw() + 
     ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
                    panel.grid.major = ggplot2::element_blank(),
                    panel.grid.minor = ggplot2::element_blank(),
                    axis.title = ggplot2::element_text(face = 'plain'),
+                   axis.text.y = element_text(angle = 90, hjust = 0.5),
                    title = ggplot2::element_text(face = 'bold'))
   
   return(n)
