@@ -3,7 +3,7 @@
 #Here we calculate VIPCAL on each replicate followed by avergaing VP and VPC. 
 #Diff is calculated by subtracting average VPC and VP
 
-i<- VPCL_SR_avg
+i<- VPCL_SR_AVG
 
 #2. VIPCAL AVERGAE replicates. VP and VPC are averaged first. VIPCAL is then calucalted.
 #Diff is calcualted by subtracting VPC-VIPCAL and VP-VIPCAL
@@ -47,7 +47,7 @@ df_list<- lapply(df_list, function(x) arrange( x, 'Location',
 )
 
 
-df_names<- c('VPCL_SR_avg', 'VPCL_AVG', 'VPCL_AVG_Diff', 'VPCL_AVG_NO_SE',
+names(df_list)<- c('VPCL_SR_avg', 'VPCL_AVG', 'VPCL_AVG_Diff', 'VPCL_AVG_NO_SE',
              'VPCL_AVG_NO_SE_Diff', 'VIPCAL_SR_DIFF_LMER_SE', 'VIPCAL_SR_DIFF_LMER_No_SE')
                                                                                                                                                 
 vipcal_df<- data.frame()
@@ -59,11 +59,11 @@ for (i in df_names) {
 
 vipcal_df<- lapply(df_list, function(x) x$VP_Mean)
 vipcal_df<- data.frame(matrix(unlist(vipcal_df), ncol=length(vipcal_df)))
-colnames(vipcal_df)<- df_names
+colnames(vipcal_df)<- names(df_list)
 
-vipcal_df2<- pivot_longer(vipcal_df, cols= 1:7, values_to = 'VP', names_to = 'VP_Type')
+vipcal_df2<- pivot_longer(vipcal_df, cols = 1:2, values_to = 'VP', names_to = 'VP_Method')
 
-ggplot(data = vipcal_df2, aes(x = VP_Type, y = VP)) +
+ggplot(data = vipcal_df2, aes(x = VP_Method, y = VP)) +
   geom_point()
 
 

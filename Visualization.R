@@ -552,8 +552,49 @@ nutrient_release <- function(data){
   
 nutrient_release(vp_calc_NJ2020_analyzed)
 
+# Test
+## Compare VPCL_AR_DIFF vs VPCL_AR_DIFF_LMER_SE viral production
+test1 <- function(vp_results){
+  plot_DF <- vp_results %>%
+    filter(VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
+    select(-all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared'))) %>%
+    mutate(VP = VP / 1e6) %>%
+    pivot_wider(names_from = 'VP_Method', values_from = 'VP')
+  
+  n <- ggplot(data = plot_DF, aes(x = VPCL_AR_DIFF, y = VPCL_AR_DIFF_LMER_SE,
+                                  color = Sample_Type, shape = Sample_Type,
+                                  fill = Sample_Type)) + 
+    geom_point() + 
+    geom_abline(intercept = 0, slope = 1) + 
+    
+    ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE vp_values') + 
+    
+    ggplot2::theme_bw() + 
+    ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
+                   panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   axis.title = ggplot2::element_text(face = 'plain'),
+                   title = ggplot2::element_text(face = 'bold'))
+  
+  return(n)
+}
 
-
-
-
-
+test2 <- function(vp_results){
+  plot_DF <- vp_results %>%
+    filter(VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
+    select(-all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared'))) 
+  
+  n <- ggplot(data = plot_DF, aes(x = VP, y = VP_Method)) + 
+    geom_point(position = 'jitter') +
+    
+    ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE ROGME distribution') + 
+    
+    ggplot2::theme_bw() + 
+    ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
+                   panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   axis.title = ggplot2::element_text(face = 'plain'),
+                   title = ggplot2::element_text(face = 'bold'))
+  
+  return(n)
+}
