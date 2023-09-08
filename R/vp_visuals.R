@@ -280,7 +280,7 @@ plot_collision_rates <- function(data,
                                 values = c(lineCR = "#333333", lineBP = "#996633"),
                                 guide = ggplot2::guide_legend(title = '', order = 2)) +
     
-    ggplot2::facet_grid(~ .data$Station_Number) + 
+    ggplot2::facet_wrap(~ .data$Station_Number, ncol = 3) + 
     
     ggplot2::theme_bw() +
     ggplot2::theme(strip.background = ggplot2::element_rect(fill = colorspace::lighten("#323D5E", amount = 0.0) , color = NA),
@@ -579,7 +579,7 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
     
     ggplot2::guides(fill = ggplot2::guide_legend(nrow = 2, byrow = TRUE, order = 1)) +
     
-    ggplot2::facet_grid(~ .data$Station_Number) + 
+    ggplot2::facet_wrap(~ .data$Station_Number, ncol = 3) + 
     
     ggplot2::labs(x = 'Burst_Size', 
                   y = 'Percentage of cells', 
