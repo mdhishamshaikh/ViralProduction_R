@@ -11,6 +11,7 @@
 #' 2. Analyze viral production step: [viralprod::analyze_viral_production]
 #' 3. Visualizations of viral production data: [viralprod::vp_visuals] 
 #' 
+#' @param vp_results Data frame with the viral production calculation results, available in global environment. See [viralprod::calculate_viral_production] for more details.
 #' @param data Data frame with the output of the flow cytometry.
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample.
 #' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
@@ -50,7 +51,8 @@
 #' nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
 #' nutrient_content_virus = list(C = 5, N = 3, P = 1), write_output = F)
 #' }
-visualize_viral_production <- function(data = data.frame(),
+visualize_viral_production <- function(vp_results = data.frame(),
+                                       data = data.frame(),
                                        original_abundances = data.frame(),
                                        burst_sizes = c(),
                                        bacterial_secondary_production = NULL,
@@ -82,7 +84,9 @@ visualize_viral_production <- function(data = data.frame(),
       }
     } else {
       visualize_vp_results_path <- paste0(output_dir, '/Figures/')
-      dir.create(visualize_vp_results_path)
+      if (!file.exists(visualize_vp_results_path)){
+        dir.create(visualize_vp_results_path)
+      }
     }
   }
   
@@ -96,7 +100,8 @@ visualize_viral_production <- function(data = data.frame(),
   
   plot_overview_counts_over_time(data)
   plot_collision_rates(data, original_abundances)
-  plot_comparison_methods(.GlobalEnv$vp_results_output_df)
+  plot_comparison_methods(vp_results)
+  plot_VIPCAL_vs_VIPCAL_SE(vp_results)
   
   analyze_viral_production(.GlobalEnv$vp_results_output_BP_df, data, original_abundances, 
                            burst_sizes, bacterial_secondary_production, 

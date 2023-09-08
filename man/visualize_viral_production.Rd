@@ -5,6 +5,7 @@
 \title{Wrapper function to visualize viral production data}
 \usage{
 visualize_viral_production(
+  vp_results = data.frame(),
   data = data.frame(),
   original_abundances = data.frame(),
   burst_sizes = c(),
@@ -16,6 +17,8 @@ visualize_viral_production(
 )
 }
 \arguments{
+\item{vp_results}{Data frame with the viral production calculation results, available in global environment. See \link{calculate_viral_production} for more details.}
+
 \item{data}{Data frame with the output of the flow cytometry.}
 
 \item{original_abundances}{Data frame with the abundances of bacterial and virus population in the original sample.}

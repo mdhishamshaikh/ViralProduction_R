@@ -24,6 +24,7 @@ Imports:
     data.table,
     dplyr,
     emmeans,
+    ggbeeswarm,
     ggnewscale,
     ggplot2,
     ggstatsplot,

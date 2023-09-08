@@ -2,8 +2,8 @@
 #' 
 #' @description
 #' Luef et al. (2009) created an online tool, `Viral Production Calculator`, that assesses and analyses viral production.
-#' Next to calculating viral production and proportion of lysogenic bacteria in the sample, other parameters for estimating
-#' virus-induced mortality are determined including lysis rate of bacteria, viral turnover time, organic carbon release and others.
+#' Next to calculating the viral production and the proportion of lysogenic bacteria in the sample, other parameters for estimating
+#' virus-induced mortality are determined including the lysis rate of bacteria, viral turnover time, organic carbon release and others.
 #' 
 #' Based on the original data and the output of [viralprod::calculate_viral_production], the same parameters are
 #' calculated and added to the already existing data frame. Another data frame with the description and units of each of the variables
@@ -15,7 +15,7 @@
 #' and lysogenic cells based on a viral reduction approach. Environmental microbiology reports, 1(1):78–85.
 #' doi:10.1111/j.1758-2229.2008.00008.x.
 #'
-#' @param vp_results Data frame with the viral production calculation results, available in global environment after running \code{calculate_viral_production}.
+#' @param vp_results Data frame with the viral production calculation results, available in global environment. See [viralprod::calculate_viral_production] for more details.
 #' @param data Data frame with the output of the flow cytometry.
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample. 
 #' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
@@ -109,7 +109,7 @@ analyze_viral_production <- function(vp_results = data.frame(),
   original_abundances_df <- original_abundances %>%
     dplyr::select(dplyr::all_of(c('Station_Number', 'Total_Bacteria', 'Total_Viruses')))
   
-  .GlobalEnv$analyzed_vp_results_df <- vp_results %>%
+  analyzed_vp_results_df <- vp_results %>%
     dplyr::left_join(dplyr::select(B_T0_df, 'Station_Number', 'Mean'), by = c('Station_Number')) %>%
     dplyr::rename(B_0 = "Mean") %>%
     dplyr::left_join(dplyr::select(original_abundances_df, 'Station_Number', 'Total_Bacteria', 'Total_Viruses'), by = c('Station_Number')) %>%
@@ -147,7 +147,7 @@ analyze_viral_production <- function(vp_results = data.frame(),
   
   ## 3. Analyze viral production results
   # 3.1 Correct values to represent original sample abundances
-  .GlobalEnv$analyzed_vp_results_df <- .GlobalEnv$analyzed_vp_results_df %>%
+  analyzed_vp_results_df <- analyzed_vp_results_df %>%
     dplyr::mutate(c_VP = .data$VP * (.data$B_OS / .data$B_0),
                   c_abs_VP = .data$abs_VP * (.data$B_OS / .data$B_0),
                   c_VP_SE = abs(.data$c_VP) * (.data$VP_SE / abs(.data$VP)))
@@ -157,44 +157,46 @@ analyze_viral_production <- function(vp_results = data.frame(),
   # 3.4 Percentage of bacterial production lysed and bacterial loss per day
   for (bs in burst_sizes){
     col_name_3_2 <- paste0('P_Cells_BS_', bs)
-    .GlobalEnv$analyzed_vp_results_df[[col_name_3_2]] <- .GlobalEnv$analyzed_vp_results_df$abs_VP * (100 / (.GlobalEnv$analyzed_vp_results_df$B_0 * bs))
+    analyzed_vp_results_df[[col_name_3_2]] <- analyzed_vp_results_df$abs_VP * (100 / (analyzed_vp_results_df$B_0 * bs))
     
     col_name_3_3 <- paste0('Rate_BS_', bs)
-    .GlobalEnv$analyzed_vp_results_df[[col_name_3_3]] <- .GlobalEnv$analyzed_vp_results_df$c_VP / bs
+    analyzed_vp_results_df[[col_name_3_3]] <- analyzed_vp_results_df$c_VP / bs
     
     col_name_3_4_1 <- paste0('P_BP_Lysed_BS_', bs)
-    .GlobalEnv$analyzed_vp_results_df[[col_name_3_4_1]] <- .GlobalEnv$analyzed_vp_results_df[[col_name_3_3]] / bacterial_secondary_production
+    analyzed_vp_results_df[[col_name_3_4_1]] <- analyzed_vp_results_df[[col_name_3_3]] / bacterial_secondary_production
     
     col_name_3_4_2 <- paste0('P_B_Loss_BS_', bs)
-    .GlobalEnv$analyzed_vp_results_df[[col_name_3_4_2]] <- ((.GlobalEnv$analyzed_vp_results_df[[col_name_3_3]] * 100) / .GlobalEnv$analyzed_vp_results_df$B_OS) * 24
+    analyzed_vp_results_df[[col_name_3_4_2]] <- ((analyzed_vp_results_df[[col_name_3_3]] * 100) / analyzed_vp_results_df$B_OS) * 24
   }
   
   # 3.5 Viral turnover time
-  .GlobalEnv$analyzed_vp_results_df <- .GlobalEnv$analyzed_vp_results_df %>%
+  analyzed_vp_results_df <- analyzed_vp_results_df %>%
     dplyr::mutate(V_TT = .data$c_VP / .data$V_OS)
   
   # 3.6 Nutrient release
   for (nutrient in 1:length(nutrient_content_viruses)){
     col_name_nutrient_virus <- paste0('DO', names(nutrient_content_viruses[nutrient]), '_V')
-    .GlobalEnv$analyzed_vp_results_df[[col_name_nutrient_virus]] <- .GlobalEnv$analyzed_vp_results_df$VP * nutrient_content_viruses[[nutrient]]
+    analyzed_vp_results_df[[col_name_nutrient_virus]] <- analyzed_vp_results_df$VP * nutrient_content_viruses[[nutrient]]
   }
   
   for (bs in burst_sizes){
     for (nutrient in 1:length(nutrient_content_bacteria)){
       current_bs_column <- paste0('Rate_BS_', bs)
       col_name_nutrient_bacteria <- paste0('DO', names(nutrient_content_bacteria[nutrient]), '_B_BS_', bs)
-      .GlobalEnv$analyzed_vp_results_df[[col_name_nutrient_bacteria]] <- .GlobalEnv$analyzed_vp_results_df[[current_bs_column]] * nutrient_content_bacteria[[nutrient]]
+      analyzed_vp_results_df[[col_name_nutrient_bacteria]] <- analyzed_vp_results_df[[current_bs_column]] * nutrient_content_bacteria[[nutrient]]
       
       # Add column with total nutrient release (bacteria + virus)
       col_name_nutrient_virus <- paste0('DO', names(nutrient_content_viruses[nutrient]), '_V')
       col_name_nutrient_total <- paste0('Total_DO', names(nutrient_content_bacteria[nutrient]), '_BS_', bs)
-      .GlobalEnv$analyzed_vp_results_df[[col_name_nutrient_total]] <- .GlobalEnv$analyzed_vp_results_df[[col_name_nutrient_bacteria]] + .GlobalEnv$analyzed_vp_results_df[[col_name_nutrient_virus]]
+      analyzed_vp_results_df[[col_name_nutrient_total]] <- analyzed_vp_results_df[[col_name_nutrient_bacteria]] + analyzed_vp_results_df[[col_name_nutrient_virus]]
     }
   }
   
   ## 4. Write output and legend if wanted
+  .GlobalEnv$analyzed_vp_results_df <- analyzed_vp_results_df
+  
   .GlobalEnv$analyzed_vp_results_dictionary <- data.frame(
-    Variable = colnames(.GlobalEnv$analyzed_vp_results_df),
+    Variable = colnames(analyzed_vp_results_df),
     Unit = c('/', '/', 'm', 'h', '/', '/', '#VLP (virus-like particles)/mLh', '#VLP/mL', '/', '/', '/',
              '#VLP/mL', '#VLP/mL', '#VLP/mL', '#VLP/mLh', '#VLP/mL', '/', '%', '#VLP/mLh', '%', '%',
              '%', '#VLP/mLh', '%', '%', '%', '#VLP/mLh', '%', '%', '1/h', 'g C/mLh', 'g N/mLh', 'g P/mLh',

@@ -13,6 +13,9 @@
 #' `plot_comparison_methods`: compares the different methods to calculate viral production. The calculated viral
 #' production is compared between the linear regression variants and the VIPCAL variants, also an overview of
 #' all the methods is made. Next to that, a plot that compares linear regression with VIPCAL and VIPCAL-SE is also produced.
+#' 
+#' `plot_VIPCAL_vs_VIPCAL_SE`: a separate visualization for comparison between VIPCAL and VIPCAL-SE. The calculated viral
+#' production values of both methods are compared plus a `Robust Graphical Method` (ROGME) is used for the comparison between the two.
 #'
 #' `plot_percentage_cells`: plots the percentage of lytically infected and lysogenic cells in function of the 
 #' different burst sizes. Important to note, that this is the percentage of cells at the bacterial endpoint of the assay,
@@ -55,6 +58,7 @@
 #' plot_overview_counts_over_time(data_NJ2020_all)
 #' plot_collision_rates(data_NJ2020_all, original_abundances_NJ2020)
 #' plot_comparison_methods(vp_results_output_df) 
+#' plot_VIPCAL_vs_VIPCAL_SE(vp_results_output_df)
 #' 
 #' analyze_viral_production(vp_results_output_BP_df, data_NJ2020_all, 
 #' original_abundances_NJ2020, write_csv = F)
@@ -471,6 +475,75 @@ plot_comparison_methods <- function(vp_results){
   plot_name <- paste0(unique(plot_data_all_methods$Location), '_Comparison_ALL')
   .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_all, 
                                             width = 15,
+                                            height = 10)
+}
+
+
+#' @rdname vp_visuals
+plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
+  ## 1. Setup
+  plot_compare_data <- vp_results %>%
+    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
+    dplyr::select(-dplyr::all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared'))) %>%
+    dplyr::mutate(VP = .data$VP / 1e6) %>%
+    tidyr::pivot_wider(names_from = 'VP_Method', values_from = 'VP')
+  
+  plot_ROGME_data <- vp_results %>%
+    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'))  %>%
+    dplyr::select(-dplyr::all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared')))
+  
+  plot_ROGME_deciles <- plot_ROGME_data %>%
+    dplyr::group_by(.data$VP_Method) %>%
+    dplyr::reframe(decile = stats::quantile(.data$VP, probs = seq(0, 1, by = 0.1))) %>%
+    dplyr::ungroup()
+  
+  ## 2. Make plot
+  n_compare <- ggplot2::ggplot(data = plot_compare_data, ggplot2::aes(x = .data$VPCL_AR_DIFF, y = .data$VPCL_AR_DIFF_LMER_SE,
+                                                                      color = .data$Sample_Type, shape = .data$Sample_Type,
+                                                                      fill = .data$Sample_Type)) + 
+    ggplot2::geom_point() + 
+    ggplot2::geom_abline(intercept = 0, slope = 1) + 
+    
+    ggplot2::scale_x_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF)), 0.5)) + 
+    ggplot2::scale_y_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF_LMER_SE)), 0.5)) +
+    
+    ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE vp_values') + 
+    
+    ggplot2::theme_bw() + 
+    ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
+                   panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   axis.title = ggplot2::element_text(face = 'plain'),
+                   title = ggplot2::element_text(face = 'bold'))
+  
+  plot_name <- paste0(unique(plot_compare_data$Location), '_Comparison_VIPCAL_VIPCAL_SE')
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_compare, 
+                                            width = 10,
+                                            height = 10)
+  
+  n_ROGME <- ggplot2::ggplot(data = plot_ROGME_data, ggplot2::aes(x = .data$VP, y = .data$VP_Method, 
+                                                                  fill = .data$VP_Method)) +
+    ggbeeswarm::geom_quasirandom(orientation = 'y',
+                                 color = 'darkolivegreen3', 
+                                 shape = 16, show.legend = F) + 
+    ggplot2::geom_segment(data = plot_ROGME_deciles,ggplot2::aes(x = .data$decile, xend = .data$decile, 
+                                                                 y = as.numeric(factor(.data$VP_Method)) - 0.2, 
+                                                                 yend = as.numeric(factor(.data$VP_Method)) + 0.2),
+                          color = "black") + 
+    
+    ggplot2::labs(title = 'Robust Graphical Methods for VIPCAL vs VIPCAL-SE') + 
+    
+    ggplot2::theme_bw() + 
+    ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
+                   panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   axis.title = ggplot2::element_text(face = 'plain'),
+                   axis.text.y = ggplot2::element_text(angle = 90, hjust = 0.5),
+                   title = ggplot2::element_text(face = 'bold'))
+  
+  plot_name <- paste0(unique(plot_compare_data$Location), '_Comparison_VIPCAL_VIPCAL_SE_ROGME')
+  .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_ROGME, 
+                                            width = 10,
                                             height = 10)
 }
 

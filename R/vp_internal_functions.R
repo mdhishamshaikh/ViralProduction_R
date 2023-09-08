@@ -5,7 +5,7 @@
 #' this process is called `gating`. During the gating process, different populations are defined based on the side scatter
 #' and green fluorescence. Since gating is a manual process, the user is free to determine which populations to define. 
 #' The count values, retrieved from the scatter plot, need to be as a column in the output data frame of the flow 
-#' cytometry step as followed: `c_PopulationName`. Given the output data frame of the flow cytometry step, 
+#' cytometry step named as followed: `c_PopulationName`. Given the output data frame of the flow cytometry step, 
 #' the different populations to analyze, determined by the gating process, are defined. 
 #' 
 #' @param data Data frame with the output of the flow cytometry.
@@ -52,7 +52,7 @@ vp_check_populations <- function(data){
 
 #' Adding unique time ranges of the assay
 #' 
-#' Given a data frame that consists of column, 'Timepoint', that represents the different sampling points of the assay,
+#' Given a data frame that consists of column, `Timepoint`, that represents the different sampling points of the assay,
 #' a column with the different time ranges of the assay is added to the original data frame. 
 #'
 #' @param DF Data frame with the count for each population and each sample at the different time points of the assay.

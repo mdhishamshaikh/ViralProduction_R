@@ -41,11 +41,13 @@ vp_list_of_methods <- function(){
     "vp_VIPCAL_average_replicates_diff_LMER",
     "vp_VIPCAL_average_replicates_diff_LMER_SE"
   )
-  .GlobalEnv$list_of_methods <- list()
+  methods_list <- list()
   
   for (method in methods_to_calculate_viral_production){
     method_function <- get(method)
-    .GlobalEnv$list_of_methods[[length(.GlobalEnv$list_of_methods) + 1]] <- method_function
+    methods_list[[length(methods_list) + 1]] <- method_function
   }
-  names(.GlobalEnv$list_of_methods) <- methods_to_calculate_viral_production
+  names(methods_list) <- methods_to_calculate_viral_production
+  
+  .GlobalEnv$list_of_methods <- methods_list
 }

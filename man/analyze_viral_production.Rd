@@ -17,7 +17,7 @@ analyze_viral_production(
 )
 }
 \arguments{
-\item{vp_results}{Data frame with the viral production calculation results, available in global environment after running \code{calculate_viral_production}.}
+\item{vp_results}{Data frame with the viral production calculation results, available in global environment. See \link{calculate_viral_production} for more details.}
 
 \item{data}{Data frame with the output of the flow cytometry.}
 
@@ -41,8 +41,8 @@ Data frame with the analyzed viral production results, different parameters for 
 }
 \description{
 Luef et al. (2009) created an online tool, \verb{Viral Production Calculator}, that assesses and analyses viral production.
-Next to calculating viral production and proportion of lysogenic bacteria in the sample, other parameters for estimating
-virus-induced mortality are determined including lysis rate of bacteria, viral turnover time, organic carbon release and others.
+Next to calculating the viral production and the proportion of lysogenic bacteria in the sample, other parameters for estimating
+virus-induced mortality are determined including the lysis rate of bacteria, viral turnover time, organic carbon release and others.
 
 Based on the original data and the output of \link{calculate_viral_production}, the same parameters are
 calculated and added to the already existing data frame. Another data frame with the description and units of each of the variables

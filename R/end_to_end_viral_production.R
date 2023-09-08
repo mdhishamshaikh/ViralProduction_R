@@ -79,7 +79,8 @@ end_to_end_viral_production <- function(data = data.frame(),
                            output_dir = output_dir)
   
   ## 3. Visualize viral production
-  visualize_viral_production(data = data,
+  visualize_viral_production(vp_results = .GlobalEnv$vp_results_output_df,
+                             data = data,
                              original_abundances = original_abundances,
                              burst_sizes = burst_sizes,
                              bacterial_secondary_production = bacterial_secondary_production,

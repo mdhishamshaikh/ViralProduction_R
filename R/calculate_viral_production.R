@@ -3,7 +3,7 @@
 #' @description
 #' Wrapper function that performs viral production calculation. Given the output of the flow cytometry step, viral production
 #' is calculated for all methods of linear regression and VIPCAL. Based on the parameters, different data frames will be available
-#' in the global environment and can be written as csv files.
+#' in the global environment and written as csv files.
 #' 
 #' 1. `vp_results_ALL.csv`: contains the viral production results for all samples.
 #' 2. `vp_results_T24.csv`: contains the viral production results for all samples at the end of the assay (T0_T24).
@@ -64,7 +64,7 @@ calculate_viral_production <- function(data = data.frame(),
       stop('No output directory is given, please define output directory before proceeding!')
       
     } else if (file.exists(output_dir)){
-      # Give the user an option if he wants to continue and possible overwrite results or not
+      # Give the user an option if he wants to continue and possibly overwrite results
       user_choice <- utils::menu(
         c("Continue and possibly overwrite existing results",
           "Stop and define another output directory"),
@@ -91,18 +91,18 @@ calculate_viral_production <- function(data = data.frame(),
   
   ## 2. Setup
   # Store all errors and warnings in list
-  .GlobalEnv$calc_vp_error_list <- list()
-  .GlobalEnv$calc_vp_warn_list <- list()
+  calc_vp_error_list <- list()
+  calc_vp_warn_list <- list()
   
   # Import all the possible methods and check the populations to analyze
   vp_list_of_methods()
   vp_check_populations(data)
   
   ## 3. Calculate viral production
-  .GlobalEnv$vp_results_output_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
-                                                Depth = integer(), Time_Range = character(), Population = character(), 
-                                                Sample_Type = character(), VP = numeric(), abs_VP = numeric(), 
-                                                VP_SE = numeric(), VP_R_Squared = numeric(), VP_Method = character())
+  vp_results_output_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
+                                     Depth = integer(), Time_Range = character(), Population = character(), 
+                                     Sample_Type = character(), VP = numeric(), abs_VP = numeric(), 
+                                     VP_SE = numeric(), VP_R_Squared = numeric(), VP_Method = character())
   
   for (method in methods){
     tryCatch(
@@ -110,18 +110,18 @@ calculate_viral_production <- function(data = data.frame(),
         message(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method]))
         vp_results <- .GlobalEnv$list_of_methods[[method]](data)
         
-        .GlobalEnv$vp_results_output_df <- dplyr::full_join(.GlobalEnv$vp_results_output_df, vp_results)
+        vp_results_output_df <- dplyr::full_join(vp_results_output_df, vp_results)
       },
       
       error = function(e){
         err <- paste(Sys.time(), paste0('Error in analysis using method ', names(.GlobalEnv$list_of_methods)[method], ':'), e)
-        .GlobalEnv$calc_vp_error_list[[length(.GlobalEnv$calc_vp_error_list) + 1]] <<- err
+        calc_vp_error_list[[length(calc_vp_error_list) + 1]] <<- err
         print(err)
       },
       
       warning = function(w){
         warn <- paste(Sys.time(), paste0('Warning in analysis using method ', names(.GlobalEnv$list_of_methods)[method], ':'), w)
-        .GlobalEnv$calc_vp_warn_list[[length(.GlobalEnv$calc_vp_warn_list) + 1]] <<- warn
+        calc_vp_warn_list[[length(calc_vp_warn_list) + 1]] <<- warn
         print(warn)
       },
       
@@ -130,8 +130,7 @@ calculate_viral_production <- function(data = data.frame(),
       }
     )
   }
-  
-  .GlobalEnv$vp_results_output_df <- .GlobalEnv$vp_results_output_df %>%
+  .GlobalEnv$vp_results_output_df <- vp_results_output_df %>%
     dplyr::arrange('tag',
                    factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
                    factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
@@ -147,10 +146,10 @@ calculate_viral_production <- function(data = data.frame(),
   
   ## 4. Results of separate replicate treatment
   if (SR_calc == T){
-    .GlobalEnv$vp_results_output_SR_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
-                                                     Depth = integer(), Time_Range = character(), Population = character(), 
-                                                     Sample_Type = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
-                                                     VP_R_Squared = numeric(), VP_Method = character())
+    vp_results_output_SR_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
+                                          Depth = integer(), Time_Range = character(), Population = character(), 
+                                          Sample_Type = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
+                                          VP_R_Squared = numeric(), VP_Method = character())
     
     methods_SR <- grep("separate_replicates", .GlobalEnv$list_of_methods)
     
@@ -160,18 +159,18 @@ calculate_viral_production <- function(data = data.frame(),
           message(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method], ', only separate replicate results'))
           vp_results <- .GlobalEnv$list_of_methods[[method]](data, AVG = F)
           
-          .GlobalEnv$vp_results_output_SR_df <- dplyr::full_join(.GlobalEnv$vp_results_output_SR_df, vp_results)
+          vp_results_output_SR_df <- dplyr::full_join(vp_results_output_SR_df, vp_results)
         },
         
         error = function(e){
           err <- paste(Sys.time(), paste0('Error in analysis using method ', names(.GlobalEnv$list_of_methods)[method], ':'), e)
-          .GlobalEnv$calc_vp_error_list[[length(.GlobalEnv$calc_vp_error_list) + 1]] <<- err
+          calc_vp_error_list[[length(calc_vp_error_list) + 1]] <<- err
           print(err)
         },
         
         warning = function(w){
           warn <- paste(Sys.time(), paste0('Warning in analysis using method ', names(.GlobalEnv$list_of_methods)[method], ':'), w)
-          .GlobalEnv$calc_vp_warn_list[[length(.GlobalEnv$calc_vp_warn_list) + 1]] <<- warn
+          calc_vp_warn_list[[length(calc_vp_warn_list) + 1]] <<- warn
           print(warn)
         },
         
@@ -180,8 +179,10 @@ calculate_viral_production <- function(data = data.frame(),
         }
       )
     }
+    .GlobalEnv$calc_vp_error_list <- calc_vp_error_list
+    .GlobalEnv$calc_vp_warn_list <- calc_vp_warn_list
     
-    .GlobalEnv$vp_results_output_SR_df <- .GlobalEnv$vp_results_output_SR_df %>%
+    .GlobalEnv$vp_results_output_SR_df <- vp_results_output_SR_df %>%
       dplyr::arrange('tag',
                      factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
                      factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%
@@ -194,10 +195,10 @@ calculate_viral_production <- function(data = data.frame(),
   
   ## 5. Results with bacterial endpoint taken into account
   if (BP_endpoint == T){
-    .GlobalEnv$vp_results_output_BP_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
-                                                     Depth = integer(), Time_Range = character(), Population = character(), 
-                                                     Sample_Type = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
-                                                     VP_R_Squared = numeric(), VP_Method = character())
+    vp_results_output_BP_df <- data.frame(tag = character(), Location = character(), Station_Number = integer(), 
+                                          Depth = integer(), Time_Range = character(), Population = character(), 
+                                          Sample_Type = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
+                                          VP_R_Squared = numeric(), VP_Method = character())
     
     BP_result_list <- list()
     data_with_tag <- data %>%
@@ -216,10 +217,10 @@ calculate_viral_production <- function(data = data.frame(),
         tidyr::unite('tag', dplyr::all_of(c('Location', 'Station_Number', 'Depth')), remove = F) %>%
         dplyr::filter(.data$tag == BP_result_list[[index]][1] & .data$Time_Range == BP_result_list[[index]][2])
       
-      .GlobalEnv$vp_results_output_BP_df <- dplyr::full_join(.GlobalEnv$vp_results_output_BP_df, vp_results_output_BP_index)
+      vp_results_output_BP_df <- dplyr::full_join(vp_results_output_BP_df, vp_results_output_BP_index)
     }
     
-    .GlobalEnv$vp_results_output_BP_df <- .GlobalEnv$vp_results_output_BP_df %>%
+    .GlobalEnv$vp_results_output_BP_df <- vp_results_output_BP_df %>%
       dplyr::arrange('tag',
                      factor(.data$Sample_Type, levels = c('VP', 'VPC', 'Diff')),
                      factor(.data$Population, levels = .GlobalEnv$populations_to_analyze[grep('c_V', .GlobalEnv$populations_to_analyze)])) %>%

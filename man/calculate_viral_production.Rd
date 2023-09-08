@@ -35,7 +35,7 @@ Depending on setting of parameters, different data frames with the viral product
 \description{
 Wrapper function that performs viral production calculation. Given the output of the flow cytometry step, viral production
 is calculated for all methods of linear regression and VIPCAL. Based on the parameters, different data frames will be available
-in the global environment and can be written as csv files.
+in the global environment and written as csv files.
 \enumerate{
 \item \code{vp_results_ALL.csv}: contains the viral production results for all samples.
 \item \code{vp_results_T24.csv}: contains the viral production results for all samples at the end of the assay (T0_T24).

@@ -5,6 +5,7 @@
 \alias{plot_overview_counts_over_time}
 \alias{plot_collision_rates}
 \alias{plot_comparison_methods}
+\alias{plot_VIPCAL_vs_VIPCAL_SE}
 \alias{plot_percentage_cells}
 \alias{plot_nutrient_release}
 \title{Visualizations of viral production data}
@@ -14,6 +15,8 @@ plot_overview_counts_over_time(data)
 plot_collision_rates(data, original_abundances)
 
 plot_comparison_methods(vp_results)
+
+plot_VIPCAL_vs_VIPCAL_SE(vp_results)
 
 plot_percentage_cells(analyzed_vp_results_bacterial_endpoint)
 
@@ -54,6 +57,9 @@ collision rate is defined as the frequency of physical encounter between a bacte
 production is compared between the linear regression variants and the VIPCAL variants, also an overview of
 all the methods is made. Next to that, a plot that compares linear regression with VIPCAL and VIPCAL-SE is also produced.
 
+\code{plot_VIPCAL_vs_VIPCAL_SE}: a separate visualization for comparison between VIPCAL and VIPCAL-SE. The calculated viral
+production values of both methods are compared plus a \verb{Robust Graphical Method} (ROGME) is used for the comparison between the two.
+
 \code{plot_percentage_cells}: plots the percentage of lytically infected and lysogenic cells in function of the
 different burst sizes. Important to note, that this is the percentage of cells at the bacterial endpoint of the assay,
 so the point where ideally the assay is stopped to retrieve less biased results between samples.
@@ -78,6 +84,7 @@ calculate_viral_production(data_NJ2020_all, write_csv = F)
 plot_overview_counts_over_time(data_NJ2020_all)
 plot_collision_rates(data_NJ2020_all, original_abundances_NJ2020)
 plot_comparison_methods(vp_results_output_df) 
+plot_VIPCAL_vs_VIPCAL_SE(vp_results_output_df)
 
 analyze_viral_production(vp_results_output_BP_df, data_NJ2020_all, 
 original_abundances_NJ2020, write_csv = F)
