@@ -45,7 +45,7 @@ vp_check_populations <- function(data){
     .GlobalEnv$populations_to_analyze <- colnames(data)[grep("^c_", colnames(data))]
     message(paste("Following populations will be analyzed:", paste(.GlobalEnv$populations_to_analyze, collapse = ", ")))
   } else {
-    stop('Total virus population, column c_Viruses, is not gated in output data fram of flow cytometry. Not able to perform viral production calculation!')
+    stop('Total virus population, column c_Viruses, is not gated in output data frame of flow cytometry. Not able to perform viral production calculation!')
   }
 }
 

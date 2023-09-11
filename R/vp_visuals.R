@@ -1,7 +1,7 @@
 #' Visualizations of viral production data
 #' 
 #' @description
-#' A major step in data analyses is `Data Visualization`. Some suggestions to visualize the flow cytometry, viral
+#' A major step in data analyses is `data visualization`. Some suggestions to visualize the flow cytometry, viral
 #' production or analyzed viral production data are given. 
 #' 
 #' `plot_overview_counts_over_time`: plots the bacterial and viral counts, retrieved from the flow cytometry, in
@@ -507,14 +507,18 @@ plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
     ggplot2::scale_x_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF)), 0.5)) + 
     ggplot2::scale_y_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF_LMER_SE)), 0.5)) +
     
-    ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE vp_values') + 
+    ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE',
+                  subtitle = 'Calculated viral production values (VP) from VIPCAL (VPCL_AR_DIFF) contrary to those from VIPCAL-SE (VPCL_AR_DIFF_LMER_SE)',
+                  x = 'VIPCAL',
+                  y = 'VIPCAL-SE') + 
     
     ggplot2::theme_bw() + 
     ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
                    panel.grid.major = ggplot2::element_blank(),
                    panel.grid.minor = ggplot2::element_blank(),
-                   axis.title = ggplot2::element_text(face = 'plain'),
-                   title = ggplot2::element_text(face = 'bold'))
+                   axis.title = ggplot2::element_text(face = 'bold'),
+                   title = ggplot2::element_text(face = 'bold'),
+                   plot.subtitle = ggplot2::element_text(face = 'plain'))
   
   plot_name <- paste0(unique(plot_compare_data$Location), '_Comparison_VIPCAL_VIPCAL_SE')
   .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_compare, 
@@ -531,15 +535,19 @@ plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
                                                                  yend = as.numeric(factor(.data$VP_Method)) + 0.2),
                           color = "black") + 
     
-    ggplot2::labs(title = 'Robust Graphical Methods for VIPCAL vs VIPCAL-SE') + 
+    ggplot2::scale_y_discrete(labels = c('VIPCAL', 'VIPCAL-SE')) + 
+    
+    ggplot2::labs(title = 'Robust Graphical Methods for VIPCAL vs VIPCAL-SE',
+                  subtitle = 'VP values from VIPCAL (VPCL_AR_DIFF) contrary to those from VIPCAL-SE (VPCL_AR_DIFF_LMER_SE) with deciles') + 
     
     ggplot2::theme_bw() + 
     ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
                    panel.grid.major = ggplot2::element_blank(),
                    panel.grid.minor = ggplot2::element_blank(),
-                   axis.title = ggplot2::element_text(face = 'plain'),
                    axis.text.y = ggplot2::element_text(angle = 90, hjust = 0.5),
-                   title = ggplot2::element_text(face = 'bold'))
+                   axis.title = ggplot2::element_text(face = 'bold'),
+                   title = ggplot2::element_text(face = 'bold'),
+                   plot.subtitle = ggplot2::element_text(face = 'plain'))
   
   plot_name <- paste0(unique(plot_compare_data$Location), '_Comparison_VIPCAL_VIPCAL_SE_ROGME')
   .GlobalEnv$plot_list[[plot_name]] <- list(plot_object = n_ROGME, 

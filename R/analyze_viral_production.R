@@ -15,9 +15,10 @@
 #' and lysogenic cells based on a viral reduction approach. Environmental microbiology reports, 1(1):78–85.
 #' doi:10.1111/j.1758-2229.2008.00008.x.
 #'
+#' @param x Data frame with the output of the flow cytometry, has to have the `viralprod` class.
+#' @param ... Arguments passed on to the next function.
 #' @param vp_results Data frame with the viral production calculation results, available in global environment. See [viralprod::calculate_viral_production] for more details.
-#' @param data Data frame with the output of the flow cytometry.
-#' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample. 
+#' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample, has to have the `viralprod_analyze` class.
 #' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
 #' @param bacterial_secondary_production Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction. 
 #' @param nutrient_content_bacteria List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.
@@ -40,34 +41,64 @@
 #' original_abundances_NJ2020 <- read.csv(system.file('extdata',
 #' 'NJ2020_original_abundances.csv', package = "viralprod"))
 #' 
-#' calculate_viral_production(data_NJ2020_all, write_output = F)
+#' x <- new_viralprod_class(data_NJ2020_all)
+#' y <- new_viralprod_class_2(original_abundances_NJ2020)
+#' calculate_viral_production(x, write_output = F)
 #' 
 #' # Perform
+#' # Default method
+#' analyze_viral_production(x = data_NJ2020_all, vp_results = vp_results_output_df, 
+#' original_abundances = original_abundances_NJ2020, write_output = F)
+#' 
+#' # S3 class, viralprod, method
+#' # Error expected when original abundances don't have correct class
+#' analyze_viral_production(x, vp_results = vp_results_output_df, 
+#' original_abundances = original_abundances_NJ2020, write_output = F)
+#' 
 #' # Write output files
-#' analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
-#' original_abundances_NJ2020, output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
+#' analyze_viral_production(x, vp_results = vp_results_output_df, 
+#' original_abundances = y, 
+#' output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
 #' “/NJ2020_vp_results”))
 #' 
 #' # No output files
-#' analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
-#' original_abundances_NJ2020, write_output = F)
+#' analyze_viral_production(x, vp_results = vp_results_output_df, 
+#' original_abundances = y, write_output = F)
 #' 
 #' # Set own parameter values
-#' analyze_viral_production(vp_results_output_df, data_NJ2020_all, original_abundances_2020,
+#' analyze_viral_production(x, vp_results = vp_results_output_df, 
+#' original_abundances = y,
 #' burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
 #' nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
 #' nutrient_content_virus = list(C = 5, N = 3, P = 1)) 
 #' }
-analyze_viral_production <- function(vp_results = data.frame(),
-                                     data = data.frame(),
-                                     original_abundances = data.frame(),
-                                     burst_sizes = c(),
-                                     bacterial_secondary_production = NULL,
-                                     nutrient_content_bacteria = list(),
-                                     nutrient_content_viruses = list(),
-                                     write_output = TRUE,
-                                     output_dir = ''){
+analyze_viral_production <- function(x, ...){
+  UseMethod("analyze_viral_production")
+}
+
+
+#' @export
+#' @rdname analyze_viral_production
+analyze_viral_production.default <- function(x, ...){
+  message('The input data frame has not the right format, please adjust before moving on! You can check your data frame with `new_viralprod_class()`.')
+}
+
+
+#' @export
+#' @rdname analyze_viral_production
+analyze_viral_production.viralprod <- function(x, ...,
+                                               vp_results = data.frame(),
+                                               original_abundances = data.frame(),
+                                               burst_sizes = c(),
+                                               bacterial_secondary_production = NULL,
+                                               nutrient_content_bacteria = list(),
+                                               nutrient_content_viruses = list(),
+                                               write_output = TRUE,
+                                               output_dir = ''){
   ## 1. Checks
+  # Check if original_abundances have correct class
+  checkmate::assert_class(original_abundances, 'viralprod_analyze')
+  
   # Check for valid output directory if csv files needs to be written
   if (write_output == T){
     if(output_dir == ''){
@@ -95,13 +126,13 @@ analyze_viral_production <- function(vp_results = data.frame(),
   }
   
   # Check if all three data frames aren't empty
-  if (any(sapply(list(vp_results, data, original_abundances), function(df) rlang::is_empty(df)))){
+  if (any(sapply(list(x, vp_results, original_abundances), function(df) rlang::is_empty(df)))){
     stop('Not able to proceed analyzing since one of the input data frames is empty!')
   }
   
   ## 2. Setup
   # Add bacterial abundance at T0 and the bacterial and viral abundances of the original sample to vp_results data frame
-  B_T0_df <- vp_average_replicate_dataframe(data) %>%
+  B_T0_df <- vp_average_replicate_dataframe(x) %>%
     dplyr::filter(.data$Timepoint == 0, .data$Population == 'c_Bacteria', .data$Sample_Type == 'VP') %>%
     dplyr::select(dplyr::all_of(c('Station_Number', 'Timepoint', 'Population', 'Sample_Type', 'Mean'))) %>%
     dplyr::distinct()

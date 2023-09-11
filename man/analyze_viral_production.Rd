@@ -2,11 +2,18 @@
 % Please edit documentation in R/analyze_viral_production.R
 \name{analyze_viral_production}
 \alias{analyze_viral_production}
+\alias{analyze_viral_production.default}
+\alias{analyze_viral_production.viralprod}
 \title{Analyze viral production data}
 \usage{
-analyze_viral_production(
+analyze_viral_production(x, ...)
+
+\method{analyze_viral_production}{default}(x, ...)
+
+\method{analyze_viral_production}{viralprod}(
+  x,
+  ...,
   vp_results = data.frame(),
-  data = data.frame(),
   original_abundances = data.frame(),
   burst_sizes = c(),
   bacterial_secondary_production = NULL,
@@ -17,11 +24,13 @@ analyze_viral_production(
 )
 }
 \arguments{
+\item{x}{Data frame with the output of the flow cytometry, has to have the \code{viralprod} class.}
+
+\item{...}{Arguments passed on to the next function.}
+
 \item{vp_results}{Data frame with the viral production calculation results, available in global environment. See \link{calculate_viral_production} for more details.}
 
-\item{data}{Data frame with the output of the flow cytometry.}
-
-\item{original_abundances}{Data frame with the abundances of bacterial and virus population in the original sample.}
+\item{original_abundances}{Data frame with the abundances of bacterial and virus population in the original sample, has to have the \code{viralprod_analyze} class.}
 
 \item{burst_sizes}{Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell.}
 
@@ -63,20 +72,33 @@ data_NJ2020_all <- read.csv(system.file('extdata',
 original_abundances_NJ2020 <- read.csv(system.file('extdata',
 'NJ2020_original_abundances.csv', package = "viralprod"))
 
-calculate_viral_production(data_NJ2020_all, write_output = F)
+x <- new_viralprod_class(data_NJ2020_all)
+y <- new_viralprod_class_2(original_abundances_NJ2020)
+calculate_viral_production(x, write_output = F)
 
 # Perform
+# Default method
+analyze_viral_production(x = data_NJ2020_all, vp_results = vp_results_output_df, 
+original_abundances = original_abundances_NJ2020, write_output = F)
+
+# S3 class, viralprod, method
+# Error expected when original abundances don't have correct class
+analyze_viral_production(x, vp_results = vp_results_output_df, 
+original_abundances = original_abundances_NJ2020, write_output = F)
+
 # Write output files
-analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
-original_abundances_NJ2020, output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
+analyze_viral_production(x, vp_results = vp_results_output_df, 
+original_abundances = y, 
+output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
 “/NJ2020_vp_results”))
 
 # No output files
-analyze_viral_production(vp_results_output_df, data_NJ2020_all, 
-original_abundances_NJ2020, write_output = F)
+analyze_viral_production(x, vp_results = vp_results_output_df, 
+original_abundances = y, write_output = F)
 
 # Set own parameter values
-analyze_viral_production(vp_results_output_df, data_NJ2020_all, original_abundances_2020,
+analyze_viral_production(x, vp_results = vp_results_output_df, 
+original_abundances = y,
 burst_sizes = c(15,30,50), bacterial_secondary_producition = 1000, 
 nutrient_content_bacteria = list(C = 20, N = 15, P = 5),
 nutrient_content_virus = list(C = 5, N = 3, P = 1)) 

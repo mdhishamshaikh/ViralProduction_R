@@ -44,7 +44,7 @@ at the end of the assay is calculated.}
 Plot objects will be stored in variable \code{plot_list} in the global environment.
 }
 \description{
-A major step in data analyses is \verb{Data Visualization}. Some suggestions to visualize the flow cytometry, viral
+A major step in data analyses is \verb{data visualization}. Some suggestions to visualize the flow cytometry, viral
 production or analyzed viral production data are given.
 
 \code{plot_overview_counts_over_time}: plots the bacterial and viral counts, retrieved from the flow cytometry, in

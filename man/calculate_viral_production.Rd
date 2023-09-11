@@ -2,10 +2,17 @@
 % Please edit documentation in R/calculate_viral_production.R
 \name{calculate_viral_production}
 \alias{calculate_viral_production}
+\alias{calculate_viral_production.default}
+\alias{calculate_viral_production.viralprod}
 \title{Wrapper function to calculate viral production}
 \usage{
-calculate_viral_production(
-  data = data.frame(),
+calculate_viral_production(x, ...)
+
+\method{calculate_viral_production}{default}(x, ...)
+
+\method{calculate_viral_production}{viralprod}(
+  x,
+  ...,
   methods = c(1:12),
   SR_calc = TRUE,
   BP_endpoint = TRUE,
@@ -14,7 +21,9 @@ calculate_viral_production(
 )
 }
 \arguments{
-\item{data}{Data frame with the output of the flow cytometry.}
+\item{x}{Data frame with the output of the flow cytometry, has to have the \code{viralprod} class.}
+
+\item{...}{Arguments passed on to the next function.}
 
 \item{methods}{Integer vector with the indexes of \code{list_of_methods}. Indexes determine which methods will be performed within the viral production calculation.}
 
@@ -56,18 +65,25 @@ data_NJ2020_all <- read.csv(system.file('extdata',
 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
 
 # Perform
+# Add S3 class
+x <- new_viralprod_class(data_NJ2020_all)
+
+# Default method
+calculate_viral_production(x = data_NJ2020_all, write_output = F)
+
+# S3 class, viralprod, method
 # Write output files
-calculate_viral_production(data_NJ2020_all, 
+calculate_viral_production(x, 
 output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
 “/NJ2020_vp_results”))
 
 # No output files
-calculate_viral_production(data_NJ2020_all, write_output = F)
+calculate_viral_production(x, write_output = F)
 
 # No bacterial endpoint and separate replicate treatment results
-calculate_viral_production(data_NJ2020_all, write_output = F, SR_calc = F, BP_endpoint = F)
+calculate_viral_production(x, write_output = F, SR_calc = F, BP_endpoint = F)
 
 # Sub selection of the methods
-calculate_viral_production(data_NJ2020_all, write_output = F, methods = c(2,3,8,12))
+calculate_viral_production(x, write_output = F, methods = c(2,3,8,12))
 }
 }

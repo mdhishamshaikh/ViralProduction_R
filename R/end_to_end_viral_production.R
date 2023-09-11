@@ -59,8 +59,12 @@ end_to_end_viral_production <- function(data = data.frame(),
                                         nutrient_content_viruses = list(),
                                         write_output = TRUE,
                                         output_dir = ''){
-  ## 1. Calculate viral production
-  calculate_viral_production(data = data,
+  ## 1. Check the input data frames
+  data_viralprod <- new_viralprod_class(data)
+  original_abundances_viralprod <- new_viralprod_class_2(original_abundances)
+  
+  ## 2. Calculate viral production
+  calculate_viral_production(x = data_viralprod,
                              methods = methods,
                              SR_calc = SR_calc,
                              BP_endpoint = BP_endpoint,
@@ -68,9 +72,9 @@ end_to_end_viral_production <- function(data = data.frame(),
                              output_dir = output_dir)
   
   ## 2. Analyze viral production
-  analyze_viral_production(vp_results = .GlobalEnv$vp_results_output_df,
-                           data = data,
-                           original_abundances = original_abundances,
+  analyze_viral_production(x = data_viralprod,
+                           vp_results = .GlobalEnv$vp_results_output_df,
+                           original_abundances = original_abundances_viralprod,
                            burst_sizes = burst_sizes,
                            bacterial_secondary_production = bacterial_secondary_production,
                            nutrient_content_bacteria = nutrient_content_bacteria,
@@ -79,9 +83,9 @@ end_to_end_viral_production <- function(data = data.frame(),
                            output_dir = output_dir)
   
   ## 3. Visualize viral production
-  visualize_viral_production(vp_results = .GlobalEnv$vp_results_output_df,
-                             data = data,
-                             original_abundances = original_abundances,
+  visualize_viral_production(x = data_viralprod,
+                             vp_results = .GlobalEnv$vp_results_output_df,
+                             original_abundances = original_abundances_viralprod,
                              burst_sizes = burst_sizes,
                              bacterial_secondary_production = bacterial_secondary_production,
                              nutrient_content_bacteria = nutrient_content_bacteria,

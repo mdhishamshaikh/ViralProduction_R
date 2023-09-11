@@ -1,8 +1,8 @@
 ---
-title: "viralprod"
+title: "viralprod tutorial"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{viralprod}
+  %\VignetteIndexEntry{viralprod tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
