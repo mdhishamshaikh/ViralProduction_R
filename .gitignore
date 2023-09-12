@@ -6,6 +6,7 @@ inst/doc
 .Rdata
 .httr-oauth
 .DS_Store
+README_cache
 
 *svg
 *fcs

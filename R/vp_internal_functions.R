@@ -11,6 +11,7 @@
 #' @param data Data frame with the output of the flow cytometry.
 #'
 #' @return A character vector with the different populations to analyze will be available in the global environment. An error occurs when the total virus population, `c_Viruses`, is not defined during the gating process. 
+#' @export
 #' 
 #' @name vp_check_populations
 #' @rdname vp_check_populations

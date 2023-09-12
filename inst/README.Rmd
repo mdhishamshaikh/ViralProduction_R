@@ -8,13 +8,157 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
+  fig.path = "man/Figures/README-",
   out.width = "100%",
   cache = TRUE
 )
 ```
 
 # Example data
+## Origin
 
-`viralprod` package offers some example data in the `extdata` folder. In total, five csv files are available, one consists of the original abundances, the other four contain the count data from the flow cytometry step. Seawater samples were collected at incoming high tides at Marsdiep, the Netherlands. 
+The `viralprod` package provides example data located in the `extdata` folder. This data originates from seawater samples collected at Marsdiep, the Netherlands, during incoming high tides. We collected samples from seven different stations, but due to memory constraints of the R package, only data from two stations is included. Specifically, seawater samples from Station 2 were retrieved on August 6, 2020, and from Station 6 on September 3, 2020, both during incoming high tides.
+
+![General Map](man/Figures/README-map.png)
+![Satellite Map](man/Figures/README-map-satellite.png)
+
+The samples underwent a viral reduction assay, and we obtained viral and bacterial counts using a flow cytometer with the SYBR GREEN I dye. For Station 2 the measurement was conducted on November 3, 2020, and for Station 6, it took place on November 12, 2020. 
+
+Detailed information about the viral reduction assay and the construction of the count data with the flow cytometer can be found in the `package's vignette`.
+
+## Exploring the data
+
+Inside the `extdata` folder, a total of five CSV files can be found:
+
+* One of these files contains the original abundances.
+* The other four contain data from the flow cytometry step. All four contain the same information but differ in the gating process.
+
+The gating process allows users to choose which gates to draw and how many, introducing variability in data analysis. The different data sets are included to demonstrate that the package works independently of the gating process, showcasing its versatility and adaptability to user preferences.
+
+Now, let's explore the data files. Please note that we assume that the `viralprod` package is already installed. If not, see the `main README file`.
+
+Load the package:
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+library(viralprod)
+```
+
+List of the data files:
+
+```{r}
+list.files(path = system.file("extdata", package = "viralprod"), pattern = "\\.csv$", full.names = FALSE)
+```
+
+The `viralprod` package relies on **two** data files: 
+
+* Count data from the flow cytometer
+* Original abundance of seawater sample 
+
+Some small requirements on both are necessary to assure the working of the package. In the package, there are two functions which check if the input data frames have the correct structure by adding an S3 class to it if so. The functions inside the package will only work if the input data frames have this specific S3 class. 
+
+First, take a look at the original abundances file. This file contains the viral and bacterial counts of the original seawater sample. 
+
+```{r}
+NJ2020_original_abundances <- read.csv(system.file('extdata','NJ2020_original_abundances.csv', package = "viralprod"))
+NJ2020_original_abundances
+```
+
+```{r}
+str(NJ2020_original_abundances)
+```
+
+For the original abundance file, it is important that a data frame is constructed with at least the following three columns:
+
+* *Station_Number*: An integer value referring to the station where the seawater samples were taken from.
+* *Total_Bacteria*: Numeric values representing the abundance of total bacteria in the original seawater sample for each station.
+* *Total_Viruses*: Numeric values representing the abundance of total viruses in the original seawater sample for each station. 
+
+Below, an example on how to check your original abundance file:
+
+```{r}
+good_dataframe <- NJ2020_original_abundances
+str(good_dataframe)
+```
+
+```{r}
+df <- new_viralprod_class_2(good_dataframe)
+class(df)
+```
+
+```{r}
+bad_dataframe <- dplyr::mutate(dplyr::select(NJ2020_original_abundances, -'Station_Number'), Total_Bacteria = as.character(Total_Bacteria))
+str(bad_dataframe)
+```
+
+```{r, error=TRUE}
+df <- new_viralprod_class_2(bad_dataframe)
+class(bad_dataframe)
+```
+
+Similar checks can be performed for the other four count data files:
+
+```{r}
+NJ2020_all <- read.csv(system.file('extdata','NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+NJ2020_less <- read.csv(system.file('extdata','NJ2020_Station_2_and_6_less_populations.csv', package = "viralprod"))
+NJ2020_more <- read.csv(system.file('extdata','NJ2020_Station_2_and_6_more_populations.csv', package = "viralprod"))
+NJ2020_without_cViruses <- read.csv(system.file('extdata','NJ2020_Station_2_and_6_without_cViruses.csv', package = "viralprod"))
+
+head(NJ2020_all)
+```
+
+```{r}
+str(NJ2020_all)
+```
+
+For this data file, the following columns need to be presented within the data:
+
+* Character columns *Location* and *Sample_Type*: Referring to the sample location and sample type.
+* Integer columns *Station_Number*, *Depth* and *Replicate*: Representing the station number, sampling depth and replicate of the sample.
+* Numeric column *Timepoint*: Referring to the timepoint of the assay of subsampling.
+
+Additionally, based on the gating process, different numeric columns with each of the gated populations should also be presented. The `viralprod` package has a function that checks which populations need to be analyzed. The function returns a message saying which populations will be analyzed and a vector in the global environment with those columns. 
+
+**Important note**: Column names for the gated process should start with `c_` the total virus populations should be gated as `c_Viruses` and subpopulations of viruses should be gated as `c_V...`. 
+
+```{r, error=TRUE}
+vp_check_populations(NJ2020_all)
+vp_check_populations(NJ2020_less)
+vp_check_populations(NJ2020_more)
+vp_check_populations(NJ2020_without_cViruses)
+```
+
+Just like for the original abundance file, `viralprod` has a function that will add a S3 class to the count data frames if they fulfill all the requirements:
+
+```{r}
+good_dataframe <- NJ2020_all
+str(good_dataframe)
+```
+
+```{r}
+df <- new_viralprod_class(good_dataframe)
+class(df)
+```
+
+```{r}
+bad_dataframe <- dplyr::mutate(dplyr::select(NJ2020_all, -dplyr::all_of(c('Location', 'Replicate'))), Timepoint = as.character(Timepoint))
+str(bad_dataframe)
+```
+
+```{r, error=TRUE}
+df <- new_viralprod_class(bad_dataframe)
+class(bad_dataframe)
+```
+
+## Get started
+
+To get started with the `viralprod` package and explore your data, follow these steps:
+
+* **Installation**: Make sure you have the `viralprod` package installed. If you haven't already, you can find installation instructions in the `main README file`. 
+* **Data Files**: Familiarize yourself with the two types of data files required for analysis. Make sure your own data files fulfill the requirements.
+* **Package Usage**: You can use these data files in the `viralprod` package to calculate, analyze, and visualize viral production. More detailed explanations and examples are in the `package's vignette`.
+
+## References
+
+* Main README file: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg
+* Package's vignette: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes
 

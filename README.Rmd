@@ -8,7 +8,7 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
+  fig.path = "man/Figures/README-",
   out.width = "100%",
   cache = TRUE
 )
@@ -22,27 +22,126 @@ knitr::opts_chunk$set(
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-`viralprod` offers an automated pipeline for viral production data analyses in R. Researchers or marine scientists investigating marine viruses can use this automated pipeline to calculate, analyze and visualize viral production. Starting from a virus reduction assay, input count data is retrieved from the flow cytometer.
-
-`viralprod` contains a vignette with detailed information and explanation about the package and input data, which can be found here: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes
-
+`viralprod` is a powerful R package designed for automating viral production data analyses. It is a valuable tool for researchers and marine scientists investigating marine viruses, enabling them to calculate, analyze and visualize viral production efficiently. Detailed explanations and examples can be found in the `package's vignette`, instructions for structuring the input data are available in the `data README file` (see `References`).
 
 ## Installation
 
-You can install the development version of viralprod from [GitHub](https://github.com/) with:
+You can install the development version of `viralprod` from [GitHub](https://github.com/) using the following code:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("mdhishamshaikh/ViralProduction_R")
 ```
 
-Load the library with:
+To load the package, use the following command:
 
 ```{r, results='hide', warning=FALSE, message=FALSE}
 library(viralprod)
 ```
 
 ## Getting started
+
+The `viralprod` package simplifies the analysis of viral production data, making it suitable for researchers studying marine viruses. To utilize the package effectively, it's essential to complete prior steps, including sampling, filtration, virus reduction assays and flow cytometry processing. The package encompasses **three** fundamental steps, each contributing to a comprehensive analysis:
+
+* *Calculating Viral Production*: It provides two primary methods, `linear regression` and `VIPCAL`, for calculating viral production rates from viral counts. 
+* *Analyze Viral Production*: Various parameters for estimating virus-mediated microbial mortality can be determined based on the calculated viral production values.
+* *Visualize Viral Production*: Effective data visualization plays a pivotal role in data analysis. The package provides illustrative examples to  visualize your viral production data effectively.
+
+Begin by exploring the functions offered by the package. In addition to the pipe operator from the `dplyr` package, there is a range of functions at your disposal:
+
+```{r}
+ls("package:viralprod")
+```
+
+The `end_to_end_viral_production` function serves as a comprehensive wrapper, encompassing all three essential steps of the viral production analysis. Executing this singular function yields calculated viral production results, analyzed data, and visualizations. Below, we will demonstrate the functionality of the wrapper function using example data available in the `inst/extdata` folder. 
+
+Running the code provided below also serves as a convenient method to verify the correct installation of the package. Notably, the assessment of input data frames conforms to the package's requirements and is seamlessly integrated into the wrapper function throug the `new_viralprod_class` function. 
+
+For detailed information regarding the specific requirements for input data, please consult the `data README file`. Furthermore, comprehensive insights into the methodology, including individual function usage, will be expounded upon in the `package's vignette`.
+
+Load in example data:
+
+```{r}
+data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+head(data_NJ2020_all)
+```
+
+```{r}
+str(data_NJ2020_all)
+```
+
+```{r}
+NJ2020_original_abundances <- read.csv(system.file('extdata','NJ2020_original_abundances.csv', package = "viralprod"))
+NJ2020_original_abundances
+```
+
+```{r}
+str(NJ2020_original_abundances)
+```
+
+Now, let's take a look at all the different arguments of the wrapper function:
+
+```{r}
+args(end_to_end_viral_production)
+```
+
+In the initial stages of the wrapper function, both input data frames undergo a thorough examination to ensure they conform to the required format. Subsequently, we encounter the `methods` parameter, which governs the selection of algorithmic variants of `linear regression` and `VIPCAL` for the calculation of viral production rates. As a user, you have the flexibility to execute all available variants or opt for a subset, among the prominent methods are:
+
+* Method **4**: vp_linear_average_replicates_diff
+* Method **9**: vp_VIPCAL_average_replicates_diff
+* Method **12**: vp_VIPCAL_average_replicates_diff_LMER_SE
+
+Furthermore, the wrapper function offers a range of supplementary parameters. In the absence of user-defined values, default settings defined within the function, are automatically applied. Notably, the package incorporates a dedicated function designed to generate a comprehensive list of available variants for viral production calculation in the global environment. 
+
+```{r}
+vp_list_of_methods()
+names(list_of_methods)
+```
+
+For example, consider a closer examination of method **12**:
+
+```{r}
+list_of_methods[12]
+```
+
+Now, the wrapper function can be executed. Since this is just for illustration purposes, no output will be written, if write_output is set to TRUE, don't forget to define the output directory where you want to store your results. All output data frames and a list with the different visualizations will become available in the global environment. 
+
+```{r, warning=FALSE, message=FALSE}
+# All methods will be executed with default parameters
+end_to_end_viral_production(data = data_NJ2020_all,
+                            original_abundances = NJ2020_original_abundances,
+                            write_output = F)
+```
+
+
+```{r}
+head(vp_results_output_df)
+```
+
+```{r}
+str(analyzed_vp_results_df)
+```
+
+```{r}
+analyzed_vp_results_dictionary
+```
+
+```{r}
+names(plot_list)
+```
+
+```{r}
+grid::grid.draw(plot_list[[1]]$plot_object)
+```
+
+
+```{r}
+plot_list[[9]]$plot_object
+```
+
+```{r}
+plot_list[[11]]$plot_object
+```
 
 
 
@@ -51,5 +150,10 @@ library(viralprod)
 MIT. See `LICENSE.md`
 
 This software is developed for scientific, educational and research purposes. It is not meant to be used for legal or economical purposes.
+
+## References
+
+* Data README file: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/inst
+* Package's vignette: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes
 
 
