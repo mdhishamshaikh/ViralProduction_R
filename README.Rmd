@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/Figures/README-",
-  out.width = "100%",
+  fig.align = "center",
+  out.width = "75%",
   cache = TRUE
 )
 ```
@@ -22,7 +23,12 @@ knitr::opts_chunk$set(
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-`viralprod` is a powerful R package designed for automating viral production data analyses. It is a valuable tool for researchers and marine scientists investigating marine viruses, enabling them to calculate, analyze and visualize viral production efficiently. Detailed explanations and examples can be found in the `package's vignette`, instructions for structuring the input data are available in the `data README file` (see `References`).
+`viralprod` is a powerful R package designed for automating viral production data analyses. It is a valuable tool for researchers and marine scientists investigating marine viruses, enabling them to calculate, analyze and visualize viral production efficiently.
+
+You can find detailed information in the vignettes online:
+
+* [Input data for viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)
+* [Introduction to viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)
 
 ## Installation
 
@@ -45,9 +51,9 @@ The `viralprod` package simplifies the analysis of viral production data, making
 
 * *Calculating Viral Production*: It provides two primary methods, `linear regression` and `VIPCAL`, for calculating viral production rates from viral counts. 
 * *Analyze Viral Production*: Various parameters for estimating virus-mediated microbial mortality can be determined based on the calculated viral production values.
-* *Visualize Viral Production*: Effective data visualization plays a pivotal role in data analysis. The package provides illustrative examples to  visualize your viral production data effectively.
+* *Visualize Viral Production*: Effective data visualization plays a pivotal role in data analysis. The package provides illustrative examples to visualize your viral production data effectively.
 
-Begin by exploring the functions offered by the package. In addition to the pipe operator from the `dplyr` package, there is a range of functions at your disposal:
+Begin by exploring the available functions within the package. Alongside the pipe operator from the `dplyr` package, a variety of functions are at your disposal:
 
 ```{r}
 ls("package:viralprod")
@@ -55,9 +61,9 @@ ls("package:viralprod")
 
 The `end_to_end_viral_production` function serves as a comprehensive wrapper, encompassing all three essential steps of the viral production analysis. Executing this singular function yields calculated viral production results, analyzed data, and visualizations. Below, we will demonstrate the functionality of the wrapper function using example data available in the `inst/extdata` folder. 
 
-Running the code provided below also serves as a convenient method to verify the correct installation of the package. Notably, the assessment of input data frames conforms to the package's requirements and is seamlessly integrated into the wrapper function throug the `new_viralprod_class` function. 
+Running the code, provided below, also serves as a convenient method to verify the correct installation of the package. Note that the assessment of input data frames conforms to the package's requirements is seamlessly integrated into the wrapper function through the `new_viralprod_class` function. 
 
-For detailed information regarding the specific requirements for input data, please consult the `data README file`. Furthermore, comprehensive insights into the methodology, including individual function usage, will be expounded upon in the `package's vignette`.
+For detailed information regarding the specific requirements for input data, please consult the vignette: `Input data for viralprod`. Furthermore, comprehensive insights into the methodology, including individual function usage, will be expounded upon in `Introduction to viralprod`.
 
 Load in example data:
 
@@ -79,7 +85,9 @@ NJ2020_original_abundances
 str(NJ2020_original_abundances)
 ```
 
-Now, let's take a look at all the different arguments of the wrapper function:
+## Package's usage
+
+Before executing the comprehensive wrapper function, let's take a look at all the different arguments:
 
 ```{r}
 args(end_to_end_viral_production)
@@ -87,9 +95,9 @@ args(end_to_end_viral_production)
 
 In the initial stages of the wrapper function, both input data frames undergo a thorough examination to ensure they conform to the required format. Subsequently, we encounter the `methods` parameter, which governs the selection of algorithmic variants of `linear regression` and `VIPCAL` for the calculation of viral production rates. As a user, you have the flexibility to execute all available variants or opt for a subset, among the prominent methods are:
 
-* Method **4**: vp_linear_average_replicates_diff
-* Method **9**: vp_VIPCAL_average_replicates_diff
-* Method **12**: vp_VIPCAL_average_replicates_diff_LMER_SE
+* Method **4**: vp_linear_average_replicates_diff.
+* Method **9**: vp_VIPCAL_average_replicates_diff.
+* Method **12**: vp_VIPCAL_average_replicates_diff_LMER_SE.
 
 Furthermore, the wrapper function offers a range of supplementary parameters. In the absence of user-defined values, default settings defined within the function, are automatically applied. Notably, the package incorporates a dedicated function designed to generate a comprehensive list of available variants for viral production calculation in the global environment. 
 
@@ -98,13 +106,13 @@ vp_list_of_methods()
 names(list_of_methods)
 ```
 
-For example, consider a closer examination of method **12**:
+For example, consider a closer look at method **12**:
 
 ```{r}
 list_of_methods[12]
 ```
 
-Now, the wrapper function can be executed. Since this is just for illustration purposes, no output will be written, if write_output is set to TRUE, don't forget to define the output directory where you want to store your results. All output data frames and a list with the different visualizations will become available in the global environment. 
+Now, it's time to execute the wrapper function. Although the following demonstration uses example data, it's essential to note that executing this function can serve as a convenient method to verify the correct installation of the package. Since this is for illustration purposes, no output files will be written. If `write_output` is set to `TRUE`, ensure to specify the output directory where the results should be stored. All output data frames and a list containing various visualizations will become available in the global environment. 
 
 ```{r, warning=FALSE, message=FALSE}
 # All methods will be executed with default parameters
@@ -113,10 +121,24 @@ end_to_end_viral_production(data = data_NJ2020_all,
                             write_output = F)
 ```
 
+After running the wrapper function, check the global environment to access its output:
+
+```{r}
+ls()
+```
+
+The `calculation` step provides by default four data frames:
+
+* *vp_results_output_df* contains the viral production results for all samples.
+* *vp_results_output_T24_df* contains the viral production results for all samples at the end of the assay.
+* *vp_results_output_SR_df* contains the viral production results of the separate replicate treatment, no averaging over replicates.
+* *vp_results_output_BP_df* contains the viral production results for all samples with the bacterial endpoint taken into account. 
 
 ```{r}
 head(vp_results_output_df)
 ```
+
+The `analyze` step enhances the viral production results by adding various parameters to estimate virus-mediated microbial mortality. An additional data frame provides descriptions and units for each variable.
 
 ```{r}
 str(analyzed_vp_results_df)
@@ -126,34 +148,38 @@ str(analyzed_vp_results_df)
 analyzed_vp_results_dictionary
 ```
 
+The `visualize` step generates a list of plot objects. The package offers eight different ways to visualize the original viral count data, calculated viral production data, or analyzed viral production data.
+
 ```{r}
 names(plot_list)
 ```
+
+For instance, let's start with an overview of the count data of Station 2 for each sample type. The bacterial endpoint for this assay is highlighted in pink. It's worth noting that stopping the assay at this point is advisable to prevent an increase in collision rates in VP samples, which may result in higher-than-expected lytic viral production.
 
 ```{r}
 grid::grid.draw(plot_list[[1]]$plot_object)
 ```
 
+Additionally, the package provides multiple ways for calculating viral production. While `linear regression` uses the slope between the count data, `VIPCAL` looks at the average of increments to determine viral production. `VIPCAL-SE` takes it a step further by considering standard errors, ensuring that only true increments are used for calculation. As shown in the figures, `VIPCAL` may overestimate viral production, while `VIPCAL-SE` tends to be more conservative. 
+
+```{r}
+plot_list[[6]]$plot_object
+```
 
 ```{r}
 plot_list[[9]]$plot_object
 ```
 
+One of the analyzed variables considers the nutrient release from bacteria and viruses, mapping the total nutrient release in the sample at the end of the assay. 
+
 ```{r}
 plot_list[[11]]$plot_object
 ```
 
-
+Now that you have explored the available functions and the wrapper function, you are ready to harness the full potential of the `viralprod` package for your own viral production data analysis. A more detailed and comprehensive tutorial on the package's functionality and usage, can be found in the `Introduction to viralprod` vignette. This vignette provides in-depth insights into various underlying methods and features of the package, enabling you to leverage the package's capabilities effectively.  
 
 ## License
 
 MIT. See `LICENSE.md`
 
 This software is developed for scientific, educational and research purposes. It is not meant to be used for legal or economical purposes.
-
-## References
-
-* Data README file: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/inst
-* Package's vignette: https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes
-
-

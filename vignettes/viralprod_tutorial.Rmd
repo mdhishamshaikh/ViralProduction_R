@@ -2,7 +2,7 @@
 title: "Introduction to viralprod"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{viralprod tutorial}
+  %\VignetteIndexEntry{Introduction to viralprod}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,12 +14,23 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(viralprod)
-```
+The `viralprod` package serves as an automated pipeline for comprehensive viral production data analysis. This versatile tool streamlines the entire process into three key steps: 
+
+* *Calculating Viral Production*: Viral production is calculated by two primary methods: `linear regression` and `VIPCAL`.
+* *Analyze Viral Production*: Determination of various parameters for estimating virus-mediated microbial mortality.
+* *Visualize Viral Production*: Illustrative examples to visualize the original viral count data, calculated viral production data, or analyzed viral production data.
+
+Before diving into the package and to ensure the correct input data for its operations, several preliminary steps are crucial. These preliminary measures encompass activities such as sampling, filtration, virus reduction assays, and flow cytometry analysis. This vignette offers invaluable insights and guidance to gain a deeper understanding of these critical preparatory procedures and to explore a comprehensive guide on effectively utilizing the package's functions.
+
+## Preliminary steps
+
+In the following sections, we will delve into each of these preliminary steps in greater detail to provide a deeper insight into their significance and proper execution.
+
+### Sampling and filtration
 
 
-# Viral Reduction Assay
+
+### Viral Reduction Assay
 
 After collecting the seawater samples, the viral reduction assay can start. First of all, the seawater undergoes tangential flow filtration to remove large bacteria and particles from the seawater. A first filtration, with a 30 kDa PES filter, will lead to virus-free seawater that is used in the second filtration to create 0.22 micrometer filtrate and virus-reduced seawater. The 0.22-micrometer filter acts as a barrier that allows smaller entities, like viruses and small bacteria, pass through while retaining larger contaminants. This step is crucial, since it helps to isolate and concentrate our samples. 
 
@@ -27,6 +38,34 @@ Next, three types of samples are retrieved that will be incubated in the dark fo
 
 The three sample types are incubated in the dark for 24h, subsamples are taken at different timepoints. The subsamples will represent snapshots of the viral and bacterial populations at specific time intervals of the assay. Analyzing by using a flow cytometer, this technique will rapidly sort the individual particles based on their characteristics: side scatter and green fluorescence. As output, graphs of green fluorescence vs the sidescatter are produced. The different populations can be distinguished based on their characteristics with a process called `gating`. In the gating process, executed by the user, the so called gates are drawn which represent a certain viral or bacterial population. Based on the surface of each of the gates, a bacterial or viral count can be retrieved. 
 
-![Gating process](man/Figures/README-gating.png)
 
 
+
+### Flow cytometry analysis
+
+```{r, fig.align = "center", out.width = "75%", fig.cap="Figure 1: Output file of flow cytometry with gating process."}
+knitr::include_graphics("images/gating.png")
+```
+
+
+## Package's usage
+
+In the subsequent sections of this vignette, we will guide you through the step-by-step functionality of the `viralprod` package. Each section will provide detailed insights into the package's operations, ensuring that you can make the most of its capabilities with confidence. 
+
+Load the package:
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+library(viralprod)
+```
+
+### Calculate Viral Production
+### Analyze Viral Production
+### Visualize Viral Production
+
+
+
+
+## References
+
+* [Main README file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)
+* [Input data for viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)

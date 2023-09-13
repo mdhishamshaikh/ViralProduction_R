@@ -67,7 +67,7 @@ calculate_viral_production <- function(x, ...){
 #' @export
 #' @rdname calculate_viral_production
 calculate_viral_production.default <- function(x, ...){
-  message('The input data frame has not the right format, please adjust before moving on! You can check your data frame with `new_viralprod_class()`.')
+  message('The input data frame has not the correct S3 class, please adjust before moving on! You can check your data frame with `new_viralprod_class()`.')
 }
 
 

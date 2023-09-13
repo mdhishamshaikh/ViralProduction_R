@@ -1,5 +1,5 @@
 Package: viralprod
-Title: Automated pipeline for viral production data analyses
+Title: Automated pipeline for comprehensive viral production data analysis
 Version: 0.0.0.9000
 Authors@R: c(
   person("Hisham", "Shaikh", ,"hisham.shaikh@vliz.be", role = c("aut", "cph"),
@@ -9,7 +9,7 @@ Authors@R: c(
   person("Jonas", "Van den Bremt", ,"jonas.vandenbremt@gmail.com", role = "ctb",
            comment = c(github = "jonasvdnbrem"))
   )
-Description: Based on virus reduction assay, calculating, analyzing and visualizing viral production.
+Description: Based on virus reduction assay, viralprod provides calculation, analyzing and visualization of viral production data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
