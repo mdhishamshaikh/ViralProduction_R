@@ -29,8 +29,8 @@
 #' @return Depending on setting of parameters, different data frames with the viral production calculation will be available in the global environment.
 #' @export
 #' 
-#' @name calculate_viral_production
-#' @rdname calculate_viral_production
+#' @name vp_calculate
+#' @rdname vp_calculate
 #'
 #' @examples \dontrun{
 #' # Setup
@@ -39,41 +39,41 @@
 #' 
 #' # Perform
 #' # Add S3 class
-#' x <- new_viralprod_class(data_NJ2020_all)
+#' x <- vp_class_count_data(data_NJ2020_all)
 #' 
 #' # Default method
-#' calculate_viral_production(x = data_NJ2020_all, write_output = F)
+#' vp_calculate(x = data_NJ2020_all, write_output = F)
 #' 
 #' # S3 class, viralprod, method
 #' # Write output files
-#' calculate_viral_production(x, 
+#' vp_calculate(x, 
 #' output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
 #' “/NJ2020_vp_results”))
 #' 
 #' # No output files
-#' calculate_viral_production(x, write_output = F)
+#' vp_calculate(x, write_output = F)
 #' 
 #' # No bacterial endpoint and separate replicate treatment results
-#' calculate_viral_production(x, write_output = F, SR_calc = F, BP_endpoint = F)
+#' vp_calculate(x, write_output = F, SR_calc = F, BP_endpoint = F)
 #' 
 #' # Sub selection of the methods
-#' calculate_viral_production(x, write_output = F, methods = c(2,3,8,12))
+#' vp_calculate(x, write_output = F, methods = c(2,3,8,12))
 #' }
-calculate_viral_production <- function(x, ...){
-  UseMethod("calculate_viral_production")
+vp_calculate <- function(x, ...){
+  UseMethod("vp_calculate")
 }
 
 
 #' @export
-#' @rdname calculate_viral_production
-calculate_viral_production.default <- function(x, ...){
-  message('The input data frame has not the correct S3 class, please adjust before moving on! You can check your data frame with `new_viralprod_class()`.')
+#' @rdname vp_calculate
+vp_calculate.default <- function(x, ...){
+  stop('The input data frame has not the correct S3 class! You can check your data frame with `vp_class_count_data()`.')
 }
 
 
 #' @export
-#' @rdname calculate_viral_production
-calculate_viral_production.viralprod <- function(x, ...,
+#' @rdname vp_calculate
+vp_calculate.viralprod <- function(x, ...,
                                                  methods = c(1:12),
                                                  SR_calc = TRUE,
                                                  BP_endpoint = TRUE,

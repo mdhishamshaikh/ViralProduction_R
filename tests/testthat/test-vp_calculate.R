@@ -23,37 +23,37 @@ expect_output_vp_results_SR <- function(x){
 test_that("Wrapper function viral production calculation works", {
   data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', 
                                           package = "viralprod"))
-  x <- new_viralprod_class(data_NJ2020_all)
+  x <- vp_class_count_data(data_NJ2020_all)
   expect_data_input(x)
   
-  calculate_viral_production(x = data_NJ2020_all, write_output = F) %>% expect_message()
+  vp_calculate(x = data_NJ2020_all, write_output = F) %>% expect_error()
   
-  calculate_viral_production(x, write_output = F, SR_calc = F, BP_endpoint = F)
+  vp_calculate(x, write_output = F, SR_calc = F, BP_endpoint = F)
   expect_output_vp_results(.GlobalEnv$vp_results_output_df)
   
   data_NJ2020_less <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_less_populations.csv', 
                                            package = "viralprod"))
-  x <- new_viralprod_class(data_NJ2020_less)
+  x <- vp_class_count_data(data_NJ2020_less)
   expect_data_input(x)
   
-  calculate_viral_production(x, write_output = F)
+  vp_calculate(x, write_output = F)
   expect_output_vp_results(.GlobalEnv$vp_results_output_df)
   expect_output_vp_results(.GlobalEnv$vp_results_output_T24_df)
   expect_output_vp_results_SR(.GlobalEnv$vp_results_output_SR_df)
   expect_output_vp_results(.GlobalEnv$vp_results_output_BP_df)
   
-  calculate_viral_production(x, write_output = T, output_dir = '') %>% expect_error()
+  vp_calculate(x, write_output = T, output_dir = '') %>% expect_error()
   
   data_NJ2020_more <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_more_populations.csv', 
                                            package = "viralprod"))
-  x <- new_viralprod_class(data_NJ2020_more)
+  x <- vp_class_count_data(data_NJ2020_more)
   expect_data_input(x)
   
-  calculate_viral_production(x, write_output = F, SR_calc = F, BP_endpoint = F, methods = c(2,6,12))
+  vp_calculate(x, write_output = F, SR_calc = F, BP_endpoint = F, methods = c(2,6,12))
   expect_output_vp_results(.GlobalEnv$vp_results_output_df)
   
   data_NJ2020_without_cViruses <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_without_cViruses.csv', 
                                                        package = "viralprod"))
   
-  new_viralprod_class(data_NJ2020_without_cViruses) %>% expect_error()
+  vp_class_count_data(data_NJ2020_without_cViruses) %>% expect_error()
 })

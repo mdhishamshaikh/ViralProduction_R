@@ -8,15 +8,13 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/Figures/README-",
-  out.width = "100%",
   cache = TRUE
 )
 ```
 
 ## Example data
 
-The `extdata` folder contains illustrative data sets for the `viralprod` package. For a deeper understanding on the data's source and how to explore it, consult the package's vignette: `Input data for viralprod`. To initiate your journey with the package, we recommend the `main README file`. For a comprehensive tutorial on the package's functionality and usage, an extensive guide can be found in the vignette: `Introduction to viralprod`.
+The `extdata` folder contains illustrative data sets for the `viralprod` package. For a deeper understanding on the data source and how to explore it, consult the package's vignette: `Input data for viralprod`. To initiate your journey with the package, we recommend the `main README file`. For a comprehensive tutorial on the package's functionality and usage, an extensive guide can be found in the vignette: `Introduction to viralprod`.
 
 You can find detailed information in the vignettes online:
 

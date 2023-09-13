@@ -7,9 +7,9 @@
 #' The functions to calculate, analyze and visualize the viral production from the viral reduction assay will only work on these specific
 #' S3 classes, otherwise an error will be thrown. 
 #' 
-#' `new_viralprod_class` checks the output data frame of the flow cytometry step. If the requirements are met, `viralprod` class is added.
+#' `vp_class_count_data` checks the output data frame of the flow cytometry step. If the requirements are met, `viralprod` class is added.
 #' 
-#' `new_viralprod_class_2` checks the original abundances data frame. If the requirements are met, `viralprod_analyze` class is added. 
+#' `vp_class_ori_abu` checks the original abundances data frame. If the requirements are met, `viralprod_analyze` class is added. 
 #' 
 #' @param data Data frame with the output of the flow cytometry.
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample.
@@ -17,8 +17,8 @@
 #' @return If data frame meets the requirements, a new class is added. Otherwise, an error will be thrown.
 #' @export
 #' 
-#' @name S3_class_viral_production
-#' @rdname S3_class_viral_production
+#' @name vp_S3_class
+#' @rdname vp_S3_class
 #'
 #' @examples \dontrun{
 #' # Setup
@@ -29,11 +29,11 @@
 #' 'NJ2020_original_abundances.csv', package = "viralprod"))
 #' 
 #' # Perform
-#' data_S3_class <- new_viralprod_class(data_NJ2020_all)
+#' data_S3_class <- vp_class_count_data(data_NJ2020_all)
 #' 
-#' original_abundances_S3_class <- new_viralprod_class_2(original_abunances_NJ2020)
+#' original_abundances_S3_class <- vp_class_ori_abu(original_abunances_NJ2020)
 #' }
-new_viralprod_class <- function(data = data.frame()){
+vp_class_count_data <- function(data = data.frame()){
   ## Assertions on the class
   # 1. Input data needs to be data frame
   checkmate::assert_data_frame(data)
@@ -58,8 +58,8 @@ new_viralprod_class <- function(data = data.frame()){
 
 
 #' @export
-#' @rdname S3_class_viral_production
-new_viralprod_class_2 <- function(original_abundances = data.frame()){
+#' @rdname vp_S3_class
+vp_class_ori_abu <- function(original_abundances = data.frame()){
   ## Assertions on the class
   # 1. Input data needs to be data frame
   checkmate::assert_data_frame(original_abundances)

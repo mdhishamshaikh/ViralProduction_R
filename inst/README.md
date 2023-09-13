@@ -4,7 +4,7 @@
 ## Example data
 
 The `extdata` folder contains illustrative data sets for the `viralprod`
-package. For a deeper understanding on the data’s source and how to
+package. For a deeper understanding on the data source and how to
 explore it, consult the package’s vignette: `Input data for viralprod`.
 To initiate your journey with the package, we recommend the
 `main README file`. For a comprehensive tutorial on the package’s

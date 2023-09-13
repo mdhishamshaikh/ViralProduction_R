@@ -23,8 +23,7 @@ knitr::include_graphics(c("images/data_map.png",
                           "images/data_map_satellite.png"))
 ```
 
-
-The samples underwent a viral reduction assay, viral and bacterial counts were obtained using a flow cytometer with the SYBR GREEN I dye. For Station 2 the measurement was conducted on November 3, 2020, and for Station 6, it took place on November 12, 2020. 
+The samples underwent a viral reduction assay, and viral and bacterial counts were obtained using a flow cytometer with the SYBR GREEN I dye. For Station 2 the measurement was conducted on November 3, 2020, and for Station 6, it took place on November 12, 2020. 
 
 Detailed information about the viral reduction assay and the construction of the count data with the flow cytometer can be found in the package's vignette: `Introduction to viralprod`.
 
@@ -83,7 +82,7 @@ str(good_dataframe)
 ```
 
 ```{r}
-df <- new_viralprod_class_2(good_dataframe)
+df <- vp_class_ori_abu(good_dataframe)
 class(df)
 ```
 
@@ -93,7 +92,7 @@ str(bad_dataframe)
 ```
 
 ```{r, error=TRUE}
-df <- new_viralprod_class_2(bad_dataframe)
+df <- vp_class_ori_abu(bad_dataframe)
 class(bad_dataframe)
 ```
 
@@ -137,7 +136,7 @@ str(good_dataframe)
 ```
 
 ```{r}
-df <- new_viralprod_class(good_dataframe)
+df <- vp_class_count_data(good_dataframe)
 class(df)
 ```
 
@@ -147,7 +146,7 @@ str(bad_dataframe)
 ```
 
 ```{r, error=TRUE}
-df <- new_viralprod_class(bad_dataframe)
+df <- vp_class_count_data(bad_dataframe)
 class(bad_dataframe)
 ```
 

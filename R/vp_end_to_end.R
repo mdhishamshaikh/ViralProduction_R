@@ -8,9 +8,9 @@
 #' 
 #' More details about the previous performed steps can be found on:
 #' 
-#' 1. Calculate viral production step: [viralprod::calculate_viral_production]
-#' 2. Analyze viral production step: [viralprod::analyze_viral_production]
-#' 3. Visualize viral production data: [viralprod::visualize_viral_production] 
+#' 1. Calculate viral production step: [viralprod::vp_calculate]
+#' 2. Analyze viral production step: [viralprod::vp_analyze]
+#' 3. Visualize viral production data: [viralprod::vp_visualize] 
 #' 
 #' @param data Data frame with the output of the flow cytometry.
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample.
@@ -30,8 +30,8 @@
 #' @return All outputs will be saved in the folder specified by `output_dir`.
 #' @export
 #' 
-#' @name end_to_end_viral_production
-#' @rdname end_to_end_viral_production
+#' @name vp_end_to_end
+#' @rdname vp_end_to_end
 #'
 #' @examples \dontrun{
 #' # Setup
@@ -42,13 +42,13 @@
 #' 'NJ2020_original_abundances.csv', package = "viralprod"))
 #' 
 #' # Perform
-#' end_to_end_viral_production <- function(
+#' vp_end_to_end <- function(
 #' data_NJ2020_all,
 #' original_abundances_NJ2020,
 #' output_dir = paste0(system.file(“extdata”, package = “viralprod”), 
 #' “/vp_results_NJ2020_all”))
 #' }
-end_to_end_viral_production <- function(data = data.frame(),
+vp_end_to_end <- function(data = data.frame(),
                                         original_abundances = data.frame(),
                                         methods = c(1:12),
                                         SR_calc = TRUE,
@@ -60,11 +60,11 @@ end_to_end_viral_production <- function(data = data.frame(),
                                         write_output = TRUE,
                                         output_dir = ''){
   ## 1. Check the input data frames
-  data_viralprod <- new_viralprod_class(data)
-  original_abundances_viralprod <- new_viralprod_class_2(original_abundances)
+  data_viralprod <- vp_class_count_data(data)
+  original_abundances_viralprod <- vp_class_ori_abu(original_abundances)
   
   ## 2. Calculate viral production
-  calculate_viral_production(x = data_viralprod,
+  vp_calculate(x = data_viralprod,
                              methods = methods,
                              SR_calc = SR_calc,
                              BP_endpoint = BP_endpoint,
@@ -72,7 +72,7 @@ end_to_end_viral_production <- function(data = data.frame(),
                              output_dir = output_dir)
   
   ## 2. Analyze viral production
-  analyze_viral_production(x = data_viralprod,
+  vp_analyze(x = data_viralprod,
                            vp_results = .GlobalEnv$vp_results_output_df,
                            original_abundances = original_abundances_viralprod,
                            burst_sizes = burst_sizes,
@@ -83,7 +83,7 @@ end_to_end_viral_production <- function(data = data.frame(),
                            output_dir = output_dir)
   
   ## 3. Visualize viral production
-  visualize_viral_production(x = data_viralprod,
+  vp_visualize(x = data_viralprod,
                              vp_results = .GlobalEnv$vp_results_output_df,
                              original_abundances = original_abundances_viralprod,
                              burst_sizes = burst_sizes,

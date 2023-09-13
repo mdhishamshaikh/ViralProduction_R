@@ -43,9 +43,9 @@ library(viralprod)
 The `viralprod` package simplifies the analysis of viral production
 data, making it suitable for researchers studying marine viruses. To
 utilize the package effectively, it’s essential to complete prior steps,
-including sampling, filtration, virus reduction assays and flow
-cytometry processing. The package encompasses **three** fundamental
-steps, each contributing to a comprehensive analysis:
+including sampling, filtration, virus reduction assay and flow cytometry
+processing. The package encompasses **three** fundamental steps, each
+contributing to a comprehensive analysis:
 
 - *Calculating Viral Production*: It provides two primary methods,
   `linear regression` and `VIPCAL`, for calculating viral production
@@ -63,25 +63,26 @@ at your disposal:
 
 ``` r
 ls("package:viralprod")
-#> [1] "%>%"                         "analyze_viral_production"   
-#> [3] "calculate_viral_production"  "end_to_end_viral_production"
-#> [5] "new_viralprod_class"         "new_viralprod_class_2"      
-#> [7] "visualize_viral_production"  "vp_check_populations"       
-#> [9] "vp_list_of_methods"
+#> [1] "%>%"                  "vp_analyze"           "vp_calculate"        
+#> [4] "vp_check_populations" "vp_class_count_data"  "vp_class_ori_abu"    
+#> [7] "vp_end_to_end"        "vp_list_of_methods"   "vp_visualize"
 ```
 
-The `end_to_end_viral_production` function serves as a comprehensive
-wrapper, encompassing all three essential steps of the viral production
-analysis. Executing this singular function yields calculated viral
-production results, analyzed data, and visualizations. Below, we will
-demonstrate the functionality of the wrapper function using example data
-available in the `inst/extdata` folder.
+Within the package, each of the three primary steps has its dedicated
+function. Additionally, a comprehensive wrapper function exists,
+`vp_end_to_end`, which integrates all three essential steps of viral
+production analysis into a single execution. Executing this singular
+function yields calculated viral production results, analyzed data, and
+visualizations. Below, we will demonstrate the functionality of the
+wrapper function using example data available in the `inst/extdata`
+folder, use of the separate main functions is integrated in the
+`Introduction to viralprod` vignette.
 
 Running the code, provided below, also serves as a convenient method to
 verify the correct installation of the package. Note that the assessment
 of input data frames conforms to the package’s requirements is
 seamlessly integrated into the wrapper function through the
-`new_viralprod_class` function.
+`vp_class_count data` function.
 
 For detailed information regarding the specific requirements for input
 data, please consult the vignette: `Input data for viralprod`.
@@ -216,7 +217,7 @@ Before executing the comprehensive wrapper function, let’s take a look
 at all the different arguments:
 
 ``` r
-args(end_to_end_viral_production)
+args(vp_end_to_end)
 #> function (data = data.frame(), original_abundances = data.frame(), 
 #>     methods = c(1:12), SR_calc = TRUE, BP_endpoint = TRUE, burst_sizes = c(), 
 #>     bacterial_secondary_production = NULL, nutrient_content_bacteria = list(), 
@@ -279,7 +280,7 @@ list_of_methods[12]
 #>             dplyr::everything())
 #>     return(viral_production_VIPCAL)
 #> }
-#> <bytecode: 0x000001c0fae82618>
+#> <bytecode: 0x000001f0147a73a0>
 #> <environment: namespace:viralprod>
 ```
 
@@ -294,9 +295,9 @@ become available in the global environment.
 
 ``` r
 # All methods will be executed with default parameters
-end_to_end_viral_production(data = data_NJ2020_all,
-                            original_abundances = NJ2020_original_abundances,
-                            write_output = F)
+vp_end_to_end(data = data_NJ2020_all,
+              original_abundances = NJ2020_original_abundances,
+              write_output = F)
 ```
 
 After running the wrapper function, check the global environment to
