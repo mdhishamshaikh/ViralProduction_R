@@ -14,58 +14,189 @@ knitr::opts_chunk$set(
 )
 ```
 
-The `viralprod` package serves as an automated pipeline for comprehensive viral production data analysis. This versatile tool streamlines the entire process into three key steps: 
+The `viralprod` package operates as an automated pipeline for comprehensive viral production data analysis. This versatile tool streamlines the entire process into three key steps: 
 
 * *Calculating Viral Production*: Viral production is calculated by two primary methods: `linear regression` and `VIPCAL`.
 * *Analyze Viral Production*: Determination of various parameters for estimating virus-mediated microbial mortality.
 * *Visualize Viral Production*: Illustrative examples to visualize the original viral count data, calculated viral production data, or analyzed viral production data.
 
-Before diving into the package and to ensure the correct input data for its operations, several preliminary steps are crucial. These preliminary measures encompass activities such as sampling, filtration, virus reduction assays, and flow cytometry analysis. This vignette offers invaluable insights and guidance to gain a deeper understanding of these critical preparatory procedures and to explore a comprehensive guide on effectively utilizing the package's functions.
+Before delving into the package, it is imperative to conduct a series of essential preliminary steps. These preparatory measures encompasses wet-lab procedures, including sampling, virus reduction assay that includes filtration and incubation stages, and the subsequent flow cytometry analysis. This vignette offers invaluable insights and guidance to gain a deeper understanding of these critical preparatory procedures as well as a comprehensive guide on effectively utilizing the package's functions.
 
 ## Preliminary steps
 
-In the following sections, we will delve into each of these preliminary steps in greater detail to provide a deeper insight into their significance and proper execution.
-
-### Sampling and filtration
-
-
+In the following sections, we will embark on an in-depth exploration of each of these preliminary stages to provide a more profound understanding of their significance and optimal execution. These steps, integral to the wet-lab domain, request careful performance as they substantially can influence the quality of subsequent calculations and analyses.
 
 ### Viral Reduction Assay
 
-After collecting the seawater samples, the viral reduction assay can start. First of all, the seawater undergoes tangential flow filtration to remove large bacteria and particles from the seawater. A first filtration, with a 30 kDa PES filter, will lead to virus-free seawater that is used in the second filtration to create 0.22 micrometer filtrate and virus-reduced seawater. The 0.22-micrometer filter acts as a barrier that allows smaller entities, like viruses and small bacteria, pass through while retaining larger contaminants. This step is crucial, since it helps to isolate and concentrate our samples. 
+The primary objective of this package is the precise estimation of viral production within natural aquatic environments. Marine viruses represent a prolific component of the marine ecosystem, with their interactions they can potentially deploy effects on phyto- and bacterioplankton populations, thereby influencing its composition and the microbial biomass release into the aquatic milieu. Viral production, in this context, is defined as the quantity of viruses generated within a specified timeframe and volume. 
 
-Next, three types of samples are retrieved that will be incubated in the dark for 24h. 0.22 samples from the 0.22 micrometer filtrate are the control samples since they should contain only viruses and no bacteria. On the other hand, the virus-reduced seawater should ideally contain only bacteria, but they consist of both viruses and bacteria (T0 concentrate). From this virus-reduced seawater, VP and VPC samples are collected. VPC samples are treated with an antibiotic, `Mitomycin-C`, whereas VP samples are not since bacteriophages (viruses) can undergo two different life cycles when infecting sea bacteria. VP samples will represent the lytic viral production where a bacteriophage infects a bacterial cell, replicates, produces new virions (phage particles) until the bacterial cell lyses and new bacterial cells can be infected by the virions. VPC samples will represent the lytic and lysogenic viral production. In the lysogenic cycle, the bacteriophage will integrate its genetic material into the bacterial host chromosome, instead of replicating and causing cell lysis, bacterial cell continues to grow and viral DNA is replicated with it. Now an induction is needed to cause cell lysis and in normal conditions the lysogenic viral production won't be measurable. Treatment with Mitomycin-C will inhibit DNA synthesis in the bacteria and lysogenic bacteriophages will be forced to go into the lytic cycle, measurement will be possible. 
+Upon the collection of seawater samples, the viral reduction assay starts by employing a `tangential flow diafiltration (TFD)` dilution method. TFD is the preferred method over conventional `vacuum diafiltration` methodologies due to its enhanced bacterial recovery and  viral dilution capabilities. Nevertheless, both methods share the advantage of enabling direct observation of viral production with use of only a single correction factor being the bacterial loss from the original sample compared to the concentrate following filtration (Winget et al., 2005).
 
-The three sample types are incubated in the dark for 24h, subsamples are taken at different timepoints. The subsamples will represent snapshots of the viral and bacterial populations at specific time intervals of the assay. Analyzing by using a flow cytometer, this technique will rapidly sort the individual particles based on their characteristics: side scatter and green fluorescence. As output, graphs of green fluorescence vs the sidescatter are produced. The different populations can be distinguished based on their characteristics with a process called `gating`. In the gating process, executed by the user, the so called gates are drawn which represent a certain viral or bacterial population. Based on the surface of each of the gates, a bacterial or viral count can be retrieved. 
+In practical terms, the filtration procedure entails subjecting the original seawater samples to two consecutive TFD filtrations (Figure 1: Step 1 & 2). A 30 kDA PES filter is initially employed to obtain what is referred to as `virus-free seawater`. This resulting filtrate serves as the flushing volume for the second filtration. This second filtration employs a 0.22 $\mu$m PES filter, wherein back pressure within the filter cartridge propels water and particles smaller than 0.22 $\mu$m (such as viruses) through the filter, yielding in `0.22 $\mu$m filtrate`. The residual retentate is reintroduced into the sample container and is further diluted with the virus-free water obtained from the initial filtration step, ultimately resulting in `virus-reduced seawater` called the T0_concentrate (Winget et al., 2005).
 
 
+```{r, echo=FALSE, fig.align = "center", out.width = "75%", fig.cap="Figure 1: Overview Viral Reduction Assay."}
+knitr::include_graphics("images/Viral_Reduction_Assay.png")
+```
 
+Following this, we move on to the incubation phase for our three distinct sample types. From the 0.22 $\mu$m filtrate, `0.22 control` samples are extracted, while both `VP` and `VPC` samples originate from the T0_concentrate. A total of three replicates is taken for each of these sample types. 
+
+Within the context of marine virology, viruses that infect bacteria are known as `phages`, constituting one of the most prevalent biological entities in the ocean. Phages exhibit two distinct life cycles:`lytic` and `lysogenic viral production`. In the lytic cycle, viral replication initiates immediately upon infection, leading to the production of phages and lysis of the bacterial cell. In contrast, the lysogenic cycle involves the integration of the phage's genetic material into the bacterial genome, resulting in potential alterations to the host genotype or the acquisition of resistance to other viral infections. Phages in lysogeny can transition into the lytic pathway spontaneously or in response to physical or chemical factors (Payet and Suttle, 2013). 
+
+Returning to our samples, the VP samples undergo treatment without antibiotics. Consequently, only lytic viral production is measured, as viruses in lysogeny remain within the bacterial cell. In the case of VPC samples, treatment with the antibiotic `Mitomycin-C` is administered. Mitomycin-C selectively inhibits DNA synthesis in the bacterial cell, triggering phage production and a transition from the lysogenic to the lytic response. The antibiotic serves as an inducer for lysogenic bacteria (Levine, 1961). Therefore, in VPC samples, both lytic and lysogenic viral production will be measured.
+
+In summary, three replicates for each of the three sample types is prepared. The 0.22 samples serve as our control group, consisting solely of viruses as seen in the filtration step. From the virus-reduced sea water, VP and VPC samples are obtained, each subjected to a different treatment enabling the measurement of lytic and lytic-lysogenic viral production. All sample replicates are incubated in darkness for 24 hours, with subsamples collected at various time intervals during the assay (Figure 1: Step 3 & 4).
 
 ### Flow cytometry analysis
 
-```{r, fig.align = "center", out.width = "75%", fig.cap="Figure 1: Output file of flow cytometry with gating process."}
+Flow cytometry serves as the analytical method for evaluating the viral reduction assay (Figure 1: Step 5 & 6). This technique combines rapid data acquisition with multiparamteric analysis of individual cells. In the context of this assay, flow cytometry is employed to detect and quantify both marine viruses and bacteria. Green fluorescense, facilitated by a `SYBR Green I` probe, is utilized to distinguish between cells (Brussaard et al., 2001). Figure 2 displays an exemplary output file (.fcs) generated by the flow cytomer, from which viral and bacterial counts can be derived.
+
+```{r, echo=FALSE, fig.align = "center", out.width = "75%", fig.cap="Figure 2: Output file of flow cytometry with gating process."}
 knitr::include_graphics("images/gating.png")
 ```
 
+The flow cytometer generates a plot of green fluorescence as a function of the side scatter. Subsequently, the retrieval of viral and bacterial counts entails a process referred to as `gating`. This user-performed process involves outlining specific viral or bacterial populations, often represented by distinct gates (indicated by black, blue, and red polygons). Based on the levels of green fluorescence and side scatter, the user defines these gates or populations. Depending on the area they encompass, count values are obtained.
+
+Executing this procedure for all output files generated by the flow cytometer results in a data file containing counts for each population at every timepoint of subsampling during the assay. This specific type of data file serves as input for the package, facilitating the calculation, analysis, and visualization of viral production.
 
 ## Package's usage
 
-In the subsequent sections of this vignette, we will guide you through the step-by-step functionality of the `viralprod` package. Each section will provide detailed insights into the package's operations, ensuring that you can make the most of its capabilities with confidence. 
+In the subsequent sections of this vignette, we will guide you through the step-by-step functionality of the `viralprod` package. Each section will provide detailed insights into the package's operations, ensuring that you can make the most of its capabilities with confidence. For instructions on package installation, please consult the `main README file`.
 
-Load the package:
+To begin, load the package:
 
 ```{r, results='hide', warning=FALSE, message=FALSE}
 library(viralprod)
 ```
 
+Previously, we explained the construction of the input data files, upon which this package relies. Given that the gating process is user-driven, you have the liberty to determine which gates to employ and how many to define. In Figure 2, a total of 7 gates are identified to the following populations: 
+
+* *Bacteria* and *Viruses*: Represented by black polygons denoting the total bacterial and virus population.
+* *HNA_Bacteria* and *LNA_Bacteria*: Indicated by red rectangles symbolizing subpopulations of the bacterial population.
+* *V1*, *V2* and *V3*: Illustrated with blue rectangles characterizing subpopulations of the virus population.
+
+The package foresees several example datasets, each with their unique set of gates. In this illustration, we will work with a dataset featuring just two gates: the total bacterial and virus population. This will showcase the `viralprod` package's flexibility in the gating process and its seamless functionality. We will load and explore this dataset while also verifying its compliance with the correct format, using the package-specific S3 class. For a detailed information around the structure of the input data, turn to the `Input data for viralprod` vignette. 
+
+Two input data files are required: count data from flow cytometer, the original abundances of seawater sample:
+
+```{r}
+NJ2020_original_abundances <- read.csv(system.file('extdata','NJ2020_original_abundances.csv', package = "viralprod"))
+str(NJ2020_original_abundances)
+```
+
+```{r}
+data_NJ2020 <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_less_populations.csv', package = "viralprod"))
+str(data_NJ2020)
+```
+
+As seen, the gating process defines just two gates, `c_Bacteria` and `c_Viruses`, signifying the total bacterial and virus population, respectively. You can confirm this using the package function `vp_check_populations`. Now, let's work out whether both data frames adhere to the correct format, utilizing the relevant package functions. It's important to note that while the `vp_end_to_end` function integrates all package functionalities, we will use the individual functions here. Thus, the addition of the specific S3 class using `vp_class_` functions should be executed first.
+
+```{r}
+vp_check_populations(data_NJ2020)
+```
+
+```{r}
+NJ2020_ori_abu <- vp_class_ori_abu(NJ2020_original_abundances)
+class(NJ2020_original_abundances)
+class(NJ2020_ori_abu)
+```
+
+```{r}
+NJ2020_count_data <- vp_class_count_data(data_NJ2020)
+class(data_NJ2020)
+class(NJ2020_count_data)
+```
+
 ### Calculate Viral Production
+
+Now that we have our input data, the first and most important step can be performed: **Estimating viral production**. Two main methods will be used to calculate the viral production: `linear regression` compared to `VIPCAL`. Figure 3 shows different variants of both methods, in total twelve different ways to calculate viral production are integrated in the package with variation based on:
+
+* Replicate treatment: `Separate` replicates taken into account or `average` over the three replicates.
+* Standard error: Is the `SE` taken into account or not.
+* Difference curve estimation: Lysogenic viral production estimated by difference curve. 
+
+```{r, echo=FALSE, fig.align = "center", out.width = "75%", fig.cap="Figure 3: Different calculation methods for viral production."}
+knitr::include_graphics("images/vp_calculate.png")
+```
+
+The `viralprod` package compares the estimation of viral production with on the one side `linear regression` and on the other hand `VIPCAL`. Linear regression uses first-order regressions (slope) of viral abundance over time to calculate the viral production. This implies a continuous increase in viral abundance. On the other hand, VIPCAL, another model, can be used that looks at the average of increments as benchmark for viral production. Since continuous growth in viral abundance is rarely found, sometimes decrease or constant abundance before increase, will VIPCAL estimate the viral production better by searching for peaks in the viral count (Leuf et al., 2009). VIPCAL has his own issues and `VIPCAL-SE` will go another step further, it takes the standard error into account. A peak is now only defined as an increase of viral abundance and without overlap of the standard error on the abundance. In this way, sufficient difference in count values are needed, resulting in only true peaks or increments making VIPCAL-SE more conservative.
+
+Next to the treatment of the replicates and the use of standard error, a third parameter is there that needs to be determined. Explained above, we know that VP samples represent lytic viral production and VPC samples lytic-lysogenic viral production. To calculate the lysogenic viral production, the difference of the viral production value from VPC samples and those from VP samples can be taken. Now another way is by estimating a difference curve in the beginning, before calculating the viral production so on the abundance data. This difference curve can be estimated in two ways. By subtraction where we subtract the viral abundance in VP samples from those in VPC samples or by using a `Linear Mixed-Effects Model (LMER)`. This LMER model will incorporate both fixed- and random effects terms and will make a maximum likelihood estimation. So next to the influence of the sample type and time point of the assay, which are the fixed effect terms also presented in the linear model of the linear regression variants, the random variability between the different replicates will be taken into account (Bates et al., 2014).
+
+Each one of these methods have in general the same structure:
+
+* Constructing the correct data frame depending on the replicate treatment.
+* Calculate the viral production depending on replicate treatment, standard error use and difference curve estimation.
+* Arrange output data frame
+
+The `calculation` step provides by default four data frames:
+
+* *vp_results_output_df* contains the viral production results for all samples.
+* *vp_results_output_T24_df* contains the viral production results for all samples at the end of the assay.
+* *vp_results_output_SR_df* contains the viral production results of the separate replicate treatment, no averaging over replicates.
+* *vp_results_output_BP_df* contains the viral production results for all samples with the bacterial endpoint taken into account. 
+
+The last two can be left out with the extra arguments of the `vp_calculate` function: `SR_calc` and `BP_endpoint`. SR_calc will return a data frame with only the separate replicate results, so afterwards no averaging over the replicates will happen. The bacterial endpoint is an extra feature in the package since an increase in collision rates is noticed in VP samples between the phages and bacteria. This is probably due to the net increase in bacterial growth established during the assay. This phenomenon is not presented in VPC samples since the treatment with Mitomycin-C. This increase in collision rates results in a higher expected lytic viral production which ultimately can result in a negative lysogenic viral production. To prevent this, we define the bacterial endpoint as the moment where the generation time in bacteria is less than the duration of our assay. This will give us an indication of at which moment in our assay we should stop to make sure less biased results are obtained. 
+
+```{r, warning=FALSE, message=FALSE}
+vp_calculate(x = NJ2020_count_data,
+             SR_calc = T,
+             BP_endpoint = T,
+             write_output = F)
+```
+
 ### Analyze Viral Production
+
+```{r, warning=FALSE, message=FALSE}
+vp_analyze(x = NJ2020_count_data,
+           vp_results = vp_results_output_df, 
+           original_abundances = NJ2020_ori_abu,
+           write_output = F)
+```
+
 ### Visualize Viral Production
 
+```{r, warning=FALSE, message=FALSE}
+vp_visualize(x = NJ2020_count_data, 
+             vp_results = vp_results_output_df, 
+             original_abundances = NJ2020_ori_abu, 
+             write_output = F)
+```
 
+## Conclusion
 
+```{r}
+data_NJ2020_more_gates <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_more_populations.csv', package = "viralprod"))
+str(data_NJ2020_more_gates)
+```
+
+```{r, warning=FALSE, message=FALSE}
+vp_end_to_end(data = data_NJ2020_more_gates,
+              original_abundances = NJ2020_original_abundances,
+              methods = c(4,9,12),
+              SR_calc = F, 
+              burst_sizes = c(20, 50, 80),
+              write_output = F)
+```
 
 ## References
 
-* [Main README file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)
 * [Input data for viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)
+* [Main README file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)
+* Bates, D., M ̈achler, M., Bolker, B., and Walker, S. (2014). Fitting linear mixed-effects models using lme4.
+arXiv preprint arXiv:1406.5823. doi:10.48550/arXiv.1406.5823.
+* Brussaard, C. P., Marie, D., Thyrhaug, R., and Bratbak, G. (2001). Flow cytometric analy-
+sis of phytoplankton viability following viral infection. Aquatic microbial ecology, 26(2):157–166.
+doi:10.3354/ame026157.
+* Levine, M. (1961). Effect of Mitomycin C on Interactions between Temperate Phages and Bacteria.
+Virology, 13(4):493–499. doi:10.1016/0042-6822(61)90280-X.
+* Luef, B., Luef, F., and Peduzzi, P. (2009). Online program ‘VIPCAL’ for calculating lytic viral production
+and lysogenic cells based on a viral reduction approach. Environmental microbiology reports, 1(1):78–85.
+doi:10.1111/j.1758-2229.2008.00008.x.
+* Payet, J. P. and Suttle, C. A. (2013). To kill or not to kill: The balance between lytic and
+lysogenic viral infection is driven by trophic status. Limnology and Oceanography, 58(2):465–474.
+doi:10.4319/lo.2013.58.2.0465.
+* Winget, D. M., Williamson, K. E., Helton, R. R., and Wommack, K. E. (2005). Tangential flow diafil-
+tration: an improved technique for estimation of virioplankton production. Aquatic Microbial Ecology,
+41(3):221–232. doi:10.3354/ame041221.
+

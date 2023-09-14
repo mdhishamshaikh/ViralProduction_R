@@ -13,9 +13,9 @@ vignette: `Introduction to viralprod`.
 
 You can find detailed information in the vignettes online:
 
-- [Main README
-  file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)
 - [Input data for
   viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)
 - [Introduction to
   viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)
+- [Main README
+  file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)

@@ -43,9 +43,10 @@ library(viralprod)
 The `viralprod` package simplifies the analysis of viral production
 data, making it suitable for researchers studying marine viruses. To
 utilize the package effectively, it’s essential to complete prior steps,
-including sampling, filtration, virus reduction assay and flow cytometry
-processing. The package encompasses **three** fundamental steps, each
-contributing to a comprehensive analysis:
+including sampling, virus reduction assay encompassing filtration and
+incubation stages, and subsequent flow cytometry processing. The package
+is structured around **three** fundamental steps, each contributing to a
+comprehensive analysis:
 
 - *Calculating Viral Production*: It provides two primary methods,
   `linear regression` and `VIPCAL`, for calculating viral production
@@ -90,7 +91,8 @@ Furthermore, comprehensive insights into the methodology, including
 individual function usage, will be expounded upon in
 `Introduction to viralprod`.
 
-Load in example data:
+Two input data files are required: count data from flow cytometer, the
+original abundances of seawater sample. Load in example data:
 
 ``` r
 data_NJ2020_all <- read.csv(system.file('extdata', 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))

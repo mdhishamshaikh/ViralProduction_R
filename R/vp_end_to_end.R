@@ -49,16 +49,16 @@
 #' “/vp_results_NJ2020_all”))
 #' }
 vp_end_to_end <- function(data = data.frame(),
-                                        original_abundances = data.frame(),
-                                        methods = c(1:12),
-                                        SR_calc = TRUE,
-                                        BP_endpoint = TRUE,
-                                        burst_sizes = c(),
-                                        bacterial_secondary_production = NULL,
-                                        nutrient_content_bacteria = list(),
-                                        nutrient_content_viruses = list(),
-                                        write_output = TRUE,
-                                        output_dir = ''){
+                          original_abundances = data.frame(),
+                          methods = c(1:12),
+                          SR_calc = TRUE,
+                          BP_endpoint = TRUE,
+                          burst_sizes = c(),
+                          bacterial_secondary_production = NULL,
+                          nutrient_content_bacteria = list(),
+                          nutrient_content_viruses = list(),
+                          write_output = TRUE,
+                          output_dir = ''){
   ## 1. Check the input data frames
   data_viralprod <- vp_class_count_data(data)
   original_abundances_viralprod <- vp_class_ori_abu(original_abundances)

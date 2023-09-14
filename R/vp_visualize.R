@@ -83,14 +83,14 @@ vp_visualize.default <- function(x, ...){
 #' @export
 #' @rdname vp_visualize
 vp_visualize.viralprod <- function(x, ...,
-                                                 vp_results = data.frame(),
-                                                 original_abundances = data.frame(),
-                                                 burst_sizes = c(),
-                                                 bacterial_secondary_production = NULL,
-                                                 nutrient_content_bacteria = list(),
-                                                 nutrient_content_viruses = list(),
-                                                 write_output = TRUE,
-                                                 output_dir = ''){
+                                   vp_results = data.frame(),
+                                   original_abundances = data.frame(),
+                                   burst_sizes = c(),
+                                   bacterial_secondary_production = NULL,
+                                   nutrient_content_bacteria = list(),
+                                   nutrient_content_viruses = list(),
+                                   write_output = TRUE,
+                                   output_dir = ''){
   ## 1. Checks
   # Check if original_abundances have correct class
   checkmate::assert_class(original_abundances, 'viralprod_analyze')

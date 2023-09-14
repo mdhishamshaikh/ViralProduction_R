@@ -74,11 +74,11 @@ vp_calculate.default <- function(x, ...){
 #' @export
 #' @rdname vp_calculate
 vp_calculate.viralprod <- function(x, ...,
-                                                 methods = c(1:12),
-                                                 SR_calc = TRUE,
-                                                 BP_endpoint = TRUE,
-                                                 write_output = TRUE,
-                                                 output_dir = ''){
+                                   methods = c(1:12),
+                                   SR_calc = TRUE,
+                                   BP_endpoint = TRUE,
+                                   write_output = TRUE,
+                                   output_dir = ''){
   ## 1. Checks
   # Check for valid output directory if csv files needs to be written
   if (write_output == T){

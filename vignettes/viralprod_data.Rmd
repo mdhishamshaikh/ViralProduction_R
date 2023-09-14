@@ -160,5 +160,5 @@ To get started with the `viralprod` package and explore your data, follow these 
 
 ## References
 
-* [Main README file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)
 * [Introduction to viralprod](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/vignettes)
+* [Main README file](https://github.com/mdhishamshaikh/ViralProduction_R/tree/rpkg/README.md)

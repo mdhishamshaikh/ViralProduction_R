@@ -87,14 +87,14 @@ vp_analyze.default <- function(x, ...){
 #' @export
 #' @rdname vp_analyze
 vp_analyze.viralprod <- function(x, ...,
-                                               vp_results = data.frame(),
-                                               original_abundances = data.frame(),
-                                               burst_sizes = c(),
-                                               bacterial_secondary_production = NULL,
-                                               nutrient_content_bacteria = list(),
-                                               nutrient_content_viruses = list(),
-                                               write_output = TRUE,
-                                               output_dir = ''){
+                                 vp_results = data.frame(),
+                                 original_abundances = data.frame(),
+                                 burst_sizes = c(),
+                                 bacterial_secondary_production = NULL,
+                                 nutrient_content_bacteria = list(),
+                                 nutrient_content_viruses = list(),
+                                 write_output = TRUE,
+                                 output_dir = ''){
   ## 1. Checks
   # Check if original_abundances have correct class
   checkmate::assert_class(original_abundances, 'viralprod_analyze')
@@ -229,7 +229,7 @@ vp_analyze.viralprod <- function(x, ...,
   .GlobalEnv$analyzed_vp_results_dictionary <- data.frame(
     Variable = colnames(analyzed_vp_results_df),
     Unit = c('/', '/', 'm', 'h', '/', '/', '#VLP (virus-like particles)/mLh', '#VLP/mL', '/', '/', '/',
-             '#VLP/mL', '#VLP/mL', '#VLP/mL', '#VLP/mLh', '#VLP/mL', '/', '%', '#VLP/mLh', '%', '%',
+             '#bacteria/mL', '#bacteria/mL', '#viruses/mL', '#VLP/mLh', '#VLP/mL', '/', '%', '#VLP/mLh', '%', '%',
              '%', '#VLP/mLh', '%', '%', '%', '#VLP/mLh', '%', '%', '1/h', 'g C/mLh', 'g N/mLh', 'g P/mLh',
              'g C/mLh', 'g C/mLh', 'g N/mLh', 'g N/mLh', 'g P/mLh', 'g P/mLh', 'g C/mLh', 'g C/mLh', 'g N/mLh',
              'g N/mLh', 'g P/mLh', 'g P/mLh', 'g C/mLh', 'g C/mLh', 'g N/mLh', 'g N/mLh', 'g P/mLh', 'g P/mLh'),
