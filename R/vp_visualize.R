@@ -1,8 +1,8 @@
 #' Wrapper function to visualize viral production data
 #' 
 #' @description
-#' A major step in data analyses is `data visualization`. Some suggestions to visualize the flow cytometry, viral
-#' production or analyzed viral production data are given. The different visualizations will be performed, stored  
+#' A major step in data analyses is `data visualization`. Some suggestions to visualize the original viral count data, 
+#' calculated viral production data, or analyzed viral production data. The different visualizations will be performed, stored  
 #' and saved as PDFs if wanted.
 #' 
 #' More details about the previous performed steps can be found on:
@@ -39,6 +39,7 @@
 #' 
 #' x <- vp_class_count_data(data_NJ2020_all)
 #' y <- vp_class_ori_abu(original_abundances_NJ2020)
+#' 
 #' vp_calculate(x, write_output = F)
 #' 
 #' # Perform
@@ -105,11 +106,11 @@ vp_visualize.viralprod <- function(x, ...,
       user_choice <- utils::menu(
         c("Continue and store figures in folder by your choice",
           "Stop and define same output directory of calculation results"),
-        title = message("Warning: The output folder does not exists!"),
+        title = "Warning: The output folder does not exists!",
         graphics = FALSE)
       
       if (user_choice == 1){
-        message('Continuing with the given output directory, analyzing results will be stored in separate folder!')
+        print('Continuing with the given output directory, analyzing results will be stored in separate folder!')
         dir.create(output_dir)
         visualize_vp_results_path <- paste0(output_dir, '/')
         
@@ -138,23 +139,25 @@ vp_visualize.viralprod <- function(x, ...,
   plot_VIPCAL_vs_VIPCAL_SE(vp_results)
   
   vp_analyze(x,
-                           vp_results = .GlobalEnv$vp_results_output_BP_df,
-                           original_abundances = original_abundances,
-                           burst_sizes = burst_sizes,
-                           bacterial_secondary_production = bacterial_secondary_production,
-                           nutrient_content_bacteria = nutrient_content_bacteria,
-                           nutrient_content_viruses = nutrient_content_viruses,
-                           write_output = F)
+             vp_results = .GlobalEnv$vp_results_output_BP_df,
+             original_abundances = original_abundances,
+             burst_sizes = burst_sizes,
+             bacterial_secondary_production = bacterial_secondary_production,
+             nutrient_content_bacteria = nutrient_content_bacteria,
+             nutrient_content_viruses = nutrient_content_viruses,
+             write_output = F)
+  
   plot_percentage_cells(.GlobalEnv$analyzed_vp_results_df)
   
   vp_analyze(x,
-                           vp_results = .GlobalEnv$vp_results_output_T24_df,
-                           original_abundances = original_abundances,
-                           burst_sizes = burst_sizes,
-                           bacterial_secondary_production = bacterial_secondary_production,
-                           nutrient_content_bacteria = nutrient_content_bacteria,
-                           nutrient_content_viruses = nutrient_content_viruses,
-                           write_output = F)
+             vp_results = .GlobalEnv$vp_results_output_T24_df,
+             original_abundances = original_abundances,
+             burst_sizes = burst_sizes,
+             bacterial_secondary_production = bacterial_secondary_production,
+             nutrient_content_bacteria = nutrient_content_bacteria,
+             nutrient_content_viruses = nutrient_content_viruses,
+             write_output = F)
+  
   plot_nutrient_release(.GlobalEnv$analyzed_vp_results_df)
   
   ## 3. Save figures as PDFs

@@ -49,8 +49,8 @@ If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 Plot objects will be stored in variable \code{plot_list} in the global environment. A subfolder, \code{Figures}, will be created in the given output folder for storing the figures as PDFs.
 }
 \description{
-A major step in data analyses is \verb{data visualization}. Some suggestions to visualize the flow cytometry, viral
-production or analyzed viral production data are given. The different visualizations will be performed, stored
+A major step in data analyses is \verb{data visualization}. Some suggestions to visualize the original viral count data,
+calculated viral production data, or analyzed viral production data. The different visualizations will be performed, stored
 and saved as PDFs if wanted.
 
 More details about the previous performed steps can be found on:
@@ -71,6 +71,7 @@ original_abundances_NJ2020 <- read.csv(system.file('extdata',
 
 x <- vp_class_count_data(data_NJ2020_all)
 y <- vp_class_ori_abu(original_abundances_NJ2020)
+
 vp_calculate(x, write_output = F)
 
 # Perform

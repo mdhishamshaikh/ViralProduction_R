@@ -48,8 +48,8 @@ If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})}
 All outputs will be saved in the folder specified by \code{output_dir}.
 }
 \description{
-Wrapper function that includes everything from the \code{viralprod} package. Calculation, analyzing and
-visualization of viral production based on the input data from the flow cytometry and the abundances
+Wrapper function that includes everything from the \code{viralprod} package. Calculating, analyzing and
+visualizing viral production based on the output data from the flow cytometry and the abundances
 of bacterial and virus populations in the original sample. All outputs will be saved together in the
 folder specified by the argument \code{output_dir}.
 

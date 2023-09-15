@@ -7,11 +7,10 @@
 vp_list_of_methods()
 }
 \value{
-A list, with the different variants of linear regression and VIPCAL to calculate viral production, will be available in the global environment.
+A list, with the different variants of linear regression and VIPCAL to calculate viral production.
 }
 \description{
-A list of all the different variants of linear regression and VIPCAL available to calculate the viral
-production rate.
+Generate a comprehensive list of available variants for viral production calculation
 
 More details on the different methods:
 \itemize{
@@ -28,6 +27,7 @@ data_NJ2020_all <- read.csv(system.file('extdata',
 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
 
 vp_check_populations(data_NJ2020_all)
+
 list_of_methods[[1]](data_NJ2020_all)
 }
 }

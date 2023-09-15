@@ -1,14 +1,16 @@
 #' Linear Mixed-Effects Model
 #' 
 #' @description
-#' The viral reduction assay has two types of samples: VP and VPC. In VP samples, count of bacteriophages in the lytic phase
-#' can be measured (`lytic viral production`). On the other hand in VPC samples, count of bacteriophages in both the lytic and
-#' lysogenic phase can be measured (`lytic + lysogenic viral production`) since treatment with antibiotic `mitomycin-C`
+#' The viral reduction assay has two types of samples: VP and VPC samples. 
+#' In VP samples, count of bacteriophages in the lytic phase
+#' can be measured (`lytic viral production`), while in VPC samples, count of bacteriophages in both the lytic and
+#' lysogenic phase can be measured (`lytic + lysogenic viral production`) since treatment with antibiotic `Mitomycin-C`
 #' forces lysogenic bacteriophages to go into the lytic phase. To retrieve the lysogenic viral production, a difference
-#' curve is used. The difference curve can be estimated by subtracting the VP samples count from the VPC samples count, `difference curve estimation by subtraction`. 
-#' But also, a \code{LMER model} can be used which will incorporate both fixed- and random effect terms. The influence 
-#' of the sample type and time point on the viral count will be considered plus the variability between the different replicates (random-effect), 
-#' `difference curve estimation by LMER model`. 
+#' curve is used. This difference curve can be derived in two ways: \code{subtraction} or the application of a 
+#' \code{Linear Mixed-Effects Model (LMER)}. In the subtraction approach, viral abundance in VP samples is subtracted from 
+#' that in VPC samples. On the other hand, the LMER model incorporates both fixed and random effect terms. 
+#' It performs a maximum likelihood estimation by considering the fixed effect terms, such as sample type and timepoint, 
+#' while also accounting for the random variability among different replicates.
 #' 
 #' See [lme4::lmer] for more details on the LMER model.
 #' 
@@ -22,6 +24,7 @@
 #' @examples \dontrun{
 #' data_NJ2020_all <- read.csv(system.file('extdata', 
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' 
 #' vp_check_populations(data_NJ2020_all)
 #' 
 #' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)

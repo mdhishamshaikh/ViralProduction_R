@@ -1,8 +1,8 @@
 #' End-to-End viral production analysis
 #' 
 #' @description
-#' Wrapper function that includes everything from the `viralprod` package. Calculation, analyzing and
-#' visualization of viral production based on the input data from the flow cytometry and the abundances
+#' Wrapper function that includes everything from the `viralprod` package. Calculating, analyzing and
+#' visualizing viral production based on the output data from the flow cytometry and the abundances
 #' of bacterial and virus populations in the original sample. All outputs will be saved together in the 
 #' folder specified by the argument `output_dir`.
 #' 
@@ -65,31 +65,31 @@ vp_end_to_end <- function(data = data.frame(),
   
   ## 2. Calculate viral production
   vp_calculate(x = data_viralprod,
-                             methods = methods,
-                             SR_calc = SR_calc,
-                             BP_endpoint = BP_endpoint,
-                             write_output = write_output,
-                             output_dir = output_dir)
+               methods = methods,
+               SR_calc = SR_calc,
+               BP_endpoint = BP_endpoint,
+               write_output = write_output,
+               output_dir = output_dir)
   
   ## 2. Analyze viral production
   vp_analyze(x = data_viralprod,
-                           vp_results = .GlobalEnv$vp_results_output_df,
-                           original_abundances = original_abundances_viralprod,
-                           burst_sizes = burst_sizes,
-                           bacterial_secondary_production = bacterial_secondary_production,
-                           nutrient_content_bacteria = nutrient_content_bacteria,
-                           nutrient_content_viruses = nutrient_content_viruses,
-                           write_output = write_output,
-                           output_dir = output_dir)
+             vp_results = .GlobalEnv$vp_results_output_df,
+             original_abundances = original_abundances_viralprod,
+             burst_sizes = burst_sizes,
+             bacterial_secondary_production = bacterial_secondary_production,
+             nutrient_content_bacteria = nutrient_content_bacteria,
+             nutrient_content_viruses = nutrient_content_viruses,
+             write_output = write_output,
+             output_dir = output_dir)
   
   ## 3. Visualize viral production
   vp_visualize(x = data_viralprod,
-                             vp_results = .GlobalEnv$vp_results_output_df,
-                             original_abundances = original_abundances_viralprod,
-                             burst_sizes = burst_sizes,
-                             bacterial_secondary_production = bacterial_secondary_production,
-                             nutrient_content_bacteria = nutrient_content_bacteria,
-                             nutrient_content_viruses = nutrient_content_viruses,
-                             write_output = write_output,
-                             output_dir = output_dir)
+               vp_results = .GlobalEnv$vp_results_output_df,
+               original_abundances = original_abundances_viralprod,
+               burst_sizes = burst_sizes,
+               bacterial_secondary_production = bacterial_secondary_production,
+               nutrient_content_bacteria = nutrient_content_bacteria,
+               nutrient_content_viruses = nutrient_content_viruses,
+               write_output = write_output,
+               output_dir = output_dir)
 }

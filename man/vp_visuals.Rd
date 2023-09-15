@@ -44,8 +44,8 @@ at the end of the assay is calculated.}
 Plot objects will be stored in variable \code{plot_list} in the global environment.
 }
 \description{
-A major step in data analyses is \verb{data visualization}. Some suggestions to visualize the flow cytometry, viral
-production or analyzed viral production data are given.
+A major step in data analyses is \verb{data visualization}. Some suggestions to visualize the original viral count data,
+calculated viral production data, or analyzed viral production data.
 
 \code{plot_overview_counts_over_time}: plots the bacterial and viral counts, retrieved from the flow cytometry, in
 function of the different time ranges of the assay. The bacterial endpoint is also highlighted in pink.
@@ -58,7 +58,7 @@ production is compared between the linear regression variants and the VIPCAL var
 all the methods is made. Next to that, a plot that compares linear regression with VIPCAL and VIPCAL-SE is also produced.
 
 \code{plot_VIPCAL_vs_VIPCAL_SE}: a separate visualization for comparison between VIPCAL and VIPCAL-SE. The calculated viral
-production values of both methods are compared plus a \verb{Robust Graphical Method} (ROGME) is used for the comparison between the two.
+production values of both methods are compared plus a \verb{Robust Graphical Method (ROGME)} is used for the comparison between the two.
 
 \code{plot_percentage_cells}: plots the percentage of lytically infected and lysogenic cells in function of the
 different burst sizes. Important to note, that this is the percentage of cells at the bacterial endpoint of the assay,
@@ -88,10 +88,12 @@ plot_VIPCAL_vs_VIPCAL_SE(vp_results_output_df)
 
 analyze_viral_production(vp_results_output_BP_df, data_NJ2020_all, 
 original_abundances_NJ2020, write_csv = F)
+
 plot_percentage_cells(analyzed_vp_results_df)
 
 analyze_viral_production(vp_results_output_T24_df, data_NJ2020_all, 
 original_abundances_NJ2020, write_csv = F)
+
 plot_nutrient_release(analyzed_vp_results_df)
 }
 }

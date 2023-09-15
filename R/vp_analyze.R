@@ -3,7 +3,7 @@
 #' @description
 #' Luef et al. (2009) created an online tool, `Viral Production Calculator`, that assesses and analyses viral production.
 #' Next to calculating the viral production and the proportion of lysogenic bacteria in the sample, other parameters for estimating
-#' virus-induced mortality are determined including the lysis rate of bacteria, viral turnover time, organic carbon release and others.
+#' virus-induced mortality are determined including the lysis rate of bacteria, viral turnover time, organic carbon release and many more.
 #' 
 #' Based on the original data and the output of [viralprod::vp_calculate], the same parameters are
 #' calculated and added to the already existing data frame. Another data frame with the description and units of each of the variables
@@ -21,7 +21,7 @@
 #' @param original_abundances Data frame with the abundances of bacterial and virus population in the original sample, has to have the `viralprod_analyze` class.
 #' @param burst_sizes Vector with three different burst sizes. The burst size refers to the number of new viral particles released from an infected bacterial cell. 
 #' @param bacterial_secondary_production Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction. 
-#' @param nutrient_content_bacteria List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.
+#' @param nutrient_content_bacteria List with the amount of organic carbon, nitrogen and phosphor released by an aquatic bacteria.
 #' @param nutrient_content_viruses List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).
 #' @param write_output If \code{TRUE}, the output data frames will be saved as csv files in the same folder of the viral production calculation.
 #' If no csv files are wanted, set to \code{FALSE}. (Default = \code{TRUE})
@@ -43,6 +43,7 @@
 #' 
 #' x <- vp_class_count_data(data_NJ2020_all)
 #' y <- vp_class_ori_abu(original_abundances_NJ2020)
+#' 
 #' vp_calculate(x, write_output = F)
 #' 
 #' # Perform
@@ -109,11 +110,11 @@ vp_analyze.viralprod <- function(x, ...,
       user_choice <- utils::menu(
         c("Continue and store analyzing results in folder by your choice",
           "Stop and define same output directory of calculation results"),
-        title = message("Warning: The output folder does not exists!"),
+        title = "Warning: The output folder does not exists!",
         graphics = FALSE)
       
       if (user_choice == 1){
-        message('Continuing with the given output directory, analyzing results will be stored in separate folder!')
+        print('Continuing with the given output directory, analyzing results will be stored in separate folder!')
         dir.create(output_dir)
         analyze_vp_results_path <- paste0(output_dir, '/')
         
@@ -150,12 +151,12 @@ vp_analyze.viralprod <- function(x, ...,
   # If no input for hyper parameters is given, default values are used
   if (rlang::is_empty(burst_sizes) | !rlang::is_bare_numeric(burst_sizes)){
     burst_sizes <- c(10,25,40)
-    message('Default values used for burst size!')
+    print('Default values used for burst size!')
   }
   
   if (!rlang::is_bare_numeric(bacterial_secondary_production)){
     bacterial_secondary_production <- 0.0027e6
-    message('Default value used for bacterial secondary production!')
+    print('Default value used for bacterial secondary production!')
   }
   
   if (rlang::is_empty(nutrient_content_bacteria) | !all(sapply(nutrient_content_bacteria, rlang::is_bare_numeric))){
@@ -163,7 +164,7 @@ vp_analyze.viralprod <- function(x, ...,
     # Content of Carbon, Nitrogen, Oxygen, Sulfur and Phosphorus in Native Aquatic and Cultured Bacteria. 
     # Aquatic Microbial Ecology - AQUAT MICROB ECOL. 10. 15-27. 10.3354/ame010015
     nutrient_content_bacteria <- list(C = 19e-15, N = 5e-15, P = 0.8e-15)
-    message('Default values used for nutrient content of bacteria!')
+    print('Default values used for nutrient content of bacteria!')
   }
   
   if (rlang::is_empty(nutrient_content_viruses) | !all(sapply(nutrient_content_viruses, rlang::is_bare_numeric))){
@@ -173,7 +174,7 @@ vp_analyze.viralprod <- function(x, ...,
     N_V <- (563058 / 6.022e23) * 14.01
     P_V <- (92428 / 6.022e23) * 30.97
     nutrient_content_viruses <- list(C = C_V, N = N_V, P = P_V) 
-    message('Default values used for nutrient condent of viruses!')
+    print('Default values used for nutrient condent of viruses!')
   }
   
   ## 3. Analyze viral production results
@@ -188,7 +189,7 @@ vp_analyze.viralprod <- function(x, ...,
   # 3.4 Percentage of bacterial production lysed and bacterial loss per day
   for (bs in burst_sizes){
     col_name_3_2 <- paste0('P_Cells_BS_', bs)
-    analyzed_vp_results_df[[col_name_3_2]] <- analyzed_vp_results_df$abs_VP * (100 / (analyzed_vp_results_df$B_0 * bs))
+    analyzed_vp_results_df[[col_name_3_2]] <- analyzed_vp_results_df$c_abs_VP * (100 / (analyzed_vp_results_df$B_0 * bs))
     
     col_name_3_3 <- paste0('Rate_BS_', bs)
     analyzed_vp_results_df[[col_name_3_3]] <- analyzed_vp_results_df$c_VP / bs
@@ -207,7 +208,7 @@ vp_analyze.viralprod <- function(x, ...,
   # 3.6 Nutrient release
   for (nutrient in 1:length(nutrient_content_viruses)){
     col_name_nutrient_virus <- paste0('DO', names(nutrient_content_viruses[nutrient]), '_V')
-    analyzed_vp_results_df[[col_name_nutrient_virus]] <- analyzed_vp_results_df$VP * nutrient_content_viruses[[nutrient]]
+    analyzed_vp_results_df[[col_name_nutrient_virus]] <- analyzed_vp_results_df$c_VP * nutrient_content_viruses[[nutrient]]
   }
   
   for (bs in burst_sizes){
@@ -266,25 +267,25 @@ vp_analyze.viralprod <- function(x, ...,
       'Viral turnover time: time to replacte the current virus population by new viruses',
       'Dissolved organic carbon release of viruses',
       'Dissolved organic nitrogen release of viruses',
-      'Dissolved organic phosphorous release of viruses',
+      'Dissolved organic phosphorus release of viruses',
       'Dissolved organic carbon release of bacteria for given burst size',
       'Total dissolved organic carbon release for given burst size',
       'Dissolved organic nitrogen release of bacteria for given burst size',
       'Total dissolved organic nitrogen release for given burst size', 
-      'Dissolved organic phosphorous release of bacteria for given burst size',
-      'Total dissolved organic phosphorous release of bacteria for given burst size',
+      'Dissolved organic phosphorus release of bacteria for given burst size',
+      'Total dissolved organic phosphorus release of bacteria for given burst size',
       'Dissolved organic carbon release of bacteria for given burst size',
       'Total dissolved organic carbon release for given burst size',
       'Dissolved organic nitrogen release of bacteria for given burst size',
       'Total dissolved organic nitrogen release for given burst size', 
-      'Dissolved organic phosphorous release of bacteria for given burst size',
-      'Total dissolved organic phosphorous release of bacteria for given burst size',
+      'Dissolved organic phosphorus release of bacteria for given burst size',
+      'Total dissolved organic phosphorus release of bacteria for given burst size',
       'Dissolved organic carbon release of bacteria for given burst size',
       'Total dissolved organic carbon release for given burst size',
       'Dissolved organic nitrogen release of bacteria for given burst size',
       'Total dissolved organic nitrogen release for given burst size', 
-      'Dissolved organic phosphorous release of bacteria for given burst size',
-      'Total dissolved organic phosphorous release of bacteria for given burst size'
+      'Dissolved organic phosphorus release of bacteria for given burst size',
+      'Total dissolved organic phosphorus release of bacteria for given burst size'
     )
   )
   

@@ -1,7 +1,7 @@
 #' Calculate viral production with linear regression
 #' 
 #' @description
-#' `Linear Regression` uses the slope between the viral counts to determine the viral production rate.
+#' `Linear regression` employs first-order regressions (slopes) of viral abundance over time to calculate viral production.
 #' Lytic viral production can be derived as the slope of the VP samples. For the lysogenic viral production,
 #' subtraction of the VP slope from the VPC slope is needed. A difference curve estimation by subtraction or
 #' LMER model is also an option to determine the lysogenic viral production rate. 
@@ -12,11 +12,11 @@
 #' 
 #' `determine_vp_linear_separate_replicates` uses a separate replicate treatment, distinguishing between replicates. 
 #' 
-#' `determine_vp_linear_average_replicates` uses an average replicate treatment, average over the replicates.
-#' Difference curve estimation by subtraction. 
+#' `determine_vp_linear_average_replicates` uses an average replicate treatment, average over the replicates,
+#' difference curve estimation by subtraction. 
 #' 
-#' `determine_vp_linear_LMER_model` uses an average replicate treatment, average over the replicates is included in LMER model. 
-#' Difference curve estimation by LMER model.
+#' `determine_vp_linear_LMER_model` uses an average replicate treatment, average over the replicates is included in LMER model, 
+#' difference curve estimation by LMER model.
 #' 
 #' See [viralprod::vp_LMER_model] for more details about the LMER model.
 #'
@@ -31,6 +31,7 @@
 #' @examples \dontrun{
 #' data_NJ2020_all <- read.csv(system.file('extdata', 
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' 
 #' vp_check_populations(data_NJ2020_all)
 #' 
 #' DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)

@@ -1,14 +1,13 @@
 #' Construct viral count data frame for viral production calculation
 #' 
 #' @description
-#' Given the output data frame of the flow cytometry step, produce the correct data frame for further
-#' calculations. Based on the replicate treatment, a different data frame will be produced. A separate
-#' replicate treatment will take each of the replicates into account, where an average replicate treatment
-#' will average over the replicates to retrieve an average count value. 
+#' Given the output data frame of the flow cytometry step, produce the correct data frame, based on the 
+#' replicate treatment,  for further calculations. A separate replicate treatment will consider each of the
+#' replicates independently, whereas an average replicate treatment will average over the amount of replicates.
 #' 
-#' `vp_separate_replicate_dataframe` creates data frame by taking the separate replicates into account.
+#' `vp_separate_replicate_dataframe` creates correct data frame for separate replicate treatment.
 #' 
-#' `vp_average_replicate_dataframe` creates data frame by taking the average over the replicates.
+#' `vp_average_replicate_dataframe` creates correct data frame for average replicate treatment.
 #' 
 #' @param data Data frame with the output of the flow cytometry.
 #' @param keep_0.22_samples If \code{FALSE}, 0.22 samples will be removed from data. These represent the control samples and are normally always filtered out. If you want to keep control samples, set to \code{TRUE}. (Default = \code{FALSE})
@@ -24,6 +23,7 @@
 #' @examples \dontrun{
 #' data_NJ2020_all <- read.csv(system.file('extdata', 
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' 
 #' vp_check_populations(data_NJ2020_all)
 #' 
 #' vp_separate_replicate_dataframe(data_NJ2020_all)

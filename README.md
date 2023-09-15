@@ -55,7 +55,7 @@ comprehensive analysis:
   virus-mediated microbial mortality can be determined based on the
   calculated viral production values.
 - *Visualize Viral Production*: Effective data visualization plays a
-  pivotal role in data analysis. The package provides illustrative
+  pivotal role in data analyses. The package provides illustrative
   examples to visualize your viral production data effectively.
 
 Begin by exploring the available functions within the package. Alongside
@@ -69,21 +69,21 @@ ls("package:viralprod")
 #> [7] "vp_end_to_end"        "vp_list_of_methods"   "vp_visualize"
 ```
 
-Within the package, each of the three primary steps has its dedicated
-function. Additionally, a comprehensive wrapper function exists,
-`vp_end_to_end`, which integrates all three essential steps of viral
-production analysis into a single execution. Executing this singular
-function yields calculated viral production results, analyzed data, and
-visualizations. Below, we will demonstrate the functionality of the
-wrapper function using example data available in the `inst/extdata`
-folder, use of the separate main functions is integrated in the
-`Introduction to viralprod` vignette.
+Within the package, each of the three primary steps has its own,
+dedicated function. Additionally, a comprehensive wrapper function
+exists, `vp_end_to_end`, which integrates all three essential steps of
+viral production analyses into a single execution. Executing this
+singular function yields calculated viral production results, analyzed
+data, and visualizations. Below, we will demonstrate the functionality
+of the wrapper function using example data available in the
+`inst/extdata` folder, use of the separate main functions is integrated
+in the `Introduction to viralprod` vignette.
 
 Running the code, provided below, also serves as a convenient method to
 verify the correct installation of the package. Note that the assessment
 of input data frames conforms to the package’s requirements is
 seamlessly integrated into the wrapper function through the
-`vp_class_count data` function.
+`vp_class_count_data` function.
 
 For detailed information regarding the specific requirements for input
 data, please consult the vignette: `Input data for viralprod`.
@@ -282,7 +282,7 @@ list_of_methods[12]
 #>             dplyr::everything())
 #>     return(viral_production_VIPCAL)
 #> }
-#> <bytecode: 0x000001f0147a73a0>
+#> <bytecode: 0x0000016daaa47808>
 #> <environment: namespace:viralprod>
 ```
 
@@ -299,7 +299,57 @@ become available in the global environment.
 # All methods will be executed with default parameters
 vp_end_to_end(data = data_NJ2020_all,
               original_abundances = NJ2020_original_abundances,
-              write_output = F)
+              methods = c(1:12),
+              SR_calc = TRUE,
+              BP_endpoint = TRUE,
+              burst_sizes = c(),
+              bacterial_secondary_production = NULL,
+              nutrient_content_bacteria = list(),
+              nutrient_content_viruses = list(),
+              write_output = FALSE,
+              output_dir = "")
+#> [1] "Following populations will be analyzed: c_Bacteria, c_HNA, c_LNA, c_Viruses, c_V1, c_V2, c_V3"
+#> [1] "Following populations will be analyzed: c_Bacteria, c_HNA, c_LNA, c_Viruses, c_V1, c_V2, c_V3"
+#> [1] "Processing using method: vp_linear_allpoints"
+#> [1] "Analysis done for method vp_linear_allpoints. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_linear_separate_replicates"
+#> [1] "Analysis done for method vp_linear_separate_replicates. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_linear_average_replicates"
+#> [1] "Analysis done for method vp_linear_average_replicates. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_linear_average_replicates_diff"
+#> [1] "Analysis done for method vp_linear_average_replicates_diff. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_linear_average_replicates_diff_LMER"
+#> [1] "Analysis done for method vp_linear_average_replicates_diff_LMER. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_separate_replicates"
+#> [1] "Analysis done for method vp_VIPCAL_separate_replicates. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_average_replicates"
+#> [1] "Analysis done for method vp_VIPCAL_average_replicates. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_average_replicates_SE"
+#> [1] "Analysis done for method vp_VIPCAL_average_replicates_SE. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_average_replicates_diff"
+#> [1] "Analysis done for method vp_VIPCAL_average_replicates_diff. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_average_replicates_diff_SE"
+#> [1] "Analysis done for method vp_VIPCAL_average_replicates_diff_SE. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_average_replicates_diff_LMER"
+#> [1] "Analysis done for method vp_VIPCAL_average_replicates_diff_LMER. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_average_replicates_diff_LMER_SE"
+#> [1] "Analysis done for method vp_VIPCAL_average_replicates_diff_LMER_SE. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_linear_separate_replicates, only separate replicate results"
+#> [1] "Analysis done for method vp_linear_separate_replicates. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Processing using method: vp_VIPCAL_separate_replicates, only separate replicate results"
+#> [1] "Analysis done for method vp_VIPCAL_separate_replicates. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings."
+#> [1] "Default values used for burst size!"
+#> [1] "Default value used for bacterial secondary production!"
+#> [1] "Default values used for nutrient content of bacteria!"
+#> [1] "Default values used for nutrient condent of viruses!"
+#> [1] "Default values used for burst size!"
+#> [1] "Default value used for bacterial secondary production!"
+#> [1] "Default values used for nutrient content of bacteria!"
+#> [1] "Default values used for nutrient condent of viruses!"
+#> [1] "Default values used for burst size!"
+#> [1] "Default value used for bacterial secondary production!"
+#> [1] "Default values used for nutrient content of bacteria!"
+#> [1] "Default values used for nutrient condent of viruses!"
 ```
 
 After running the wrapper function, check the global environment to
@@ -369,40 +419,40 @@ str(analyzed_vp_results_df)
 #>  $ c_VP            : num  10933826 -502993 10933826 -502993 10933826 ...
 #>  $ c_abs_VP        : num  262411815 -12071822 262411815 -12071822 262411815 ...
 #>  $ c_VP_SE         : num  1729248 477393 2616233 164588 2232943 ...
-#>  $ P_Cells_BS_10   : num  812.2 -25.7 812.2 -25.7 812.2 ...
+#>  $ P_Cells_BS_10   : num  3062.2 -95.9 3062.2 -95.9 3062.2 ...
 #>  $ Rate_BS_10      : num  1093383 -50299 1093383 -50299 1093383 ...
 #>  $ P_BP_Lysed_BS_10: num  405 -18.6 405 -18.6 405 ...
 #>  $ P_B_Loss_BS_10  : num  812.2 -25.7 812.2 -25.7 812.2 ...
-#>  $ P_Cells_BS_25   : num  324.9 -10.3 324.9 -10.3 324.9 ...
+#>  $ P_Cells_BS_25   : num  1224.9 -38.4 1224.9 -38.4 1224.9 ...
 #>  $ Rate_BS_25      : num  437353 -20120 437353 -20120 437353 ...
 #>  $ P_BP_Lysed_BS_25: num  161.98 -7.45 161.98 -7.45 161.98 ...
 #>  $ P_B_Loss_BS_25  : num  324.9 -10.3 324.9 -10.3 324.9 ...
-#>  $ P_Cells_BS_40   : num  203.04 -6.42 203.04 -6.42 203.04 ...
+#>  $ P_Cells_BS_40   : num  766 -24 766 -24 766 ...
 #>  $ Rate_BS_40      : num  273346 -12575 273346 -12575 273346 ...
 #>  $ P_BP_Lysed_BS_40: num  101.24 -4.66 101.24 -4.66 101.24 ...
 #>  $ P_B_Loss_BS_40  : num  203.04 -6.42 203.04 -6.42 203.04 ...
 #>  $ V_TT            : num  0.05342 -0.00329 0.05342 -0.00329 0.05342 ...
-#>  $ DOC_V           : num  9.63e-11 -4.47e-12 9.63e-11 -4.47e-12 9.63e-11 ...
-#>  $ DON_V           : num  3.80e-11 -1.76e-12 3.80e-11 -1.76e-12 3.80e-11 ...
-#>  $ DOP_V           : num  1.38e-11 -6.40e-13 1.38e-11 -6.40e-13 1.38e-11 ...
+#>  $ DOC_V           : num  3.63e-10 -1.67e-11 3.63e-10 -1.67e-11 3.63e-10 ...
+#>  $ DON_V           : num  1.43e-10 -6.59e-12 1.43e-10 -6.59e-12 1.43e-10 ...
+#>  $ DOP_V           : num  5.20e-11 -2.39e-12 5.20e-11 -2.39e-12 5.20e-11 ...
 #>  $ DOC_B_BS_10     : num  2.08e-08 -9.56e-10 2.08e-08 -9.56e-10 2.08e-08 ...
-#>  $ Total_DOC_BS_10 : num  2.09e-08 -9.60e-10 2.09e-08 -9.60e-10 2.09e-08 ...
+#>  $ Total_DOC_BS_10 : num  2.11e-08 -9.72e-10 2.11e-08 -9.72e-10 2.11e-08 ...
 #>  $ DON_B_BS_10     : num  5.47e-09 -2.51e-10 5.47e-09 -2.51e-10 5.47e-09 ...
-#>  $ Total_DON_BS_10 : num  5.50e-09 -2.53e-10 5.50e-09 -2.53e-10 5.50e-09 ...
+#>  $ Total_DON_BS_10 : num  5.61e-09 -2.58e-10 5.61e-09 -2.58e-10 5.61e-09 ...
 #>  $ DOP_B_BS_10     : num  8.75e-10 -4.02e-11 8.75e-10 -4.02e-11 8.75e-10 ...
-#>  $ Total_DOP_BS_10 : num  8.88e-10 -4.09e-11 8.88e-10 -4.09e-11 8.88e-10 ...
+#>  $ Total_DOP_BS_10 : num  9.27e-10 -4.26e-11 9.27e-10 -4.26e-11 9.27e-10 ...
 #>  $ DOC_B_BS_25     : num  8.31e-09 -3.82e-10 8.31e-09 -3.82e-10 8.31e-09 ...
-#>  $ Total_DOC_BS_25 : num  8.41e-09 -3.87e-10 8.41e-09 -3.87e-10 8.41e-09 ...
+#>  $ Total_DOC_BS_25 : num  8.67e-09 -3.99e-10 8.67e-09 -3.99e-10 8.67e-09 ...
 #>  $ DON_B_BS_25     : num  2.19e-09 -1.01e-10 2.19e-09 -1.01e-10 2.19e-09 ...
-#>  $ Total_DON_BS_25 : num  2.22e-09 -1.02e-10 2.22e-09 -1.02e-10 2.22e-09 ...
+#>  $ Total_DON_BS_25 : num  2.33e-09 -1.07e-10 2.33e-09 -1.07e-10 2.33e-09 ...
 #>  $ DOP_B_BS_25     : num  3.50e-10 -1.61e-11 3.50e-10 -1.61e-11 3.50e-10 ...
-#>  $ Total_DOP_BS_25 : num  3.64e-10 -1.67e-11 3.64e-10 -1.67e-11 3.64e-10 ...
+#>  $ Total_DOP_BS_25 : num  4.02e-10 -1.85e-11 4.02e-10 -1.85e-11 4.02e-10 ...
 #>  $ DOC_B_BS_40     : num  5.19e-09 -2.39e-10 5.19e-09 -2.39e-10 5.19e-09 ...
-#>  $ Total_DOC_BS_40 : num  5.29e-09 -2.43e-10 5.29e-09 -2.43e-10 5.29e-09 ...
+#>  $ Total_DOC_BS_40 : num  5.56e-09 -2.56e-10 5.56e-09 -2.56e-10 5.56e-09 ...
 #>  $ DON_B_BS_40     : num  1.37e-09 -6.29e-11 1.37e-09 -6.29e-11 1.37e-09 ...
-#>  $ Total_DON_BS_40 : num  1.40e-09 -6.46e-11 1.40e-09 -6.46e-11 1.40e-09 ...
+#>  $ Total_DON_BS_40 : num  1.51e-09 -6.95e-11 1.51e-09 -6.95e-11 1.51e-09 ...
 #>  $ DOP_B_BS_40     : num  2.19e-10 -1.01e-11 2.19e-10 -1.01e-11 2.19e-10 ...
-#>  $ Total_DOP_BS_40 : num  2.32e-10 -1.07e-11 2.32e-10 -1.07e-11 2.32e-10 ...
+#>  $ Total_DOP_BS_40 : num  2.71e-10 -1.25e-11 2.71e-10 -1.25e-11 2.71e-10 ...
 ```
 
 ``` r
@@ -419,9 +469,9 @@ analyzed_vp_results_dictionary
 #> 9             VP_SE                               /
 #> 10     VP_R_Squared                               /
 #> 11        VP_Method                               /
-#> 12              B_0                         #VLP/mL
-#> 13             B_OS                         #VLP/mL
-#> 14             V_OS                         #VLP/mL
+#> 12              B_0                    #bacteria/mL
+#> 13             B_OS                    #bacteria/mL
+#> 14             V_OS                     #viruses/mL
 #> 15             c_VP                        #VLP/mLh
 #> 16         c_abs_VP                         #VLP/mL
 #> 17          c_VP_SE                               /
@@ -492,25 +542,25 @@ analyzed_vp_results_dictionary
 #> 30                                         Viral turnover time: time to replacte the current virus population by new viruses
 #> 31                                                                               Dissolved organic carbon release of viruses
 #> 32                                                                             Dissolved organic nitrogen release of viruses
-#> 33                                                                          Dissolved organic phosphorous release of viruses
+#> 33                                                                           Dissolved organic phosphorus release of viruses
 #> 34                                                         Dissolved organic carbon release of bacteria for given burst size
 #> 35                                                               Total dissolved organic carbon release for given burst size
 #> 36                                                       Dissolved organic nitrogen release of bacteria for given burst size
 #> 37                                                             Total dissolved organic nitrogen release for given burst size
-#> 38                                                    Dissolved organic phosphorous release of bacteria for given burst size
-#> 39                                              Total dissolved organic phosphorous release of bacteria for given burst size
+#> 38                                                     Dissolved organic phosphorus release of bacteria for given burst size
+#> 39                                               Total dissolved organic phosphorus release of bacteria for given burst size
 #> 40                                                         Dissolved organic carbon release of bacteria for given burst size
 #> 41                                                               Total dissolved organic carbon release for given burst size
 #> 42                                                       Dissolved organic nitrogen release of bacteria for given burst size
 #> 43                                                             Total dissolved organic nitrogen release for given burst size
-#> 44                                                    Dissolved organic phosphorous release of bacteria for given burst size
-#> 45                                              Total dissolved organic phosphorous release of bacteria for given burst size
+#> 44                                                     Dissolved organic phosphorus release of bacteria for given burst size
+#> 45                                               Total dissolved organic phosphorus release of bacteria for given burst size
 #> 46                                                         Dissolved organic carbon release of bacteria for given burst size
 #> 47                                                               Total dissolved organic carbon release for given burst size
 #> 48                                                       Dissolved organic nitrogen release of bacteria for given burst size
 #> 49                                                             Total dissolved organic nitrogen release for given burst size
-#> 50                                                    Dissolved organic phosphorous release of bacteria for given burst size
-#> 51                                              Total dissolved organic phosphorous release of bacteria for given burst size
+#> 50                                                     Dissolved organic phosphorus release of bacteria for given burst size
+#> 51                                               Total dissolved organic phosphorus release of bacteria for given burst size
 ```
 
 The `visualize` step generates a list of plot objects. The package

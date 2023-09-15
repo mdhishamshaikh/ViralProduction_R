@@ -51,7 +51,7 @@ The `viralprod` package simplifies the analysis of viral production data, making
 
 * *Calculating Viral Production*: It provides two primary methods, `linear regression` and `VIPCAL`, for calculating viral production rates from viral counts. 
 * *Analyze Viral Production*: Various parameters for estimating virus-mediated microbial mortality can be determined based on the calculated viral production values.
-* *Visualize Viral Production*: Effective data visualization plays a pivotal role in data analysis. The package provides illustrative examples to visualize your viral production data effectively.
+* *Visualize Viral Production*: Effective data visualization plays a pivotal role in data analyses. The package provides illustrative examples to visualize your viral production data effectively.
 
 Begin by exploring the available functions within the package. Alongside the pipe operator from the `dplyr` package, a variety of functions are at your disposal:
 
@@ -59,9 +59,9 @@ Begin by exploring the available functions within the package. Alongside the pip
 ls("package:viralprod")
 ```
 
-Within the package, each of the three primary steps has its dedicated function. Additionally, a comprehensive wrapper function exists, `vp_end_to_end`, which integrates all three essential steps of viral production analysis into a single execution. Executing this singular function yields calculated viral production results, analyzed data, and visualizations. Below, we will demonstrate the functionality of the wrapper function using example data available in the `inst/extdata` folder, use of the separate main functions is integrated in the `Introduction to viralprod` vignette. 
+Within the package, each of the three primary steps has its own, dedicated function. Additionally, a comprehensive wrapper function exists, `vp_end_to_end`, which integrates all three essential steps of viral production analyses into a single execution. Executing this singular function yields calculated viral production results, analyzed data, and visualizations. Below, we will demonstrate the functionality of the wrapper function using example data available in the `inst/extdata` folder, use of the separate main functions is integrated in the `Introduction to viralprod` vignette. 
 
-Running the code, provided below, also serves as a convenient method to verify the correct installation of the package. Note that the assessment of input data frames conforms to the package's requirements is seamlessly integrated into the wrapper function through the `vp_class_count data` function. 
+Running the code, provided below, also serves as a convenient method to verify the correct installation of the package. Note that the assessment of input data frames conforms to the package's requirements is seamlessly integrated into the wrapper function through the `vp_class_count_data` function. 
 
 For detailed information regarding the specific requirements for input data, please consult the vignette: `Input data for viralprod`. Furthermore, comprehensive insights into the methodology, including individual function usage, will be expounded upon in `Introduction to viralprod`.
 
@@ -118,7 +118,15 @@ Now, it's time to execute the wrapper function. Although the following demonstra
 # All methods will be executed with default parameters
 vp_end_to_end(data = data_NJ2020_all,
               original_abundances = NJ2020_original_abundances,
-              write_output = F)
+              methods = c(1:12),
+              SR_calc = TRUE,
+              BP_endpoint = TRUE,
+              burst_sizes = c(),
+              bacterial_secondary_production = NULL,
+              nutrient_content_bacteria = list(),
+              nutrient_content_viruses = list(),
+              write_output = FALSE,
+              output_dir = "")
 ```
 
 After running the wrapper function, check the global environment to access its output:

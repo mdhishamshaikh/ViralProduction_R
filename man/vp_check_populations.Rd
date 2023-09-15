@@ -10,13 +10,13 @@ vp_check_populations(data)
 \item{data}{Data frame with the output of the flow cytometry.}
 }
 \value{
-A character vector with the different populations to analyze will be available in the global environment. An error occurs when the total virus population, \code{c_Viruses}, is not defined during the gating process.
+A character vector with the different populations to analyze. An error occurs when the total virus population, \code{c_Viruses}, is not defined during the gating process.
 }
 \description{
 Bacterial and viral counts are retrieved from flow cytometry data by selecting an area on the generated scatter plot,
-this process is called \code{gating}. During the gating process, different populations are defined based on the side scatter
-and green fluorescence. Since gating is a manual process, the user is free to determine which populations to define.
-The count values, retrieved from the scatter plot, need to be as a column in the output data frame of the flow
+a process called \code{gating}. During the gating process, different populations are defined based on the level of green
+fluorescence and side scatter. Since gating is a manual process, the user is free to determine which populations to define.
+Depending on the area the gates encompass, count values are obtained and need to be as a column in the output data frame of the flow
 cytometry step named as followed: \code{c_PopulationName}. Given the output data frame of the flow cytometry step,
 the different populations to analyze, determined by the gating process, are defined.
 }
@@ -26,24 +26,28 @@ the different populations to analyze, determined by the gating process, are defi
 # (most common populations)
 data_NJ2020_all <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_all)
 
 # Case 2: Less populations defined during gating 
 # (only the total viral and bacterial population for example)
 data_NJ2020_less <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_less_populations.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_less)
 
 # Case 3: More populations defined during gating 
 # (more niche populations, like c_V4, for example)
 data_NJ2020_more <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_more_populations.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_more)
 
 # Case 4: Total virus population is not defined during gating 
 # (error expected)
 data_NJ2020_without_cViruses <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_without_cViruses.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_without_cViruses)
 }
 }

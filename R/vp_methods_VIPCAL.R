@@ -4,7 +4,7 @@
 #' Two main methods are used to determine the viral production rate in the viral reduction assay: `Linear Regression` vs
 #' `VIPCAL`. Different variants of both methods are performed: variance in replicate treatment, use of standard error
 #' and type of estimation of the difference curve is presented. Next, the different variants of `VIPCAL`
-#' which uses the average of increments between the viral counts to determine the viral production rate. 
+#' which examines the average of increments as a benchmark for viral production. 
 #' The following general step-by-step plan is carried out by each of the variants:
 #'    
 #' 1. Constructing correct data frame depending on replicate treatment.
@@ -47,6 +47,7 @@
 #' @examples \dontrun{
 #' data_NJ2020_all <- read.csv(system.file('extdata', 
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' 
 #' vp_check_populations(data_NJ2020_all)
 #' 
 #' vp_VIPCAL_separate_replicates(data_NJ2020_all)

@@ -17,9 +17,10 @@ vp_calculate_difference_samples(DF, VIPCAL = FALSE, SE = FALSE)
 Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 }
 \description{
-The viral reduction assay has two types of samples: VP and VPC. In VP samples, count of bacteriophages in lytic phase
-can be measured (\verb{lytic viral production}). On the other hand in VPC samples, count of bacteriophages in both lytic and
-lysogenic phase can be measured (\verb{lytic + lysogenic viral production}) since treatment with antibiotic \code{mitomycin-C}.
+The viral reduction assay has two types of samples: VP and VPC. In VP samples, count of bacteriophages in the lytic phase
+can be measured (\verb{lytic viral production}), while in VPC samples, count of bacteriophages in both the lytic and
+lysogenic phase can be measured (\verb{lytic + lysogenic viral production}) since treatment with antibiotic \code{Mitomycin-C}.
+
 Bacteriophages in the lysogenic phase integrate with the genome of the bacteria and can't be measured normally. Mitomycin-C
 inhibits DNA synthesis in the bacteria, therefore the bacteriophage needs to go into the lytic phase and measurement is
 possible. The details around the different calculation methods of viral production, being it either with linear regression
@@ -27,17 +28,18 @@ or VIPCAL, are available on: \link{determine_vp_linear_regression} and \link{det
 
 Some of the variants estimate the difference curve by subtraction or LMER model to calculate the lysogenic viral production.
 If there is no estimation of the difference curve, lysogenic viral production is calculated afterwards as the difference
-between the viral production of VPC samples and VP samples.
+between the viral production values of VPC samples and VP samples.
 }
 \examples{
 \dontrun{
 data_NJ2020_all <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_all)
 
-DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
 # For average replicate treatment, no difference curve estimation by subtraction
 # Take subset of data frame
+DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
 DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all) \%>\% subset(Sample_Type != 'Diff') 
 
 vp_linear_allpoints <- determine_vp_linear_allpoints(DF_SR)

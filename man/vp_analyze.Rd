@@ -36,7 +36,7 @@ vp_analyze(x, ...)
 
 \item{bacterial_secondary_production}{Value for the bacterial secondary production, how much new bacterial biomass is produced as a result of bacterial growth and reproduction.}
 
-\item{nutrient_content_bacteria}{List with the amount of organic carbon, nitrogen and phosphor released by a bacteria, preferred a aquatic, North Sea bacteria.}
+\item{nutrient_content_bacteria}{List with the amount of organic carbon, nitrogen and phosphor released by an aquatic bacteria.}
 
 \item{nutrient_content_viruses}{List with the amount of organic carbon, nitrogen and phosphor released by a marine virus (bacteriophage).}
 
@@ -51,7 +51,7 @@ Data frame with the analyzed viral production results, different parameters for 
 \description{
 Luef et al. (2009) created an online tool, \verb{Viral Production Calculator}, that assesses and analyses viral production.
 Next to calculating the viral production and the proportion of lysogenic bacteria in the sample, other parameters for estimating
-virus-induced mortality are determined including the lysis rate of bacteria, viral turnover time, organic carbon release and others.
+virus-induced mortality are determined including the lysis rate of bacteria, viral turnover time, organic carbon release and many more.
 
 Based on the original data and the output of \link{vp_calculate}, the same parameters are
 calculated and added to the already existing data frame. Another data frame with the description and units of each of the variables
@@ -74,6 +74,7 @@ original_abundances_NJ2020 <- read.csv(system.file('extdata',
 
 x <- vp_class_count_data(data_NJ2020_all)
 y <- vp_class_ori_abu(original_abundances_NJ2020)
+
 vp_calculate(x, write_output = F)
 
 # Perform

@@ -5,10 +5,10 @@
 #' is calculated for all methods of linear regression and VIPCAL. Based on the parameters, different data frames will be available
 #' in the global environment and written as csv files.
 #' 
-#' 1. `vp_results_ALL.csv`: contains the viral production results for all samples.
-#' 2. `vp_results_T24.csv`: contains the viral production results for all samples at the end of the assay (T0_T24).
-#' 3. `vp_results_SR.csv`: contains the viral production results for all samples of the separate replicate treatment, VP and VPC samples only.
-#' 4. `vp_results_BP.csv`: contains the viral production results for all samples with the bacterial endpoint into account. Results for that time range will be stored in data frame.
+#' 1. `vp_results_ALL.csv`: Contains the viral production results for all samples.
+#' 2. `vp_results_T24.csv`: Contains the viral production results for all samples at the end of the assay (T0_T24).
+#' 3. `vp_results_SR.csv`: Contains the viral production results for all samples of the separate replicate treatment, VP and VPC samples only.
+#' 4. `vp_results_BP.csv`: Contains the viral production results for all samples with the bacterial endpoint into account. Results for that time range will be stored in data frame.
 #' 
 #' More details about the calculation methods:
 #' 
@@ -90,11 +90,11 @@ vp_calculate.viralprod <- function(x, ...,
       user_choice <- utils::menu(
         c("Continue and possibly overwrite existing results",
           "Stop and define another output directory"),
-        title = message("Warning: The output folder already exists!"),
+        title = "Warning: The output folder already exists!",
         graphics = FALSE)
       
       if (user_choice == 1){
-        message('Continuing with the existing output directory, existing results will possibly be overwritten!')
+        print('Continuing with the existing output directory, existing results will possibly be overwritten!')
         vp_results_path <- paste0(output_dir, '/')
         
       } else {
@@ -129,7 +129,7 @@ vp_calculate.viralprod <- function(x, ...,
   for (method in methods){
     tryCatch(
       expr = {
-        message(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method]))
+        print(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method]))
         vp_results <- .GlobalEnv$list_of_methods[[method]](x)
         
         vp_results_output_df <- dplyr::full_join(vp_results_output_df, vp_results)
@@ -148,7 +148,7 @@ vp_calculate.viralprod <- function(x, ...,
       },
       
       finally = {
-        message(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
+        print(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
       }
     )
   }
@@ -178,7 +178,7 @@ vp_calculate.viralprod <- function(x, ...,
     for (method in methods_SR){
       tryCatch(
         expr = {
-          message(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method], ', only separate replicate results'))
+          print(paste0('Processing using method: ', names(.GlobalEnv$list_of_methods)[method], ', only separate replicate results'))
           vp_results <- .GlobalEnv$list_of_methods[[method]](x, AVG = F)
           
           vp_results_output_SR_df <- dplyr::full_join(vp_results_output_SR_df, vp_results)
@@ -197,7 +197,7 @@ vp_calculate.viralprod <- function(x, ...,
         },
         
         finally = {
-          message(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
+          print(paste0('Analysis done for method ', names(.GlobalEnv$list_of_methods)[method], '. Please check calc_vp_error_list and calc_vp_warn_list for any error or warnings.'))
         }
       )
     }

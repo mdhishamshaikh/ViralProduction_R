@@ -86,8 +86,15 @@ df <- vp_class_ori_abu(good_dataframe)
 class(df)
 ```
 
+```{r, results='hide', warning=FALSE, message=FALSE}
+library(dplyr)
+```
+
 ```{r}
-bad_dataframe <- dplyr::mutate(dplyr::select(NJ2020_original_abundances, -'Station_Number'), Total_Bacteria = as.character(Total_Bacteria))
+bad_dataframe <- NJ2020_original_abundances %>% 
+  select(-'Station_Number') %>%
+  mutate(Total_Bacteria = as.character(Total_Bacteria))
+
 str(bad_dataframe)
 ```
 
@@ -141,7 +148,10 @@ class(df)
 ```
 
 ```{r}
-bad_dataframe <- dplyr::mutate(dplyr::select(NJ2020_all, -dplyr::all_of(c('Location', 'Replicate'))), Timepoint = as.character(Timepoint))
+bad_dataframe <- NJ2020_all %>%
+  select(-all_of(c('Location', 'Replicate'))) %>%
+  mutate(Timepoint = as.character(Timepoint))
+
 str(bad_dataframe)
 ```
 

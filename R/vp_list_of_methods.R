@@ -1,15 +1,14 @@
 #' List of methods used for viral production calculation
 #' 
 #' @description
-#' A list of all the different variants of linear regression and VIPCAL available to calculate the viral
-#' production rate.
+#' Generate a comprehensive list of available variants for viral production calculation
 #' 
 #' More details on the different methods:
 #' 
 #' - Variants of linear regression: [viralprod::vp_methods_linear]
 #' - Variants of VIPCAL: [viralprod::vp_methods_VIPCAL]
 #' 
-#' @return A list, with the different variants of linear regression and VIPCAL to calculate viral production, will be available in the global environment.
+#' @return A list, with the different variants of linear regression and VIPCAL to calculate viral production.
 #' 
 #' @name vp_list_of_methods
 #' @rdname vp_list_of_methods
@@ -24,6 +23,7 @@
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
 #' 
 #' vp_check_populations(data_NJ2020_all)
+#' 
 #' list_of_methods[[1]](data_NJ2020_all)
 #' }
 vp_list_of_methods <- function(){

@@ -2,14 +2,16 @@
 #' 
 #' @description
 #' In the VP samples, an increase of collision rates between the bacteriophages (viruses) and bacteria is noticed. 
-#' This is probably due to the net increase in bacterial growth that is established during the assay. In VPC samples
-#' on the other hand, this phenomenon isn't presented since treatment with antibiotic `mitomycin-C` inhibits the
-#' growth of bacteria. This increase in collision rates in solely VP samples results in a higher expected lytic viral production.
-#' Ultimately, this can result in a negative lysogenic viral production. To achieve comparable results between the different sample types,
-#' we define the bacterial endpoint as the moment where the generation time in bacteria is less then 24 hours, since the duration of
-#' the assay is 24 hours. The generation time is calculated based of the net increase of the total bacteria population in 
-#' the VP samples of the assay. The bacterial endpoint will determine the moment when to stop the assay to assure less biased results.
-#'
+#' This is probably due to the net increase in bacterial growth that is established during the assay. In VPC samples, 
+#' this phenomenon isn't presented since treatment with antibiotic `Mitomycin-C` inhibits the
+#' growth of bacteria. Such increased collision rates can result in an overestimated lytic viral production 
+#' and a negative lysogenic viral production.
+#' 
+#' To mitigate this, we define the bacterial endpoint as the point at which the bacterial generation time becomes 
+#' less than the assay duration, indication the appropriate moment to stop the assay and obtain less biased results.
+#' The generation time is calculated based of the net increase of the total bacteria population in 
+#' the VP samples of the assay.
+#' 
 #' @param data Data frame with the output of the flow cytometry.
 #' @param visual If \code{FALSE}, a character with the time range to stop the assay is returned. The character value is from the form: T0_TX. If \code{TRUE}, an integer with the index of the time point to stop the assay is returned. (Default = \code{FALSE})
 #' 
@@ -21,6 +23,7 @@
 #' @examples \dontrun{
 #' data_NJ2020_all <- read.csv(system.file('extdata', 
 #' 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+#' 
 #' vp_check_populations(data_NJ2020_all)
 #' 
 #' # Bacterial endpoint is determined per station/experiment

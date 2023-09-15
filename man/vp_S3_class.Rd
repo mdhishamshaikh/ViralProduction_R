@@ -21,8 +21,8 @@ If data frame meets the requirements, a new class is added. Otherwise, an error 
 \description{
 The \code{viralprod} package is dependent on two data frames, the output data frame of the flow cytometry step and a data
 frame with the original abundances in the sample. To make the R package more organized, maintainable and user-friendly,
-\verb{S3 object-oriented programming} is introduced. Based on the requirements of the data frames, a separate S3 class is defined.
-The functions to calculate, analyze and visualize the viral production from the viral reduction assay will only work on these specific
+\verb{S3 object-oriented programming} is introduced. Based on the requirements of the data frames, a separate S3 class, unique to this package, is defined.
+The functions to calculate, analyze and visualize the viral production will only work on these specific
 S3 classes, otherwise an error will be thrown.
 
 \code{vp_class_count_data} checks the output data frame of the flow cytometry step. If the requirements are met, \code{viralprod} class is added.

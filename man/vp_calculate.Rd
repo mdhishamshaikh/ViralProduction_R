@@ -46,10 +46,10 @@ Wrapper function that performs viral production calculation. Given the output of
 is calculated for all methods of linear regression and VIPCAL. Based on the parameters, different data frames will be available
 in the global environment and written as csv files.
 \enumerate{
-\item \code{vp_results_ALL.csv}: contains the viral production results for all samples.
-\item \code{vp_results_T24.csv}: contains the viral production results for all samples at the end of the assay (T0_T24).
-\item \code{vp_results_SR.csv}: contains the viral production results for all samples of the separate replicate treatment, VP and VPC samples only.
-\item \code{vp_results_BP.csv}: contains the viral production results for all samples with the bacterial endpoint into account. Results for that time range will be stored in data frame.
+\item \code{vp_results_ALL.csv}: Contains the viral production results for all samples.
+\item \code{vp_results_T24.csv}: Contains the viral production results for all samples at the end of the assay (T0_T24).
+\item \code{vp_results_SR.csv}: Contains the viral production results for all samples of the separate replicate treatment, VP and VPC samples only.
+\item \code{vp_results_BP.csv}: Contains the viral production results for all samples with the bacterial endpoint into account. Results for that time range will be stored in data frame.
 }
 
 More details about the calculation methods:

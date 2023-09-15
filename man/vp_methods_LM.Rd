@@ -34,7 +34,7 @@ Data frame with the viral production rate and the absolute viral production for 
 Two main methods are used to determine the viral production rate in the viral reduction assay: \verb{Linear Regression} vs
 \code{VIPCAL}. Different variants of both methods are performed: variance in replicate treatment, use of standard error
 and type of estimation of the difference curve is presented. Next, the different variants of \verb{Linear Regression}
-which uses the slope between the viral counts to determine the viral production rate. The following general
+which uses first-order regressions for calculating viral production. The following general
 step-by-step plan is carried out by each of the variants:
 \enumerate{
 \item Constructing correct data frame depending on replicate treatment.
@@ -65,6 +65,7 @@ More details about the used functions:
 \dontrun{
 data_NJ2020_all <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_all)
 
 vp_linear_allpoints(data_NJ2020_all)

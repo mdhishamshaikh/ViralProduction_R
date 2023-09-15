@@ -1,8 +1,8 @@
 #' Visualizations of viral production data
 #' 
 #' @description
-#' A major step in data analyses is `data visualization`. Some suggestions to visualize the flow cytometry, viral
-#' production or analyzed viral production data are given. 
+#' A major step in data analyses is `data visualization`. Some suggestions to visualize the original viral count data, 
+#' calculated viral production data, or analyzed viral production data.
 #' 
 #' `plot_overview_counts_over_time`: plots the bacterial and viral counts, retrieved from the flow cytometry, in
 #' function of the different time ranges of the assay. The bacterial endpoint is also highlighted in pink. 
@@ -15,7 +15,7 @@
 #' all the methods is made. Next to that, a plot that compares linear regression with VIPCAL and VIPCAL-SE is also produced.
 #' 
 #' `plot_VIPCAL_vs_VIPCAL_SE`: a separate visualization for comparison between VIPCAL and VIPCAL-SE. The calculated viral
-#' production values of both methods are compared plus a `Robust Graphical Method` (ROGME) is used for the comparison between the two.
+#' production values of both methods are compared plus a `Robust Graphical Method (ROGME)` is used for the comparison between the two.
 #'
 #' `plot_percentage_cells`: plots the percentage of lytically infected and lysogenic cells in function of the 
 #' different burst sizes. Important to note, that this is the percentage of cells at the bacterial endpoint of the assay,
@@ -62,10 +62,12 @@
 #' 
 #' analyze_viral_production(vp_results_output_BP_df, data_NJ2020_all, 
 #' original_abundances_NJ2020, write_csv = F)
+#' 
 #' plot_percentage_cells(analyzed_vp_results_df)
 #' 
 #' analyze_viral_production(vp_results_output_T24_df, data_NJ2020_all, 
 #' original_abundances_NJ2020, write_csv = F)
+#' 
 #' plot_nutrient_release(analyzed_vp_results_df)
 #' }
 plot_overview_counts_over_time <- function(data){
@@ -109,8 +111,10 @@ plot_overview_counts_over_time <- function(data){
                                   labels = unique(plot_dataframe_counts$Population),
                                   values = RColorBrewer::brewer.pal(n = 12, name = 'Paired')) + 
       
-      ggplot2::labs(title = paste0(plot_dataframe_counts$tag, " - Overview"),
-                    subtitle = 'Bacterial and Viral counts for Lytic and Lysogenic inductions',
+      ggplot2::labs(title = paste0(unique(plot_dataframe_counts$Location), '_Station_', 
+                                   unique(plot_dataframe_counts$Station_Number), '_Depth_', 
+                                   unique(plot_dataframe_counts$Depth), '_Overview'),
+                    subtitle = 'Bacterial and Viral counts for lytic and lysogenic inductions',
                     x = 'Sampling Timepoints\n (in hours)',
                     y = 'FCM Counts\n (in millions)') + 
       
@@ -295,7 +299,7 @@ plot_collision_rates <- function(data,
                    axis.text = ggplot2::element_text(size = 10)) + 
     
     ggplot2::labs(title = paste0(unique(collision_rates_plot_df$Location), '_Collision_Rates'),
-                  subtitle = 'Difference in collision rates between VP and VPC samples over time\nPercentages represents decrease of collision rates in T0_sample compared to original seawater sample (WW_sample)',
+                  subtitle = 'Difference in collision rates between VP and VPC samples over time\nPercentages represents decrease of collision rates in T0_sample compared to original seawater sample',
                   x = 'Sampling Timepoints\n (in hours)',
                   y = 'Mean Relative Collision Rate') 
   
@@ -576,7 +580,7 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
   n <- ggplot2::ggplot(data = plot_data) + 
     ggplot2::geom_col(mapping = ggplot2::aes(x = .data$Burst_Size, y = .data$P_Cells, fill = .data$Sample_Type), 
                       position = 'dodge') + 
-    ggplot2::geom_text(data = plot_data, ggplot2::aes(x = unique(.data$Burst_Size)[2], y = max(.data$P_Cells)),
+    ggplot2::geom_text(data = plot_data, ggplot2::aes(x = unique(.data$Burst_Size)[2], y = max(.data$P_Cells) - 5),
                        label = paste0('Timepoint of the assay\n(Bacterial Endpoint): T0_T', plot_data$Timepoint),
                        size = 3, color = 'black', show.legend = F) +
     

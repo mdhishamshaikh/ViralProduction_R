@@ -28,28 +28,30 @@ determine_vp_VIPCAL_LMER_model_SE(SR_dataframe)
 Data frame with the viral production rate and the absolute viral production for each population at the different time points of the assay.
 }
 \description{
-\code{VIPCAL} uses the average of increments to determine the viral production rate. Firstly, the peaks and valleys in the count
-data need to be determined. Viral production rate is obtained by taking the average of increments during the current time range.
-An increment is defined as the transition from an valley to a peak. Again, lytic viral production can be derived from
-the VP samples, the average of increments of the difference curve is needed for lysogenic viral production.
-\code{VIPCAL-SE} goes one step further and takes the standard error into account, since this has a major influence on the results.
+\code{VIPCAL} examines the average of increments as a benchmark for viral production. An increment is recognized as
+the transition from a valley to a peak with a peak defined as an increase in viral abundance relative to the
+abundance at the preceding timepoint, conversely when a decrease is observed, we speak of a valley. Again,
+lytic viral production can be derived from the VP samples, the average of increments of the difference curve is
+needed for lysogenic viral production.
+
+\code{VIPCAL-SE} takes this a step further by incorporating the standard error., since this has a major influence on the results.
 With the determination of peaks and valleys, only true increments are returned by VIPCAL-SE.
 A peak/valley is only defined if there is no overlap between the standard errors. By adding this requirement,
 sufficient differences in count values are needed so that there is a true increase in the viral count.
 
 \code{determine_vp_VIPCAL_separate_replicates} uses a separate replicate treatment, distinguishing between replicates.
 
-\code{determine_vp_VIPCAL_average_replicates} uses an average replicate treatment, average over the replicates.
-Difference curve estimation by subtraction.
+\code{determine_vp_VIPCAL_average_replicates} uses an average replicate treatment, average over the replicates,
+difference curve estimation by subtraction.
 
-\code{determine_vp_VIPCAL_average_replicates_SE} uses VIPCAL-SE and an average replicate treatment, average over the replicates.
-Difference curve estimation by subtraction.
+\code{determine_vp_VIPCAL_average_replicates_SE} uses VIPCAL-SE and an average replicate treatment, average over the replicates,
+difference curve estimation by subtraction.
 
-\code{determine_vp_VIPCAL_LMER_model} uses an average replicate treatment, average over the replicates is included in LMER model.
-Difference curve estimation by LMER model.
+\code{determine_vp_VIPCAL_LMER_model} uses an average replicate treatment, average over the replicates is included in LMER model,
+difference curve estimation by LMER model.
 
-\code{determine_vp_VIPCAL_LMER_model_SE} Uses VIPCAL-SE and an average replicate treatment, average over the replicates is included in LMER model.
-Difference curve estimation by LMER model.
+\code{determine_vp_VIPCAL_LMER_model_SE} Uses VIPCAL-SE and an average replicate treatment, average over the replicates is included in LMER model,
+difference curve estimation by LMER model.
 
 See \link{vp_LMER_model} for more details about the LMER model.
 }
@@ -57,6 +59,7 @@ See \link{vp_LMER_model} for more details about the LMER model.
 \dontrun{
 data_NJ2020_all <- read.csv(system.file('extdata', 
 'NJ2020_Station_2_and_6_all_populations.csv', package = "viralprod"))
+
 vp_check_populations(data_NJ2020_all)
 
 DF_SR <- vp_separate_replicate_dataframe(data_NJ2020_all)
