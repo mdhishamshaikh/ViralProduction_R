@@ -36,7 +36,7 @@ You can install the development version of `viralprod` from [GitHub](https://git
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mdhishamshaikh/ViralProduction_R")
+devtools::install_github("mdhishamshaikh/ViralProduction_R", dependencies = TRUE, build_vignettes = TRUE)
 ```
 
 To load the package, use the following command:

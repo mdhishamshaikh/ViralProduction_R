@@ -29,7 +29,7 @@ You can install the development version of `viralprod` from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mdhishamshaikh/ViralProduction_R")
+devtools::install_github("mdhishamshaikh/ViralProduction_R", dependencies = TRUE, build_vignettes = TRUE)
 ```
 
 To load the package, use the following command:
@@ -282,7 +282,7 @@ list_of_methods[12]
 #>             dplyr::everything())
 #>     return(viral_production_VIPCAL)
 #> }
-#> <bytecode: 0x000002b83158a728>
+#> <bytecode: 0x00000172c1595af8>
 #> <environment: namespace:viralprod>
 ```
 
@@ -341,15 +341,15 @@ vp_end_to_end(data = data_NJ2020_all,
 #> [1] "Default values used for burst size!"
 #> [1] "Default value used for bacterial secondary production!"
 #> [1] "Default values used for nutrient content of bacteria!"
-#> [1] "Default values used for nutrient condent of viruses!"
+#> [1] "Default values used for nutrient content of viruses!"
 #> [1] "Default values used for burst size!"
 #> [1] "Default value used for bacterial secondary production!"
 #> [1] "Default values used for nutrient content of bacteria!"
-#> [1] "Default values used for nutrient condent of viruses!"
+#> [1] "Default values used for nutrient content of viruses!"
 #> [1] "Default values used for burst size!"
 #> [1] "Default value used for bacterial secondary production!"
 #> [1] "Default values used for nutrient content of bacteria!"
-#> [1] "Default values used for nutrient condent of viruses!"
+#> [1] "Default values used for nutrient content of viruses!"
 ```
 
 After running the wrapper function, check the global environment to
