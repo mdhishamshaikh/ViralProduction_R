@@ -45,8 +45,8 @@ vp_class_count_data <- function(data = data.frame()){
   
   # 3. Columns need to be of correct class
   if (has_correct_columns){
-    checkmate::assert_true(all(sapply(data[c('Timepoint', .GlobalEnv$populations_to_analyze)], is.numeric)) && 
-                             all(sapply(data[c('Station_Number', 'Depth', 'Replicate')], is.integer)) && 
+    checkmate::assert_true(all(sapply(data[c('Timepoint', 'Station_Number', 'Depth', 'Replicate',
+                                             .GlobalEnv$populations_to_analyze)], is.numeric)) &&  
                              all(sapply(data[c('Location', 'Sample_Type')], is.character)))
   }
   
@@ -70,8 +70,7 @@ vp_class_ori_abu <- function(original_abundances = data.frame()){
   
   # 3. Columns need to be of correct class
   if (has_correct_columns){
-    checkmate::assert_true(all(sapply(original_abundances[c('Total_Bacteria', 'Total_Viruses')], is.numeric)) && 
-                             all(sapply(original_abundances[c('Station_Number')], is.integer)))
+    checkmate::assert_true(all(sapply(original_abundances[c('Station_Number', 'Total_Bacteria', 'Total_Viruses')], is.numeric)))
   }
   
   ## Return object with new class

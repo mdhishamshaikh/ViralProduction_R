@@ -174,7 +174,7 @@ vp_analyze.viralprod <- function(x, ...,
     N_V <- (563058 / 6.022e23) * 14.01
     P_V <- (92428 / 6.022e23) * 30.97
     nutrient_content_viruses <- list(C = C_V, N = N_V, P = P_V) 
-    print('Default values used for nutrient condent of viruses!')
+    print('Default values used for nutrient content of viruses!')
   }
   
   ## 3. Analyze viral production results
