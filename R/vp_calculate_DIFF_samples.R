@@ -52,7 +52,7 @@ vp_calculate_difference_samples <- function(DF,
         dplyr::summarise(
           VP = sum(.data$VP[.data$Sample_Type == 'VPC']) - sum(.data$VP[.data$Sample_Type == "VP"]),
           abs_VP = sum(.data$abs_VP[.data$Sample_Type == 'VPC']) - sum(.data$abs_VP[.data$Sample_Type == "VP"]),
-          VP_SE = sum(.data$VP_SE[.data$Sample_Type == "VPC"]) + sum(.data$VP_SE[.data$Sample_Type == "VP"]), 
+          VP_SE = sqrt((sum(.data$VP_SE[.data$Sample_Type == "VPC"]))^2 + (sum(.data$VP_SE[.data$Sample_Type == "VP"]))^2), 
           Sample_Type = "Diff")
     } else {
       difference_samples <- DF %>%
@@ -68,7 +68,7 @@ vp_calculate_difference_samples <- function(DF,
       dplyr::summarise(
         VP = sum(.data$VP[.data$Sample_Type == 'VPC']) - sum(.data$VP[.data$Sample_Type == "VP"]),
         abs_VP = sum(.data$abs_VP[.data$Sample_Type == 'VPC']) - sum(.data$abs_VP[.data$Sample_Type == "VP"]),
-        VP_SE = sum(.data$VP_SE[.data$Sample_Type == "VPC"]) + sum(.data$VP_SE[.data$Sample_Type == "VP"]), 
+        VP_SE = sqrt((sum(.data$VP_SE[.data$Sample_Type == "VPC"]))^2 + (sum(.data$VP_SE[.data$Sample_Type == "VP"]))^2), 
         VP_R_Squared = NA,
         Sample_Type = "Diff")
   }
