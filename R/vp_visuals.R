@@ -320,11 +320,11 @@ plot_comparison_methods <- function(vp_results){
     dplyr::filter(stringr::str_starts(.data$VP_Method, "VPCL"), .data$Population == 'c_Viruses')
   
   plot_data_LM_vs_VPCL <- vp_results %>%
-    dplyr::filter(.data$VP_Method %in% c('LM_AR_DIFF','VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), 
+    dplyr::filter(.data$VP_Method %in% c('LM_AR_DIFF','VPCL_AR_DIFF', 'VPCL_AR_DIFF_SE'), 
                   .data$Population == 'c_Viruses')
   
   plot_data_VPCL_vs_VPCL_SE <- vp_results %>%
-    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'), 
+    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_SE'), 
                   .data$Population == 'c_Viruses')
   
   plot_data_all_methods <- vp_results %>%
@@ -487,13 +487,13 @@ plot_comparison_methods <- function(vp_results){
 plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
   ## 1. Setup
   plot_compare_data <- vp_results %>%
-    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE')) %>%
+    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_SE')) %>%
     dplyr::select(-dplyr::all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared'))) %>%
     dplyr::mutate(VP = .data$VP / 1e6) %>%
     tidyr::pivot_wider(names_from = 'VP_Method', values_from = 'VP')
   
   plot_ROGME_data <- vp_results %>%
-    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_LMER_SE'))  %>%
+    dplyr::filter(.data$VP_Method %in% c('VPCL_AR_DIFF', 'VPCL_AR_DIFF_SE'))  %>%
     dplyr::select(-dplyr::all_of(c('abs_VP', 'VP_SE', 'VP_R_Squared')))
   
   plot_ROGME_deciles <- plot_ROGME_data %>%
@@ -502,17 +502,17 @@ plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
     dplyr::ungroup()
   
   ## 2. Make plot
-  n_compare <- ggplot2::ggplot(data = plot_compare_data, ggplot2::aes(x = .data$VPCL_AR_DIFF, y = .data$VPCL_AR_DIFF_LMER_SE,
+  n_compare <- ggplot2::ggplot(data = plot_compare_data, ggplot2::aes(x = .data$VPCL_AR_DIFF, y = .data$VPCL_AR_DIFF_SE,
                                                                       color = .data$Sample_Type, shape = .data$Sample_Type,
                                                                       fill = .data$Sample_Type)) + 
     ggplot2::geom_point() + 
     ggplot2::geom_abline(intercept = 0, slope = 1) + 
     
     ggplot2::scale_x_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF)), 0.5)) + 
-    ggplot2::scale_y_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF_LMER_SE)), 0.5)) +
+    ggplot2::scale_y_continuous(breaks = seq(0, ceiling(max(plot_compare_data$VPCL_AR_DIFF_SE)), 0.5)) +
     
     ggplot2::labs(title = 'Comparison VIPCAL, VIPCAL-SE',
-                  subtitle = 'Calculated viral production values (VP) from VIPCAL (VPCL_AR_DIFF) contrary to those from VIPCAL-SE (VPCL_AR_DIFF_LMER_SE)',
+                  subtitle = 'Calculated viral production values (VP) from VIPCAL (VPCL_AR_DIFF) contrary to those from VIPCAL-SE (VPCL_AR_DIFF_SE)',
                   x = 'VIPCAL',
                   y = 'VIPCAL-SE') + 
     
@@ -542,7 +542,7 @@ plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
     ggplot2::scale_y_discrete(labels = c('VIPCAL', 'VIPCAL-SE')) + 
     
     ggplot2::labs(title = 'Robust Graphical Methods for VIPCAL vs VIPCAL-SE',
-                  subtitle = 'VP values from VIPCAL (VPCL_AR_DIFF) contrary to those from VIPCAL-SE (VPCL_AR_DIFF_LMER_SE) with deciles') + 
+                  subtitle = 'VP values from VIPCAL (VPCL_AR_DIFF) contrary to those from VIPCAL-SE (VPCL_AR_DIFF_SE) with deciles') + 
     
     ggplot2::theme_bw() + 
     ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = 'white'),
@@ -564,7 +564,7 @@ plot_VIPCAL_vs_VIPCAL_SE <- function(vp_results){
 plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
   ## 1. Setup
   plot_data <- analyzed_vp_results_bacterial_endpoint %>%
-    dplyr::filter(.data$Sample_Type != 'VPC', .data$VP_Method == 'VPCL_AR_DIFF_LMER_SE', 
+    dplyr::filter(.data$Sample_Type != 'VPC', .data$VP_Method == 'VPCL_AR_DIFF_SE', 
                   .data$Population == 'c_Viruses') %>%
     dplyr::select('Location', 'Station_Number', 'Time_Range', 'Population', 'Sample_Type', 
                   tidyr::starts_with('P_Cells_')) %>%
@@ -596,7 +596,7 @@ plot_percentage_cells <- function(analyzed_vp_results_bacterial_endpoint){
     ggplot2::labs(x = 'Burst_Size', 
                   y = 'Percentage of cells', 
                   title = 'Percentage of lytically infected and lysogenic cells for different burst sizes',
-                  subtitle = 'Population: c_Viruses; Calculation method: VPCL_AR_DIFF_LMER_SE; Bacterial endpoint taken into account') +
+                  subtitle = 'Population: c_Viruses; Calculation method: VPCL_AR_DIFF_SE; Bacterial endpoint taken into account') +
     
     ggplot2::theme_bw() + 
     ggplot2::theme(strip.background = ggplot2::element_rect(color = 'black', fill = '#999999'),
@@ -617,7 +617,7 @@ plot_nutrient_release <- function(analyzed_vp_results_T0_T24){
   ## 1. Setup
   plot_data <- analyzed_vp_results_T0_T24 %>%
     dplyr::filter(.data$Population == 'c_Viruses', .data$Sample_Type == 'VP', 
-                  .data$VP_Method == 'VPCL_AR_DIFF_LMER_SE') %>%
+                  .data$VP_Method == 'VPCL_AR_DIFF_SE') %>%
     dplyr::select('Location', 'Station_Number', 'Depth', 'Time_Range', 'Population', 'Sample_Type', 'VP_Method', tidyr::matches('Total_DO')) %>%
     tidyr::pivot_longer(cols = tidyr::matches('Total_DO'), 
                         names_to = 'Nutrient_per_BS', 
@@ -639,7 +639,7 @@ plot_nutrient_release <- function(analyzed_vp_results_T0_T24){
     ggplot2::facet_grid(.data$Station_Number ~ .) + 
     
     ggplot2::labs(title = 'Total nutrient release per burst size',
-                  subtitle = 'Population: c_Viruses; Sample_Type: VP; Calculation method: VPCL_AR_DIFF_LMER_SE; Time of assay: T0_T24',
+                  subtitle = 'Population: c_Viruses; Sample_Type: VP; Calculation method: VPCL_AR_DIFF_SE; Time of assay: T0_T24',
                   x = 'Total nutrient release',
                   y = 'Burst size') + 
     
