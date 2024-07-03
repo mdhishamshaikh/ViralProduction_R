@@ -135,16 +135,16 @@ vp_analyze.viralprod <- function(x, ...,
   # Add bacterial abundance at T0 and the bacterial and viral abundances of the original sample to vp_results data frame
   B_T0_df <- vp_average_replicate_dataframe(x) %>%
     dplyr::filter(.data$Timepoint == 0, .data$Population == 'c_Bacteria', .data$Sample_Type == 'VP') %>%
-    dplyr::select(dplyr::all_of(c('Station_Number', 'Timepoint', 'Population', 'Sample_Type', 'Mean'))) %>%
+    dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Timepoint', 'Population', 'Sample_Type', 'Mean'))) %>%
     dplyr::distinct()
   
   original_abundances_df <- original_abundances %>%
-    dplyr::select(dplyr::all_of(c('Station_Number', 'Total_Bacteria', 'Total_Viruses')))
+    dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Total_Bacteria', 'Total_Viruses')))
   
   analyzed_vp_results_df <- vp_results %>%
-    dplyr::left_join(dplyr::select(B_T0_df, 'Station_Number', 'Mean'), by = c('Station_Number')) %>%
+    dplyr::left_join(dplyr::select(B_T0_df, 'Location', 'Station_Number', 'Depth', 'Mean'), by = c('Location', 'Station_Number', 'Depth')) %>%
     dplyr::rename(B_0 = "Mean") %>%
-    dplyr::left_join(dplyr::select(original_abundances_df, 'Station_Number', 'Total_Bacteria', 'Total_Viruses'), by = c('Station_Number')) %>%
+    dplyr::left_join(dplyr::select(original_abundances_df, 'Location', 'Station_Number', 'Depth', 'Total_Bacteria', 'Total_Viruses'), by = c('Location', 'Station_Number', 'Depth')) %>%
     dplyr::rename(B_OS = "Total_Bacteria",
                   V_OS = "Total_Viruses")
   
