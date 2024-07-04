@@ -61,6 +61,8 @@ vp_bacterial_endpoint <- function(data,
     as.data.frame() %>%
     dplyr::mutate_at(dplyr::vars(-'Timepoint'), as.numeric)
   
+  .GlobalEnv$DF_bacterial_endpoint <- DF_bacterial_endpoint
+  
   bacterial_endpoint_index <- intersect(which(DF_bacterial_endpoint$c_Bacteria > 0), which(DF_bacterial_endpoint$c_Bacteria < 24))[1]
   
   if (visual == T){
