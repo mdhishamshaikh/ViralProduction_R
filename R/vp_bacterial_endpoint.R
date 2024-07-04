@@ -48,13 +48,12 @@ vp_bacterial_endpoint <- function(data,
         dplyr::arrange(.data$Timepoint)
       
       generation_time <- (log10(2)*(DF_current_bacteria$Timepoint[time] - DF_current_bacteria$Timepoint[1])) / (log10(DF_current_bacteria$Mean[time]) - log10(DF_current_bacteria$Mean[1]))
-      net_growth_rate <- (log10(DF_current_bacteria$Mean[time] / DF_current_bacteria$Mean[1])) / (DF_current_bacteria$Timepoint[time] - DF_current_bacteria$Timepoint[1])
-      result <- c(unique_timepoints[time], bacteria, generation_time, net_growth_rate)
+      result <- c(unique_timepoints[time], bacteria, generation_time)
       bacterial_generation_time[[length(bacterial_generation_time) + 1]] <- result
     }
   }
   DF_bacterial_endpoint <- data.frame(t(sapply(bacterial_generation_time, c)))
-  colnames(DF_bacterial_endpoint) <- c('Timepoint', 'Population', 'Generation_Time', 'Net_Growth_Rate')
+  colnames(DF_bacterial_endpoint) <- c('Timepoint', 'Population', 'Generation_Time')
   
   DF_bacterial_endpoint <- DF_bacterial_endpoint %>%
     tidyr::pivot_wider(names_from = 'Population', values_from = 'Generation_Time')  %>%
@@ -79,4 +78,31 @@ vp_bacterial_endpoint <- function(data,
     }
   }
   return(stop_assay)
+}
+
+vp_bacterial_growth_rate <- function(data,
+                                  visual = FALSE){
+  DF_bacterial_and_VP_samples_only <- data %>%
+    vp_average_replicate_dataframe(add_timepoints = F) %>%
+    dplyr::filter(.data$Sample_Type == 'VP', .data$Microbe == 'Bacteria')
+  
+  bacterial_generation_time <- list()
+  unique_timepoints <- unique(DF_bacterial_and_VP_samples_only$Timepoint)
+  
+  for (bacteria in unique(DF_bacterial_and_VP_samples_only$Population)){
+    for (time in 2:length(unique_timepoints)){ # Calculate generation time relative towards starting point: time point 1 = T_0
+      DF_current_bacteria <- DF_bacterial_and_VP_samples_only %>%
+        dplyr::filter(.data$Population == bacteria) %>%
+        dplyr::arrange(.data$Timepoint)
+      
+      generation_time <- (log10(2)*(DF_current_bacteria$Timepoint[time] - DF_current_bacteria$Timepoint[1])) / (log10(DF_current_bacteria$Mean[time]) - log10(DF_current_bacteria$Mean[1]))
+      net_growth_rate <- (log10(DF_current_bacteria$Mean[time] / DF_current_bacteria$Mean[1])) / (DF_current_bacteria$Timepoint[time] - DF_current_bacteria$Timepoint[1])
+      result <- c(unique_timepoints[time], bacteria, generation_time, net_growth_rate)
+      bacterial_generation_time[[length(bacterial_generation_time) + 1]] <- result
+    }
+  }
+  DF_bacterial_endpoint <- data.frame(t(sapply(bacterial_generation_time, c)))
+  colnames(DF_bacterial_endpoint) <- c('Timepoint', 'Population', 'Generation_Time', 'Net_Growth_Rate')
+
+  return(DF_bacterial_endpoint)
 }
