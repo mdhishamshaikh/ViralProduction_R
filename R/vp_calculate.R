@@ -222,17 +222,29 @@ vp_calculate.viralprod <- function(x, ...,
                                           Sample_Type = character(), VP = numeric(), abs_VP = numeric(), VP_SE = numeric(), 
                                           VP_R_Squared = numeric(), VP_Method = character())
     
+    BP_calc_list <- list()
     BP_result_list <- list()
+    
     data_with_tag <- x %>%
       tidyr::unite(dplyr::all_of(c('Location', 'Station_Number', 'Depth')), col = 'tag', remove = F)
     
     for (combi_tag in unique(data_with_tag$tag)){
       BP_DF <- data_with_tag %>%
         dplyr::filter(.data$tag == combi_tag)
+
+      BP_calc <- vp_bacterial_growth_rate(BP_DF)
+      BP_calc$combi_tag <- combi_tag
+      BP_calc_list[[length(BP_calc_list) + 1]] <- BP_calc
       
       BP_res <- vp_bacterial_endpoint(BP_DF)
       BP_result_list[[length(BP_result_list) + 1]] <- c(combi_tag, BP_res)
     }
+    
+# Extracting bacterial net growth rate and generation time
+    combined_BP_calc <- do.call(rbind, BP_calc_list)
+    combined_BP_calc <- combined_BP_calc %>%
+      separate(combi_tag, into = c('Location', 'Station_Number', 'Depth'), sep = '_', convert = TRUE, remove = FALSE)
+    .GlobalEnv$combined_BP_calc <- combined_BP_calc
     
     for (index in 1:length(unique(data_with_tag$tag))){
       vp_results_output_BP_index <- .GlobalEnv$vp_results_output_df %>%
@@ -250,7 +262,7 @@ vp_calculate.viralprod <- function(x, ...,
     
     if (write_output == T){
       utils::write.csv(.GlobalEnv$vp_results_output_BP_df, file.path(vp_results_path, 'vp_results_BP.csv'), row.names = F)
-      utils::write.csv(.GlobalEnv$DF_bacterial_endpoint, file.path(vp_results_path, 'vp_BP_calc.csv'), row.names = F)
+      utils::write.csv(.GlobalEnv$combined_BP_calc, file.path(vp_results_path, 'vp_BP_calc.csv'), row.names = F)
       
     }
   }
