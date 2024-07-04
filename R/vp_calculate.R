@@ -250,6 +250,8 @@ vp_calculate.viralprod <- function(x, ...,
     
     if (write_output == T){
       utils::write.csv(.GlobalEnv$vp_results_output_BP_df, file.path(vp_results_path, 'vp_results_BP.csv'), row.names = F)
+      utils::write.csv(.GlobalEnv$DF_bacterial_endpoint, file.path(vp_results_path, 'vp_BP_calc.csv'), row.names = F)
+      
     }
   }
 }
