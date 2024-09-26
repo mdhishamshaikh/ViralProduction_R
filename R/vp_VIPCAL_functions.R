@@ -180,10 +180,11 @@ determine_vp_VIPCAL_average_replicates_SE <- function(AVG_dataframe){
           DF2 <- DF %>%
             dplyr::filter(.data$Time_Range == time)
           
-          index_peaks <- vp_determine_peaks_with_se(c(+10e+10, DF2$Mean, -10e+10),
-                                                    c(0, DF2$SE, 0))
-          index_valleys <- vp_determine_valleys_with_se(c(+10e+10, DF2$Mean, -10e+10),
-                                                        c(0, DF2$SE, 0))
+          indices <- vp_determine_peaks_with_se(c(+10e+10, DF2$Mean, -10e+10),
+                                                c(0, DF2$SE, 0))
+          
+          index_peaks <- indices$peaks
+          index_valleys <- indices$valleys
           
           if (length(index_peaks) == 0){
             viral_production <- 0
