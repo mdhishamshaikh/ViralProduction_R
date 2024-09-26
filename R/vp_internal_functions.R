@@ -206,3 +206,55 @@ vp_determine_valleys_with_se <- function(count_values,
   }
   return(which(diff(result_list) > 0)) # VALLEY if difference is positive
 }
+
+
+vp_determine_peaks_with_se <- function(counts, sem) {
+  # Load the necessary library
+  library(pracma)
+  
+  # Step 1: Add a large constant to shift all values to positive range
+  shift_constant <- abs(min(counts)) + 10e10  # Ensure all values are positive
+  shifted_counts <- counts + shift_constant
+  
+  # Step 2: Identify peaks and valleys in the shifted data
+  peak_indices <- findpeaks(shifted_counts)
+  valley_indices <- findpeaks(-shifted_counts)  # Use negative to find valleys
+  
+  # Extract positions of peaks and valleys
+  peak_positions <- peak_indices[, 2]  # 2nd column contains the positions of peaks
+  valley_positions <- valley_indices[, 2]  # 2nd column contains the positions of valleys
+  
+  # Initialize vectors for valid indices
+  valid_peaks <- c()
+  valid_valleys <- c()
+  
+  # Step 3: Pair each valley with the nearest peak to the right and validate with SEM
+  for (valley_pos in valley_positions) {
+    # Find the first peak that comes after the valley
+    next_peak_index <- which(peak_positions > valley_pos)[1]
+    
+    # Skip if no peak is found to the right
+    if (is.na(next_peak_index)) next
+    
+    # Get the position of this next peak
+    peak_pos <- peak_positions[next_peak_index]
+    
+    # Calculate means and SEMs for the original (non-shifted) data
+    valley_mean <- counts[valley_pos]  # Adjust position due to boundary
+    valley_sem <- sem[valley_pos]
+    
+    peak_mean <- counts[peak_pos]  # Adjust position due to boundary
+    peak_sem <- sem[peak_pos]
+    
+    # Step 4: Check SEM overlap condition
+    if ((valley_mean + valley_sem) < (peak_mean - peak_sem)) {
+      # If no overlap, store the valid indices
+      valid_peaks <- c(valid_peaks, peak_pos - 1)
+      valid_valleys <- c(valid_valleys, valley_pos - 1)
+    }
+  }
+  
+  # Return a list containing vectors of peak and valley indices
+  return(list(peaks = valid_peaks, valleys = valid_valleys))
+}
+
