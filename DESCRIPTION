@@ -38,5 +38,6 @@ Imports:
     scales,
     stringr,
     tidyr,
-    utils
+    utils,
+    pracma
 Config/testthat/edition: 3
