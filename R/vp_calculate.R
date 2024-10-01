@@ -243,7 +243,7 @@ vp_calculate.viralprod <- function(x, ...,
 # Extracting bacterial net growth rate and generation time
     combined_BP_calc <- do.call(rbind, BP_calc_list)
     combined_BP_calc <- combined_BP_calc %>%
-      separate(combi_tag, into = c('Location', 'Station_Number', 'Depth'), sep = '_', convert = TRUE, remove = FALSE)
+      tidyr::separate(combi_tag, into = c('Location', 'Station_Number', 'Depth'), sep = '_', convert = TRUE, remove = FALSE)
     .GlobalEnv$combined_BP_calc <- combined_BP_calc
     
     for (index in 1:length(unique(data_with_tag$tag))){
