@@ -207,6 +207,7 @@ vp_determine_valleys_with_se <- function(count_values,
   return(which(diff(result_list) > 0)) # VALLEY if difference is positive
 }
 
+# New peak/valley function using pracma
 
 vp_determine_peaks_with_se <- function(counts, sem) {
   # Load the necessary library
