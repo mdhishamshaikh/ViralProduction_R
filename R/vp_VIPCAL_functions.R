@@ -70,8 +70,8 @@ determine_vp_VIPCAL_separate_replicates <- function(SR_dataframe){
             DF2 <- DF %>%
               dplyr::filter(.data$Time_Range == time)
             
-            index_peaks <- vp_determine_peaks(c(+10e+10, DF2$Count, -10e+10))
-            index_valleys <- vp_determine_valleys(c(+10e+10, DF2$Count, -10e+10))
+            index_peaks <- vp_determine_peaks_valleys_pracma(c(+10e+100, DF2$Count + 10e+10, -10e+100))[[1]]
+            index_valleys <- vp_determine_peaks_valleys_pracma(c(+10e+100, DF2$Count + 10e+10, -10e+100))[[2]]
             
             if (length(index_peaks) == 0){
               viral_production <- 0
@@ -126,8 +126,8 @@ determine_vp_VIPCAL_average_replicates <- function(AVG_dataframe){
           DF2 <- DF %>%
             dplyr::filter(.data$Time_Range == time)
           
-          index_peaks <- vp_determine_peaks(c(+10e+10, DF2$Mean, -10e+10))
-          index_valleys <- vp_determine_valleys(c(+10e+10, DF2$Mean, -10e+10))
+          index_peaks <- vp_determine_peaks_valleys_pracma(c(+10e+100, DF2$Mean + 10e+10, -10e+100))[[1]]
+          index_valleys <- vp_determine_peaks_valleys_pracma(c(+10e+100, DF2$Mean + 10e+10, -10e+100))[[2]]
           
           if (length(index_peaks) == 0){
             viral_production <- 0
@@ -180,8 +180,8 @@ determine_vp_VIPCAL_average_replicates_SE <- function(AVG_dataframe){
           DF2 <- DF %>%
             dplyr::filter(.data$Time_Range == time)
           
-          indices <- vp_determine_peaks_with_se(c(+10e+10, DF2$Mean, -10e+10),
-                                                c(0, DF2$SE, 0))
+          indices <- vp_determine_peaks_with_se_pracma(c(+10e+100, DF2$Mean + 10e+10, -10e+100),
+                                                c(1, DF2$SE, 1))
           
           index_peaks <- indices$peaks
           index_valleys <- indices$valleys
@@ -248,8 +248,8 @@ determine_vp_VIPCAL_LMER_model <- function(SR_dataframe){
           DF3 <- DF_with_LMER_model %>%
             dplyr::filter(.data$Sample_Type == sample)
           
-          index_peaks <- vp_determine_peaks(c(+10e+10, DF3$Mean, -10e+10))
-          index_valleys <- vp_determine_valleys(c(+10e+10, DF3$Mean, -10e+10))
+          index_peaks <- vp_determine_peaks_valleys_pracma(c(+10e+100, DF3$Mean + 10e+10, -10e+100))
+          index_valleys <- vp_determine_peaks_valleys_pracma(c(+10e+100, DF3$Mean + 10e+10, -10e+100))
           
           if (length(index_peaks) == 0){
             viral_production <- 0
@@ -306,12 +306,12 @@ determine_vp_VIPCAL_LMER_model_SE <- function(SR_dataframe){
         for(sample in unique(DF_with_LMER_model$Sample_Type)){
           DF3 <- DF_with_LMER_model %>%
             dplyr::filter(.data$Sample_Type == sample)
-          
-          indices <- vp_determine_peaks_with_se(c(+10e+10, DF2$Mean, -10e+10),
-                                                c(0, DF2$SE, 0))
-          
-          index_peaks <- indices$peaks
-          index_valleys <- indices$valleys
+
+          index_peaks <- vp_determine_peaks_with_se_pracma(c(+10e+100, DF3$Mean + 10e+10, -10e+100),
+                                                    c(1, DF3$SE, 1))$peaks
+          index_valleys <- vp_determine_peaks_with_se_pracma(c(+10e+100, DF3$Mean + 10e+10, -10e+100),
+                                                        c(1, DF3$SE, 1))$valleys
+
           
           if (length(index_peaks) == 0){
             viral_production <- 0
