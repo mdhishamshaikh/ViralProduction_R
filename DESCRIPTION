@@ -1,7 +1,7 @@
 Package: viralprod
 Title: Automated pipeline for comprehensive viral production data analyses
 
-Version: 0.0.0.93
+Version: 0.90
 
 Authors@R: c(
   person("Hisham", "Shaikh", ,"hisham.shaikh@vliz.be", role = c("aut", "cre"),
