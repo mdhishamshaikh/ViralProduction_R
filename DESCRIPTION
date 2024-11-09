@@ -33,11 +33,11 @@ Imports:
     lme4,
     magrittr,
     plotrix,
+    pracma,
     RColorBrewer,
     rlang,
     scales,
     stringr,
     tidyr,
-    utils,
-    pracma
+    utils
 Config/testthat/edition: 3
