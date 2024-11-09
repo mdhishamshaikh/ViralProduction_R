@@ -154,7 +154,7 @@ The `vp_calculate` function can be executed as follows:
 
 ```{r, warning=FALSE, message=FALSE}
 vp_calculate(x = NJ2020_count_data,
-             methods = c(1:12), 
+             methods = c(12), 
              SR_calc = T,
              BP_endpoint = T,
              write_output = F,

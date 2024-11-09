@@ -307,10 +307,11 @@ determine_vp_VIPCAL_LMER_model_SE <- function(SR_dataframe){
           DF3 <- DF_with_LMER_model %>%
             dplyr::filter(.data$Sample_Type == sample)
           
-          index_peaks <- vp_determine_peaks_with_se(c(+10e+10, DF3$Mean, -10e+10),
-                                                    c(0, DF3$SE, 0))
-          index_valleys <- vp_determine_valleys_with_se(c(+10e+10, DF3$Mean, -10e+10),
-                                                        c(0, DF3$SE, 0))
+          indices <- vp_determine_peaks_with_se(c(+10e+10, DF2$Mean, -10e+10),
+                                                c(0, DF2$SE, 0))
+          
+          index_peaks <- indices$peaks
+          index_valleys <- indices$valleys
           
           if (length(index_peaks) == 0){
             viral_production <- 0
@@ -341,6 +342,7 @@ determine_vp_VIPCAL_LMER_model_SE <- function(SR_dataframe){
       }
     }
   }
+  
   viral_production_VIPCAL <- data.frame(t(sapply(result_list, c)))
   colnames(viral_production_VIPCAL) <- c('tag', 'Time_Range', 'Population', 'Sample_Type', 'VP', 'abs_VP', 'VP_SE')
   viral_production_VIPCAL[, c('VP', 'abs_VP', 'VP_SE')] <- lapply(viral_production_VIPCAL[, c('VP', 'abs_VP', 'VP_SE')], as.numeric)
