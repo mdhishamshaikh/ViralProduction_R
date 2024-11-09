@@ -200,12 +200,14 @@ vp_determine_peaks_valleys_pracma <- function(counts) {
 
 
 vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
+  # Loading the necessary library
+  library(pracma)
   
   # Step 1: Identifying initial peaks and valleys in the data
   peak_indices <- pracma::findpeaks(counts)
   valley_indices <- pracma::findpeaks(-counts)  # Using negative to find valleys
   
-  # Extracting positions of peaks and valleys
+  # Extractg positions of peaks and valleys
   peak_positions <- peak_indices[, 2]  # 2nd column contains the positions of peaks
   valley_positions <- valley_indices[, 2]  # 2nd column contains the positions of valleys
   
@@ -213,9 +215,9 @@ vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
   valid_peaks <- c()
   valid_valleys <- c()
   
-  # Step 2: Pairing each valley with the nearest peak to the right and validate with SEM
+  # Step 2: Pairng each valley with the nearest peak to the right and validate with SEM
   for (valley_pos in valley_positions) {
-    # Finding the first peak that comes after the valley
+    # Find the first peak that comes after the valley
     next_peak_index <- which(peak_positions > valley_pos)[1]
     
     # Skipping if no peak is found to the right
@@ -232,13 +234,13 @@ vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
     
     # Checking SEM overlap condition
     if ((valley_mean + valley_sem) < (peak_mean - peak_sem)) {
-      # If no overlap, storing initial valid valley and peak indices
+      # If no overlap, store initial valid valley and peak indices
       valid_peaks <- c(valid_peaks, peak_pos)
       valid_valleys <- c(valid_valleys, valley_pos)
     }
   }
   
-  # Step 3: Refining valid peaks by moving left to find the last insignificant neighbour,
+  # Step 3: Refinig valid peaks by moving left to find the last insignificant neighbor,
   # only up to the position just before the associated valley
   final_peaks <- c()
   for (i in seq_along(valid_peaks)) {
@@ -248,7 +250,7 @@ vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
     left_neighbor <- current_peak - 1
     
     # Moving leftward until a significant difference is found or we reach just before the valley
-    while (left_neighbor > 0 && left_neighbor >= valley_pos + 1) {
+    while (left_neighbor > 0 && left_neighbor > valley_pos) {  # Ensure we don't move past the valley
       left_mean <- counts[left_neighbor]
       left_sem <- sem[left_neighbor]
       peak_mean <- counts[current_peak]
@@ -269,17 +271,17 @@ vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
     final_peaks <- c(final_peaks, current_peak)
   }
   
-  # Step 4: Refining valid valleys by moving right to find the last insignificant neighbor,
-  # only up to the position just before the associated peak
+  # Step 4: Refinng valid valleys by moving right to find the last insignificant neighbor,
+  # only up to the position just before the associated (refined) peak
   final_valleys <- c()
   for (i in seq_along(valid_valleys)) {
     valley_pos <- valid_valleys[i]
-    peak_pos <- valid_peaks[i]
+    current_peak <- final_peaks[i]  # Use the dynamically refined peak position for this valley
     current_valley <- valley_pos
     right_neighbor <- current_valley + 1
     
-    # Moving rightward until a significant difference is found or we reach just before the peak
-    while (right_neighbor <= length(counts) && right_neighbor <= peak_pos - 1) {
+    # Moving rightward until a significant difference is found or we reach the refined peak position
+    while (right_neighbor <= length(counts) && right_neighbor < current_peak) {  # Ensurinng valley does not reach the refined peak
       right_mean <- counts[right_neighbor]
       right_sem <- sem[right_neighbor]
       valley_mean <- counts[current_valley]
@@ -300,14 +302,13 @@ vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
     final_valleys <- c(final_valleys, current_valley) 
   }
   
-  # Correcting for position
+  # Adjusting for boundary additions if necessary
   final_peaks <- final_peaks - 1
   final_valleys <- final_valleys - 1
   
   # Returning a list containing vectors of refined peak and valley indices
   return(list(peaks = final_peaks, valleys = final_valleys))
 }
-
 #' @rdname vp_peaks_and_valleys
 #' @noRd
 
