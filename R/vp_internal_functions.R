@@ -144,69 +144,18 @@ vp_add_timepoints <- function(DF){
 #' DF_AVG <- vp_average_replicate_dataframe(data_NJ2020_all)
 #' 
 #' # Adding two values to make sure the first and last element of the count values are not dismissed
-#' vp_determine_peaks(c(+10e+10, DF_SR$Count, -10e+10))
-#' vp_determine_peaks(c(+10e+10, DF_AVG$Mean, -10e+10))
+#' vp_determine_peaks_valleys_pracma(c(+10e+100, DF_SR$Count+10e+10, -10e+100))[[1]]
+#' vp_determine_peaks_valleys_pracma(c(+10e+100, DF_AVG$Mean+10e+10, -10e+100))[[2]]
 #' 
-#' vp_determine_valleys(c(+10e+10, DF_SR$Count, -10e+10))
-#' vp_determine_valleys(c(+10e+10, DF_AVG$Mean, -10e+10))
+#' vp_determine_peaks_valleys_pracma(c(+10e+100, DF_SR$Count+10e+10, -10e+100))[[1]]
+#' vp_determine_peaks_valleys_pracma(c(+10e+100, DF_AVG$Mean+10e+10, -10e+100))[[2]]
 #' 
-#' vp_determine_peaks_with_se(c(+10e+10, DF_AVG$Mean, -10e+10),
-#'                            c(0, DF_AVG$SE, 0))
-#' vp_determine_valleys_with_se(c(+10e+10, DF_AVG$Mean, -10e+10),
-#'                              c(0, DF_AVG$SE, 0))
+#' vp_determine_peaks_valleys_pracma(c(+10e+100, DF_AVG$Mean+10e+10, -10e+100),
+#'                            c(1, DF_AVG$SE, 1))[[1]]
+#' vp_determine_peaks_valleys_pracma(c(+10e+100, DF_AVG$Mean+10e+10, -10e+100),
+#'                              c(1, DF_AVG$SE, 1))[[2]]
 #' }
-vp_determine_peaks <- function(count_values){
-  result_list <- c()
-  
-  for (index in 1:(length(count_values)-1)){ 
-    sign_index <- sign(count_values[index+1] - count_values[index])
-    result_list[length(result_list)+1] <- sign_index 
-  }
-  
-  return(which(diff(result_list) < 0)) # PEAK if difference is negative
-}
 
-
-#' @rdname vp_peaks_and_valleys
-#' @noRd
-vp_determine_valleys <- function(count_values){
-  result_list <- c()
-  
-  for (index in 1:(length(count_values)-1)){ 
-    sign_index <- sign(count_values[index+1] - count_values[index]) 
-    result_list[length(result_list)+1] <- sign_index 
-  }
-  
-  return(which(diff(result_list) > 0)) # VALLEY if difference is positive
-}
-
-#' @rdname vp_peaks_and_valleys
-#' @noRd
-vp_determine_peaks_with_se <- function(count_values, 
-                                       count_se){
-  result_list <- c()
-  
-  for (index in 1:(length(count_values)-1)){
-    sign_index <- sign((count_values[index+1] - count_se[index+1]) - (count_values[index] + count_se[index]))
-    result_list[length(result_list)+1] <- sign_index
-  }
-  return(which(diff(result_list) < 0)) # PEAK if difference is negative
-}
-
-
-#' @rdname vp_peaks_and_valleys
-#' @noRd
-vp_determine_valleys_with_se <- function(count_values, 
-                                         count_se){
-  result_list <- c()
-  
-  for (index in 1:(length(count_values)-1)){
-    sign_index <- sign((count_values[index+1] - count_se[index+1]) - (count_values[index] + count_se[index]))
-    result_list[length(result_list)+1] <- sign_index
-  }
-  return(which(diff(result_list) > 0)) # VALLEY if difference is positive
-}
-#########
 # New peak/valley function using pracma
 
 vp_determine_peaks_valleys_pracma <- function(counts) {
@@ -250,7 +199,7 @@ vp_determine_peaks_valleys_pracma <- function(counts) {
 #' @noRd
 
 
-vp_determine_peaks_with_se_pracma <- function(counts, sem) {
+vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
   
   # Step 1: Identifying initial peaks and valleys in the data
   peak_indices <- pracma::findpeaks(counts)

@@ -75,7 +75,7 @@ vp_average_replicate_dataframe <- function(data,
     dplyr::select(dplyr::all_of(c('Location', 'Station_Number', 'Depth', 'Sample_Type', 'Timepoint', 'Replicate', !!!.GlobalEnv$populations_to_analyze))) %>%
     tidyr::pivot_longer(cols = dplyr::starts_with('c_'), names_to = 'Population', values_to = 'Count') %>%
     dplyr::group_by(.data$Location, .data$Station_Number, .data$Depth, .data$Sample_Type, .data$Timepoint, .data$Population) %>%
-    dplyr::summarise(n = dplyr::n(), Mean = mean(.data$Count), SE = plotrix::std.error(.data$Count))
+    dplyr::summarise(n = dplyr::n(), Mean = mean(.data$Count, na.rm = T), SE = plotrix::std.error(.data$Count, na.rm = T))
   
   AVG_dataframe_only_means <- AVG_dataframe %>%
     dplyr::select(-'SE') %>%

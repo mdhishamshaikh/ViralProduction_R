@@ -180,7 +180,7 @@ determine_vp_VIPCAL_average_replicates_SE <- function(AVG_dataframe){
           DF2 <- DF %>%
             dplyr::filter(.data$Time_Range == time)
           
-          indices <- vp_determine_peaks_with_se_pracma(c(+10e+100, DF2$Mean + 10e+10, -10e+100),
+          indices <- vp_determine_peaks_and_valleys_with_se_pracma(c(+10e+100, DF2$Mean + 10e+10, -10e+100),
                                                 c(1, DF2$SE, 1))
           
           index_peaks <- indices$peaks
