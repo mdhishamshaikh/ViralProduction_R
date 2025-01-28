@@ -202,6 +202,8 @@ vp_determine_peaks_valleys_pracma <- function(counts) {
 vp_determine_peaks_and_valleys_with_se_pracma <- function(counts, sem) {
   # Loading the necessary library
   library(pracma)
+  # Step 0: Overwriting NAs in SEM to 1
+  sem <- ifelse(is.na(sem), 1, sem)
   
   # Step 1: Identifying initial peaks and valleys in the data
   peak_indices <- pracma::findpeaks(counts)
