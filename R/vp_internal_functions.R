@@ -111,7 +111,7 @@ vp_add_timepoints <- function(DF){
   
   DF <- DF %>%
     tidyr::pivot_longer(cols = dplyr::all_of(colnames), names_to = "Time_Range", values_to = "Time_Time") %>%
-    tidyr::drop_na()
+    dplyr::filter(!is.na(Time_Time))
   
   return(DF)
 }
